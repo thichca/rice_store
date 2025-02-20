@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Cửa Hàng Mới</title>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-6">
+<div class="bg-white p-8 rounded-lg shadow-lg text-center w-full max-w-md">
+    <!-- Ảnh minh họa -->
+    <img alt="Store creation illustration" class="mx-auto mb-4" height="100"
+         src="https://storage.googleapis.com/a1aa/image/S_GXXXIfxwNbi69G19FoXi7HtgYgwQkW33Eei0ofUDI.jpg"
+         width="100"/>
+
+    <!-- Tiêu đề -->
+    <h1 class="text-2xl font-semibold mb-6 text-gray-800">
+        Hãy tạo cửa hàng của bạn
+    </h1>
+
+    <!-- Form tạo cửa hàng -->
+    <form action="#" th:action="@{/createStore}" method="post" onsubmit="return validateForm()">
+        <div class="mb-4 relative">
+            <input id="storeName" name="name" class="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300"
+                   placeholder="Đặt tên cho cửa hàng của bạn" type="text"/>
+            <i id="errorIcon"
+               class="fas fa-exclamation-circle text-red-500 absolute right-3 top-1/2 transform -translate-y-1/2 hidden"></i>
+        </div>
+
+        <!-- Nút tạo cửa hàng -->
+        <button class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition duration-200"
+                type="submit">
+            Tạo cửa hàng
+        </button>
+    </form>
+</div>
+<div th:replace="~{fragments/script :: script}"></div>
+</body>
+</html>
