@@ -18,20 +18,12 @@ public class HomeController {
     private UserServiceIpml userService;
 
     @PostMapping("/home")
-    public String handleStoreSelection(Model model) {
-        Long userId = userService.getCurrentUserId();
-        String name = storeService.getStoreNameByUserId(userId);
-        model.addAttribute("storeName", name);
-        model.addAttribute("userId", userId);
+    public String handleStoreSelection() {
         return "home";
     }
 
     @GetMapping("/home")
-    public String getHome(Model model) {
-        Long userId = userService.getCurrentUserId();
-        String name = storeService.getStoreNameByUserId(userId);
-        model.addAttribute("storeName", name);
-        model.addAttribute("userId", userId);
+    public String getHome() {
         return "home";
     }
 }

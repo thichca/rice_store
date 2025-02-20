@@ -25,7 +25,7 @@ public class ProfileController {
     }
 
     @PostMapping("/updateInfo")
-    public String updateInfo(@RequestParam("nameStore") String nameStore,
+    public String updateInfo(@RequestParam("storeName") String storeName,
                              @RequestParam("address") String address,
                              @RequestParam("phone") String phone,
                              @RequestParam("email") String email,
@@ -44,7 +44,7 @@ public class ProfileController {
         }
 
         try {
-            user.setStoreName(nameStore);
+            user.setStoreName(storeName);
             user.setAddress(address);
             user.setPhone(phone);
             user.setEmail(email);
