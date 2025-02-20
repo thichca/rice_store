@@ -25,12 +25,15 @@ public class StoreController {
         Long userId = userService.getCurrentUserId();
         List<Store> stores = storeService.getStoresByUser(userId);
         model.addAttribute("stores", stores);
+        model.addAttribute("userId", userId);
         return "store";
     }
 
     @GetMapping("/createStore")
     public String createStoreForm(Model model) {
+        Long userId = userService.getCurrentUserId();
         model.addAttribute("store", new Store());
+        model.addAttribute("userId", userId);
         return "createStore";
     }
 
