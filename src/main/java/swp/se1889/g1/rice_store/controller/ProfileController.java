@@ -1,5 +1,6 @@
 package swp.se1889.g1.rice_store.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
@@ -18,8 +20,10 @@ public class ProfileController {
     private UserServiceIpml userServiceIpml;
 
     @GetMapping("/profile")
-    public String profile(Model model) {
+    public String profile(HttpSession session, Model model) {
         User user = userServiceIpml.getCurrentUser();
+        Store store = (Store) session.getAttribute("store");
+        model.addAttribute("store", store);
         model.addAttribute("user", user);
         return "profile";
     }

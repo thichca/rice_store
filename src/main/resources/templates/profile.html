@@ -24,7 +24,7 @@
                     <label class="block text-sm font-medium text-gray-700">
                         <span th:text="${user != null ? (user.role == 'ROLE_OWNER' ? 'Tên cửa hàng' : 'Tên người dùng') : ''}"></span>
                     </label>
-                    <input type="text" name="storeName" th:value="${user != null ? user.storeName : ''}"
+                    <input type="text" name="storeName" th:value="${store != null ? store.name : ''}"
                            class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                 </div>
                 <div>

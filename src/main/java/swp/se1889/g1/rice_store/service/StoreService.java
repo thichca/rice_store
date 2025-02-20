@@ -21,12 +21,7 @@ public class StoreService {
         storeRepository.save(store);
     }
 
-    public String getStoreNameByUserId(Long userId) {
-        Store store = storeRepository.findByUserId(userId).stream().findFirst().orElse(null);
-        return store != null ? store.getName() : null;
-    }
-
-    public Store getStoreById(Long userId) {
-        return storeRepository.findByUserId(userId).stream().findFirst().orElse(null);
+    public Store findByName(String storeName) {
+        return storeRepository.findByName(storeName);
     }
 }

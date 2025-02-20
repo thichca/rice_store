@@ -15,8 +15,8 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
     <th:block th:each="store : ${stores}">
         <form th:action="@{/home}" method="post" class="w-full">
-            <input type="hidden" name="name" th:value="${store.name}">
             <input type="hidden" name="userId" th:value="${store.userId}">
+            <input type="hidden" name="storeName" th:value="${store.name}">
             <button type="submit"
                     class="border rounded-lg p-6 flex flex-col items-center bg-white shadow-md hover:shadow-lg transition duration-300 cursor-pointer relative w-full">
                 <div class="bg-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mb-2">
