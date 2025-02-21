@@ -34,7 +34,9 @@ public class ProfileController {
                              @RequestParam("phone") String phone,
                              @RequestParam("email") String email,
                              @RequestParam("note") String note,
-                             RedirectAttributes redirectAttributes) {
+                             RedirectAttributes redirectAttributes,
+                             HttpSession session,
+                             Model model) {
         User user = userServiceIpml.getCurrentUser();
 
         if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
@@ -54,6 +56,13 @@ public class ProfileController {
             user.setEmail(email);
             user.setNote(note);
             userServiceIpml.updateUser(user);
+
+            if (user.getRole().equals("ROLE_OWNER")) {
+                Store store = (Store) session.getAttribute("store");
+                store.setName(storeName);
+                session.setAttribute("store", store);
+                model.addAttribute("store", store);
+            }
 
             redirectAttributes.addFlashAttribute("success", "Cập nhật thành công!");
         } catch (Exception e) {

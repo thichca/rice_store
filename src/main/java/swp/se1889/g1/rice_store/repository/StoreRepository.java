@@ -10,5 +10,5 @@ import java.util.List;
 public interface StoreRepository extends JpaRepository<Store, Long> {
     List<Store> findByUserId(Long userId);
 
-    Store findByName(String storeName);
+    Store findByNameAndUserId(String name, Long userId);
 }

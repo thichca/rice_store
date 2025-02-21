@@ -21,7 +21,7 @@ public class StoreService {
         storeRepository.save(store);
     }
 
-    public Store findByName(String storeName) {
-        return storeRepository.findByName(storeName);
+    public Store findByNameAndUserId(String name, Long userId) {
+        return storeRepository.findByNameAndUserId(name, userId);
     }
 }

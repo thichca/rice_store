@@ -15,16 +15,20 @@
 <div class="mt-28">
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-semibold">Người dùng</h2>
+            <h2 class="text-xl font-semibold">
+                <span th:text="${user != null ? (user.role == 'ROLE_OWNER' ? 'Cửa hàng' : 'Người dùng') : ''}"></span>
+            </h2>
         </div>
 
         <form th:action="@{/updateInfo}" method="post">
             <div class="grid grid-cols-2 gap-6 mb-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                        <span th:text="${user != null ? (user.role == 'ROLE_OWNER' ? 'Tên cửa hàng' : 'Tên người dùng') : ''}"></span>
+                    <label class="block text-sm font-medium text-gray-700"
+                           th:text="${user != null} ? (${user.role == 'ROLE_OWNER'} ? 'Tên cửa hàng' : 'Tên người dùng') : ''">
                     </label>
-                    <input type="text" name="storeName" th:value="${store != null ? store.name : ''}"
+
+                    <input type="text" name="storeName"
+                           th:value="${user != null ? (user.role == 'ROLE_OWNER' ? (store != null ? store.name : '') : (user != null ? user.storeName : '')) : ''}"
                            class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                 </div>
                 <div>
@@ -41,7 +45,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Vai trò</label>
-                    <span th:text="${user != null ? (user.role == 'ROLE_ADMIN' ? 'Admin' : (user.role == 'ROLE_EMPLOYEE' ? 'Nhân viên' : 'Chủ cửa hàng')) : ''}"
+                    <span th:text="${user != null ? (user.role == 'ROLE_OWNER' ? 'Chủ cửa hàng' : 'Nhân viên') : ''}"
                           class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
             </span>
                 </div>
@@ -83,7 +87,7 @@
                                    class="flex-1 border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                             <button type="button" onclick="togglePassword('currentPassword', 'toggleIcon1')"
                                     class="ml-2 text-gray-500 hover:text-gray-700">
-                                <i id="toggleIcon1" class="fas fa-eye"></i>
+                                <i id="toggleIcon1" class="fas fa-eye-slash"></i>
                             </button>
                         </div>
                         <div class="flex items-center">
@@ -91,7 +95,7 @@
                                    class="flex-1 border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                             <button type="button" onclick="togglePassword('newPassword', 'toggleIcon2')"
                                     class="ml-2 text-gray-500 hover:text-gray-700">
-                                <i id="toggleIcon2" class="fas fa-eye"></i>
+                                <i id="toggleIcon2" class="fas fa-eye-slash"></i>
                             </button>
                         </div>
                         <div class="flex items-center">
@@ -100,7 +104,7 @@
                                    class="flex-1 border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                             <button type="button" onclick="togglePassword('confirmNewPassword', 'toggleIcon3')"
                                     class="ml-2 text-gray-500 hover:text-gray-700">
-                                <i id="toggleIcon3" class="fas fa-eye"></i>
+                                <i id="toggleIcon3" class="fas fa-eye-slash"></i>
                             </button>
                         </div>
                     </div>

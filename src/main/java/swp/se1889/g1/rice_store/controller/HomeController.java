@@ -21,8 +21,10 @@ public class HomeController {
     private UserServiceIpml userService;
 
     @PostMapping("/home")
-    public String storeSelection(@RequestParam("storeName") String storeName, Model model, HttpSession session) {
-        Store store = storeService.findByName(storeName);
+    public String storeSelection(@RequestParam("storeName") String name,
+                                 @RequestParam("userId") Long userId,
+                                 Model model, HttpSession session) {
+        Store store = storeService.findByNameAndUserId(name, userId);
         session.setAttribute("store", store);
         model.addAttribute("store", store);
         return "home";
