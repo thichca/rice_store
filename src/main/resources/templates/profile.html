@@ -51,17 +51,20 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Điện thoại</label>
-                    <input type="text" name="phone" th:value="${user != null ? user.phone : ''}"
+                    <input type="text" name="phone"
+                           th:value="${user != null ? (user.role == 'ROLE_OWNER' ? (store != null ? store.phone : '') : (user != null ? user.phone : '')) : ''}"
                            class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" name="email" th:value="${user != null ? user.email : ''}"
+                    <input type="email" name="email"
+                           th:value="${user != null ? (user.role == 'ROLE_OWNER' ? (store != null ? store.email : '') : (user != null ? user.email : '')) : ''}"
                            class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Ghi chú</label>
-                    <textarea name="note" th:text="${user != null ? user.note : ''}"
+                    <textarea name="note"
+                              th:value="${user != null ? (user.role == 'ROLE_OWNER' ? (store != null ? store.note : '') : (user != null ? user.note : '')) : ''}"
                               class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300 h-24"></textarea>
                 </div>
             </div>
