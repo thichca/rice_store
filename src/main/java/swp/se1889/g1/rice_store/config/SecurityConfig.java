@@ -37,7 +37,10 @@ public class SecurityConfig {
                                 .permitAll()
                 )
                 .logout(
-                        logout -> logout.permitAll()
+                        logout -> logout
+                                .invalidateHttpSession(true)
+                                .deleteCookies("JSESSIONID")
+                                .permitAll()
                 ).exceptionHandling(
                         configurer -> configurer.accessDeniedPage("/login")
                 );
