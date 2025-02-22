@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     List<Customer> findByStoreIdOrderByIdDesc(Long storeId);
+    //List<Customer> findByStoreIdOrderByIdDesc(Long storeId);
+    Customer findByIdAndStoreId(Long id, Long storeId);
 }

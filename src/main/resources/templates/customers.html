@@ -58,12 +58,16 @@
       <td>
         <a th:href="@{/customers/edit/{id}(id=${customer.id})}" class="btn btn-warning">Sửa</a>
 
-        <a th:href="@{/customers/debt(id=${customer.id})}" class="btn btn-primary btn-sm">Thêm công nợ</a>
-        <a th:href="@{/customers/detail(id=${customer.id})}" class="btn btn-info btn-sm">Chi tiết</a>
+        <a th:href="@{/debt/add(customerId=${customer.id})}" class="btn btn-primary btn-sm">Thêm công nợ</a>
+        <a th:href="@{/debt/detail(customerId=${customer.id})}" class="btn btn-info btn-sm">Chi tiết</a>
+
       </td>
     </tr>
     </tbody>
   </table>
+  <div>
+    <a class="btn btn-primary" th:href="@{home}">Trang chủ</a>
+  </div>
 </div>
 
 <!-- Phân trang -->
