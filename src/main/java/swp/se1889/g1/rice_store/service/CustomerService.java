@@ -57,7 +57,7 @@ public class CustomerService {
                 if (currentUser != null) {
                     existingCustomer.setUpdatedBy(currentUser.getUsername()); // Gán User vào updatedBy
                 } else {
-                    existingCustomer.setUpdatedBy("Hệ thống");
+                    existingCustomer.setUpdatedBy("Admin");
                 }
             } else {
                 existingCustomer.setUpdatedBy("Hệ thống");
@@ -73,6 +73,9 @@ public class CustomerService {
     }
     public Optional<Customer> getCustomerById(Long id) {
         return customerRepository.findById(id);
+    }
+    public boolean isPhoneNumberExists(String phone, Long storeId) {
+        return customerRepository.existsByPhoneAndStoreId(phone, storeId);
     }
 
 }
