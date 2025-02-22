@@ -24,4 +24,8 @@ public class StoreService {
     public Store findByNameAndUserId(String name, Long userId) {
         return storeRepository.findByNameAndUserId(name, userId);
     }
+
+    public void updateStore(Store store) {
+        storeRepository.save(store);
+    }
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1889.g1.rice_store.entity.User;
+import swp.se1889.g1.rice_store.repository.StoreRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
 
 import java.util.Optional;
@@ -32,7 +33,7 @@ public class AuthController {
         model.addAttribute("user", new User());
         return "register";
     }
-    
+
     @PostMapping("/register")
     public String register(
             @RequestParam String username,
