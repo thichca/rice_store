@@ -3,6 +3,7 @@ package swp.se1889.g1.rice_store.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp.se1889.g1.rice_store.entity.Store;
+import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.StoreRepository;
 
 import java.util.List;
@@ -23,5 +24,9 @@ public class StoreService {
 
     public Store findByNameAndUserId(String name, Long userId) {
         return storeRepository.findByNameAndUserId(name, userId);
+    }
+
+    public void updatStore(Store store) {
+        storeRepository.save(store);
     }
 }

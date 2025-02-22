@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
+import swp.se1889.g1.rice_store.service.StoreService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
 @Controller
@@ -18,6 +19,9 @@ public class ProfileController {
 
     @Autowired
     private UserServiceIpml userServiceIpml;
+
+    @Autowired
+    private StoreService storeService;
 
     @GetMapping("/profile")
     public String profile(HttpSession session, Model model) {
@@ -60,6 +64,7 @@ public class ProfileController {
             if (user.getRole().equals("ROLE_OWNER")) {
                 Store store = (Store) session.getAttribute("store");
                 store.setName(storeName);
+                storeService.updatStore(store);
                 session.setAttribute("store", store);
                 model.addAttribute("store", store);
             }
