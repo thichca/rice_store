@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     List<Customer> findByStoreIdOrderByIdDesc(Long storeId);
+    boolean existsByPhoneAndStoreId(String phone, Long storeId);
 }

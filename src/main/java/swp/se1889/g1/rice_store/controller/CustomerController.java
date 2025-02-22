@@ -60,27 +60,37 @@ public class CustomerController {
     public String addCustomer(@ModelAttribute("customer") @Valid Customer customer,
                               BindingResult result,
                               Model model,
-                              HttpSession session,
-                              RedirectAttributes redirectAttributes) {
+                              HttpSession session) {
         Store store = (Store) session.getAttribute("store");
         if (store == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần chọn cửa hàng trước khi thêm khách hàng.");
             return "redirect:/store";
         }
+
         Optional<Store> storeOpt = storeRepository.findById(store.getId());
         if (storeOpt.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Cửa hàng không tồn tại hoặc đã bị xóa.");
-            return "redirect:/customers";
+            model.addAttribute("errorMessage", "Cửa hàng không tồn tại hoặc đã bị xóa.");
+            return "add-customer";
         }
+
+        // Kiểm tra số điện thoại đã tồn tại
+        if (customerService.isPhoneNumberExists(customer.getPhone(), store.getId())) {
+            model.addAttribute("errorMessage", "Số điện thoại này đã tồn tại. Vui lòng nhập số khác.");
+            model.addAttribute("store", storeOpt.get());
+            return "add-customer"; // Trả về form mà không redirect
+        }
+
         if (result.hasErrors()) {
             model.addAttribute("store", storeOpt.get());
             return "add-customer";
         }
+
         customer.setStoreId(storeOpt.get().getId());
         customerService.saveCustomer(customer);
-        redirectAttributes.addFlashAttribute("successMessage", "Khách hàng đã được thêm thành công.");
+        model.addAttribute("successMessage", "Khách hàng đã được thêm thành công.");
         return "redirect:/customers";
     }
+
+
     @GetMapping("/edit/{id}")
     public String showEditCustomerForm(@PathVariable("id") Long customerId, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
         Store store = (Store) session.getAttribute("store");
@@ -107,28 +117,39 @@ public class CustomerController {
     @PostMapping("/edit")
     public String updateCustomer(@ModelAttribute("customer") @Valid Customer customer,
                                  BindingResult result,
-                                 HttpSession session,
-                                 RedirectAttributes redirectAttributes) {
+                                 Model model,
+                                 HttpSession session) {
         Store store = (Store) session.getAttribute("store");
 
         if (store == null) {
             return "redirect:/store";
         }
         if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng kiểm tra lại thông tin.");
-            return "redirect:/customers/edit/" + customer.getId();
+            model.addAttribute("errorMessage", "Vui lòng kiểm tra lại thông tin.");
+            return "edit-customer";
         }
+
         Optional<Customer> existingCustomerOpt = customerService.getCustomerById(customer.getId());
         if (existingCustomerOpt.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Khách hàng không tồn tại.");
-            return "redirect:/customers";
+            model.addAttribute("errorMessage", "Khách hàng không tồn tại.");
+            return "edit-customer";
         }
 
         Customer existingCustomer = existingCustomerOpt.get();
         if (!existingCustomer.getStoreId().equals(store.getId())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Khách hàng không thuộc cửa hàng này.");
-            return "redirect:/customers";
+            model.addAttribute("errorMessage", "Khách hàng không thuộc cửa hàng này.");
+            return "edit-customer";
         }
+
+        // Kiểm tra nếu số điện thoại đã tồn tại nhưng không phải của chính khách hàng này
+        if (!existingCustomer.getPhone().equals(customer.getPhone()) &&
+                customerService.isPhoneNumberExists(customer.getPhone(), store.getId())) {
+            model.addAttribute("errorMessage", "Số điện thoại này đã tồn tại. Vui lòng nhập số khác.");
+            model.addAttribute("customer", customer);
+            model.addAttribute("store", store);
+            return "edit-customer"; // Giữ lại trang chỉnh sửa
+        }
+
         existingCustomer.setName(customer.getName());
         existingCustomer.setPhone(customer.getPhone());
         existingCustomer.setAddress(customer.getAddress());
@@ -136,13 +157,9 @@ public class CustomerController {
 
         customerService.updateCustomer(existingCustomer);
 
-        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật khách hàng thành công.");
+        model.addAttribute("successMessage", "Cập nhật khách hàng thành công.");
         return "redirect:/customers";
     }
-
-
-
-
 
 
 }

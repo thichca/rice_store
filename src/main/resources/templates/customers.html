@@ -7,7 +7,6 @@
 </head>
 <body>
 <div class="container mt-5">
-  <h2>Danh sách Khách Hàng</h2>
 
   <!-- Nút thêm khách hàng -->
   <div class="mb-3">
@@ -18,12 +17,10 @@
     <thead>
     <tr>
       <th>ID</th>
-
       <th>Tên</th>
       <th>Số điện thoại</th>
       <th>Địa chỉ</th>
       <th>Số dư nợ</th>
-
       <th>Ngày tạo</th>
       <th>Ngày cập nhật</th>
       <th>Hành động</th>
@@ -40,15 +37,21 @@
         <input type="number" id="search-debt-min" class="form-control" placeholder="Từ" />
         <input type="number" id="search-debt-max" class="form-control mt-1" placeholder="Đến" />
       </th>
-      <th><input type="text" id="search-created-date" class="form-control" /></th>
-      <th><input type="text" id="search-updated-date" class="form-control" /></th>
+      <th>
+        <input type="date" id="search-created-date-min" class="form-control" placeholder="Từ" />
+        <input type="date" id="search-created-date-max" class="form-control mt-1" placeholder="Đến" />
+      </th>
+      <th>
+        <input type="date" id="search-updated-date-min" class="form-control" placeholder="Từ" />
+        <input type="date" id="search-updated-date-max" class="form-control mt-1" placeholder="Đến" />
+      </th>
+
       <th><button id="clearFilter" class="btn btn-warning">Bỏ lọc</button></th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="customer,x : ${customers}">
       <td th:text="${customers.size()-x.index}"></td>
-
       <td th:text="${customer.name}"></td>
       <td th:text="${customer.phone}"></td>
       <td th:text="${customer.address}"></td>
@@ -57,7 +60,6 @@
       <td th:text="${#temporals.format(customer.updatedAt, 'dd-MM-yyyy')}"></td>
       <td>
         <a th:href="@{/customers/edit/{id}(id=${customer.id})}" class="btn btn-warning">Sửa</a>
-
         <a th:href="@{/customers/debt(id=${customer.id})}" class="btn btn-primary btn-sm">Thêm công nợ</a>
         <a th:href="@{/customers/detail(id=${customer.id})}" class="btn btn-info btn-sm">Chi tiết</a>
       </td>
@@ -73,47 +75,58 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     let inputs = document.querySelectorAll("input");
-    let rows = document.querySelectorAll("#customerTable tbody tr");
-    let pageSize = 5;  // Số khách hàng hiển thị trên mỗi trang
+    let rows = Array.from(document.querySelectorAll("#customerTable tbody tr"));
+    let pageSize = 5; // Số khách hàng hiển thị trên mỗi trang
     let currentPage = 0;
 
     function applyFiltersAndPaginate() {
-      let searchIdMin = parseInt(document.getElementById("search-id-min").value) || null;
-      let searchIdMax = parseInt(document.getElementById("search-id-max").value) || null;
-      let searchName = document.getElementById("search-name").value.toLowerCase();
-      let searchPhone = document.getElementById("search-phone").value.toLowerCase();
-      let searchAddress = document.getElementById("search-address").value.toLowerCase();
-      let searchDebtMin = parseFloat(document.getElementById("search-debt-min").value) || null;
-      let searchDebtMax = parseFloat(document.getElementById("search-debt-max").value) || null;
+      let searchIdMin = parseInt(document.getElementById("search-id-min").value.trim()) || null;
+      let searchIdMax = parseInt(document.getElementById("search-id-max").value.trim()) || null;
+      let searchName = document.getElementById("search-name").value.trim().toLowerCase();
+      let searchPhone = document.getElementById("search-phone").value.trim().toLowerCase();
+      let searchAddress = document.getElementById("search-address").value.trim().toLowerCase();
+      let searchDebtMin = parseFloat(document.getElementById("search-debt-min").value.trim()) || null;
+      let searchDebtMax = parseFloat(document.getElementById("search-debt-max").value.trim()) || null;
+      let searchCreatedDateMin = document.getElementById("search-created-date-min").value.trim();
+      let searchCreatedDateMax = document.getElementById("search-created-date-max").value.trim();
+      let searchUpdatedDateMin = document.getElementById("search-updated-date-min").value.trim();
+      let searchUpdatedDateMax = document.getElementById("search-updated-date-max").value.trim();
 
-      let filteredRows = [];
-      rows.forEach(row => {
-        let id = parseInt(row.cells[0].innerText) || 0;
-        let name = row.cells[2].innerText.toLowerCase();
-        let phone = row.cells[3].innerText.toLowerCase();
-        let address = row.cells[4].innerText.toLowerCase();
-        let debt = parseFloat(row.cells[5].innerText) || 0;
+      let filteredRows = rows.filter(row => {
+        let cells = row.getElementsByTagName("td");
+
+        let id = parseInt(cells[0].innerText) || 0;
+        let name = cells[1].innerText.trim().toLowerCase();
+        let phone = cells[2].innerText.trim().toLowerCase();
+        let address = cells[3].innerText.trim().toLowerCase();
+        let debt = parseFloat(cells[4].innerText) || 0;
+        let createdDate = formatDate(cells[5].innerText.trim());
+        let updatedDate = formatDate(cells[6].innerText.trim());
 
         let matches = true;
 
-        // Kiểm tra khoảng giá trị cho ID
-        if ((searchIdMin !== null && id < searchIdMin) || (searchIdMax !== null && id > searchIdMax)) {
-          matches = false;
-        }
+        // Kiểm tra ID
+        if (searchIdMin !== null && id < searchIdMin) matches = false;
+        if (searchIdMax !== null && id > searchIdMax) matches = false;
 
-        // Kiểm tra khoảng giá trị cho Công nợ
-        if ((searchDebtMin !== null && debt < searchDebtMin) || (searchDebtMax !== null && debt > searchDebtMax)) {
-          matches = false;
-        }
+        // Kiểm tra Công nợ
+        if (searchDebtMin !== null && debt < searchDebtMin) matches = false;
+        if (searchDebtMax !== null && debt > searchDebtMax) matches = false;
 
-        // Kiểm tra các bộ lọc khác
+        // Kiểm tra Tên, SĐT, Địa chỉ
         if (searchName && !name.includes(searchName)) matches = false;
         if (searchPhone && !phone.includes(searchPhone)) matches = false;
         if (searchAddress && !address.includes(searchAddress)) matches = false;
 
-        if (matches) {
-          filteredRows.push(row);
-        }
+        // Kiểm tra Ngày tạo (theo khoảng)
+        if (searchCreatedDateMin && createdDate < formatDate(searchCreatedDateMin)) matches = false;
+        if (searchCreatedDateMax && createdDate > formatDate(searchCreatedDateMax)) matches = false;
+
+        // Kiểm tra Ngày cập nhật (theo khoảng)
+        if (searchUpdatedDateMin && updatedDate < formatDate(searchUpdatedDateMin)) matches = false;
+        if (searchUpdatedDateMax && updatedDate > formatDate(searchUpdatedDateMax)) matches = false;
+
+        return matches;
       });
 
       paginate(filteredRows);
@@ -136,7 +149,7 @@
 
     function updatePagination(totalPages) {
       let paginationDiv = document.getElementById("pagination");
-      paginationDiv.innerHTML = ""; // Xóa nội dung cũ
+      paginationDiv.innerHTML = "";
 
       let prevButton = document.createElement("button");
       prevButton.classList.add("btn", "btn-primary", "me-2");
@@ -167,6 +180,12 @@
       paginationDiv.appendChild(nextButton);
     }
 
+    // Chuyển đổi ngày từ dd-MM-yyyy sang yyyy-MM-dd để so sánh chính xác
+    function formatDate(dateStr) {
+      let parts = dateStr.split("-");
+      return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : dateStr;
+    }
+
     // Gán sự kiện cho tất cả input
     inputs.forEach(input => {
       input.addEventListener("input", function () {
@@ -185,6 +204,7 @@
     // Khởi chạy bộ lọc khi tải trang
     applyFiltersAndPaginate();
   });
+
 </script>
 </body>
 </html>
