@@ -4,18 +4,28 @@
   <meta charset="UTF-8">
   <title>Thêm Công Nợ</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    #errorAlert {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1050;
+      display: none; /* Ẩn mặc định */
+    }
+  </style>
 </head>
 <body>
 <div class="container mt-5">
   <h2>Thêm Công Nợ</h2>
-  <form th:action="@{/debt/add}" method="post">
-    <!-- Ẩn id khách hàng để truyền lên controller -->
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-      <span th:text="${error}"></span>
-<!--      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>-->
-    </div>
+  <div id="errorAlert" class="alert alert-danger" role="alert"></div>
+<!--  <div th:if="${error}" class="alert alert-danger" role="alert">-->
+<!--    <span th:text="${error}"></span>-->
+<!--  </div>-->
+  <div th:if="${success}" class=" alert alert-success" role="alert">
+    <span th:text="${success}"></span>
+  </div>
+  <form th:action="@{/debt/add}" method="post" onsubmit="return validateForm()">
     <input type="hidden" name="customerId" th:value="${customer.id}">
-
     <div class="mb-3">
       <label class="form-label">Tên Khách Hàng:</label>
       <input type="text" class="form-control" th:value="${customer.name}" readonly>
@@ -30,7 +40,7 @@
     </div>
     <div class="mb-3">
       <label class="form-label">Số tiền:</label>
-      <input type="number" name="amount" class="form-control" pattern="^\d+\.*\d*$" title="Số tiền không được âm" required>
+      <input type="number" name="amount" id="amount" class="form-control"  required>
     </div>
     <div class="mb-3">
       <label class="form-label">Loại Công Nợ:</label>
@@ -43,5 +53,31 @@
     <a th:href="@{/customers}" class="btn btn-secondary">Hủy</a>
   </form>
 </div>
+<script>
+  function validateForm() {
+   let amount = document.getElementById("amount").value;
+    let errorMessages = [];
+
+    if (amount < 0) {
+      errorMessages.push("Số tiền phải lớn hơn 0.");
+    }
+    if (errorMessages.length > 0) {
+      showError(errorMessages);
+      return false;  // Ngăn form submit
+    }
+    return true;  // Cho phép submit nếu không có lỗi
+  }
+
+  function showError(errors) {
+    let errorAlert = document.getElementById("errorAlert");
+    errorAlert.innerHTML = errors.join("<br>");
+    errorAlert.style.display = "block"; // Hiển thị thông báo lỗi
+
+    // Tự động ẩn sau 3 giây
+    setTimeout(function () {
+      errorAlert.style.display = "none";
+    }, 3000);
+  }
+</script>
 </body>
 </html>

@@ -55,9 +55,9 @@ private StoreRepository storeRepository;
                           HttpSession session, RedirectAttributes redirectAttributes) {
         Store store = (Store) session.getAttribute("store");
        if(amount < 0  ){
-           redirectAttributes.addFlashAttribute("error", "Số tiền nợ không hợp lệ");
+          redirectAttributes.addFlashAttribute("error", "Số tiền nợ không hợp lệ");
            return "redirect:/debt/add?customerId=" + customerId;
-       }
+      }
         Customer customer = customerRepository.findByIdAndStoreId(customerId, store.getId());
      //   model.addAttribute("store", store);
         if (customer != null) {
@@ -68,6 +68,8 @@ private StoreRepository storeRepository;
             debtRecord.setType(type);
             // Các thông tin khác (ngày tạo, người tạo,...) sẽ được set trong service
             debtService.saveDebtRecord(debtRecord, customerId);
+           redirectAttributes.addFlashAttribute("success", "Thêm nợ thành công");
+            return "redirect:/debt/detail?customerId=" + customerId;
         }
         return "redirect:/customers";
     }

@@ -9,6 +9,9 @@
 <div class="container mt-5">
   <h2>Chi Tiết Công Nợ</h2>
   <a th:href="@{/debt/add(customerId=${customerId})}" class="btn btn-success">Thêm Công Nợ</a><br><br>
+  <div th:if="${success}" class=" alert alert-success" role="alert">
+    <span th:text="${success}"></span>
+  </div>
   <table id="customerTable" class="table table-bordered">
     <thead>
     <tr>
