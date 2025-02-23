@@ -23,3 +23,8 @@ function validateForm() {
     input.classList.remove("border-red-500");
     return true;
 }
+// noti.js
+
+
+
+

@@ -9,13 +9,40 @@
 <div class="container mt-5">
   <h2>Chi Tiết Công Nợ</h2>
   <a th:href="@{/debt/add(customerId=${customerId})}" class="btn btn-success">Thêm Công Nợ</a><br><br>
-  <table class="table table-bordered">
+  <table id="customerTable" class="table table-bordered">
     <thead>
     <tr>
       <th>ID</th>
       <th>Số Tiền</th>
       <th>Loại Công Nợ</th>
       <th>Ngày Tạo</th>
+      <th>Ngày Cập Nhật</th>
+    </tr>
+    <tr>
+      <th>
+        <input type="number" id="search-id-min" class="form-control" placeholder="Từ" />
+        <input type="number" id="search-id-max" class="form-control mt-1" placeholder="Đến" />
+      </th>
+        <th>
+            <input type="number" id="search-amount-min" class="form-control" placeholder="Từ" />
+            <input type="number" id="search-amount-max" class="form-control mt-1" placeholder="Đến" />
+        </th>
+        <th>
+            <select id="search-type" class="form-control">
+            <option value="">Tất cả</option>
+            <option value="GHI_NO">Ghi nợ</option>
+            <option value="TRA_NO">Trả nợ</option>
+            </select>
+        </th>
+        <th>
+            <input type="date" id="search-created-date-min" class="form-control" placeholder="Từ" />
+            <input type="date" id="search-created-date-max" class="form-control mt-1" placeholder="Đến" />
+        </th>
+        <th>
+            <input type="date" id="search-updated-date-min" class="form-control" placeholder="Từ" />
+            <input type="date" id="search-updated-date-max" class="form-control mt-1" placeholder="Đến" />
+        </th>
+        <th><button id="clearFilter" class="btn btn-warning">Bỏ lọc</button></th>
     </tr>
     </thead>
     <tbody>
@@ -24,10 +51,140 @@
       <td th:text="${debt.amount}"></td>
       <td th:text="${debt.type}"></td>
       <td th:text="${#temporals.format(debt.createdAt, 'dd-MM-yyyy')}"></td>
+      <td th:text="${#temporals.format(debt.updatedAt, 'dd-MM-yyyy')}"></td>
     </tr>
     </tbody>
   </table>
   <a th:href="@{/customers}" class="btn btn-secondary">Quay lại</a>
 </div>
+<div id="pagination" class="mt-3 text-center"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let inputs = document.querySelectorAll("input, select");
+        let rows = Array.from(document.querySelectorAll("#customerTable tbody tr"));
+        let pageSize = 5; // Số khách hàng hiển thị trên mỗi trang
+        let currentPage = 0;
+
+        function applyFiltersAndPaginate() {
+            let searchIdMin = parseInt(document.getElementById("search-id-min").value.trim()) || null;
+            let searchIdMax = parseInt(document.getElementById("search-id-max").value.trim()) || null;
+            let searchAmountMin = parseFloat(document.getElementById("search-amount-min").value.trim()) || null;
+            let searchAmountMax = parseFloat(document.getElementById("search-amount-max").value.trim()) || null;
+            let searchType = document.getElementById("search-type").value.trim();
+            let searchCreatedDateMin = document.getElementById("search-created-date-min").value.trim();
+            let searchCreatedDateMax = document.getElementById("search-created-date-max").value.trim();
+            let searchUpdatedDateMin = document.getElementById("search-updated-date-min").value.trim();
+            let searchUpdatedDateMax = document.getElementById("search-updated-date-max").value.trim();
+
+            let filteredRows = rows.filter(row => {
+                let cells = row.getElementsByTagName("td");
+
+                let id = parseInt(cells[0].innerText) || 0;
+                let amount = parseFloat(cells[1].innerText) || 0;
+                let type = cells[2].innerText.trim();
+                let createdDate = formatDate(cells[3].innerText.trim());
+                let updatedDate = formatDate(cells[4].innerText.trim());
+
+                let matches = true;
+
+                // Kiểm tra ID
+                if (searchIdMin !== null && id < searchIdMin) matches = false;
+                if (searchIdMax !== null && id > searchIdMax) matches = false;
+
+                // Kiểm tra Số tiền
+                if (searchAmountMin !== null && amount < searchAmountMin) matches = false;
+                if (searchAmountMax !== null && amount > searchAmountMax) matches = false;
+
+                // Kiểm tra Loại Công Nợ
+                if (searchType && type !== searchType) matches = false;
+
+                // Kiểm tra Ngày tạo (theo khoảng)
+                if (searchCreatedDateMin && createdDate < formatDate(searchCreatedDateMin)) matches = false;
+                if (searchCreatedDateMax && createdDate > formatDate(searchCreatedDateMax)) matches = false;
+
+                // Kiểm tra Ngày cập nhật (theo khoảng)
+                if (searchUpdatedDateMin && updatedDate < formatDate(searchUpdatedDateMin)) matches = false;
+                if (searchUpdatedDateMax && updatedDate > formatDate(searchUpdatedDateMax)) matches = false;
+
+                return matches;
+            });
+
+            paginate(filteredRows);
+        }
+
+        function paginate(filteredRows) {
+            let totalPages = Math.ceil(filteredRows.length / pageSize);
+            let start = currentPage * pageSize;
+            let end = start + pageSize;
+
+            // Ẩn tất cả hàng
+            rows.forEach(row => row.style.display = "none");
+
+            // Hiển thị hàng phù hợp với bộ lọc
+            filteredRows.slice(start, end).forEach(row => row.style.display = "");
+
+            // Cập nhật phân trang
+            updatePagination(totalPages);
+        }
+
+        function updatePagination(totalPages) {
+            let paginationDiv = document.getElementById("pagination");
+            paginationDiv.innerHTML = "";
+
+            let prevButton = document.createElement("button");
+            prevButton.classList.add("btn", "btn-primary", "me-2");
+            prevButton.innerText = "Trang trước";
+            prevButton.disabled = currentPage === 0;
+            prevButton.addEventListener("click", function () {
+                if (currentPage > 0) {
+                    currentPage--;
+                    applyFiltersAndPaginate();
+                }
+            });
+            paginationDiv.appendChild(prevButton);
+
+            let pageInfo = document.createElement("span");
+            pageInfo.innerHTML = `<strong>Trang ${currentPage + 1} / ${totalPages || 1}</strong>`;
+            paginationDiv.appendChild(pageInfo);
+
+            let nextButton = document.createElement("button");
+            nextButton.classList.add("btn", "btn-primary", "ms-2");
+            nextButton.innerText = "Trang sau";
+            nextButton.disabled = currentPage >= totalPages - 1;
+            nextButton.addEventListener("click", function () {
+                if (currentPage < totalPages - 1) {
+                    currentPage++;
+                    applyFiltersAndPaginate();
+                }
+            });
+            paginationDiv.appendChild(nextButton);
+        }
+
+        // Chuyển đổi ngày từ dd-MM-yyyy sang yyyy-MM-dd để so sánh chính xác
+        function formatDate(dateStr) {
+            let parts = dateStr.split("-");
+            return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : dateStr;
+        }
+
+        // Gán sự kiện cho tất cả input
+        inputs.forEach(input => {
+            input.addEventListener("input", function () {
+                currentPage = 0;
+                applyFiltersAndPaginate();
+            });
+        });
+
+        // Xóa bộ lọc
+        document.getElementById("clearFilter").addEventListener("click", function () {
+            inputs.forEach(input => input.value = "");
+            currentPage = 0;
+            applyFiltersAndPaginate();
+        });
+
+        // Khởi chạy bộ lọc khi tải trang
+        applyFiltersAndPaginate();
+    });
+</script>
 </body>
 </html>

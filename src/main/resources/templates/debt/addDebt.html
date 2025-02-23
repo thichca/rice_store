@@ -10,6 +10,10 @@
   <h2>Thêm Công Nợ</h2>
   <form th:action="@{/debt/add}" method="post">
     <!-- Ẩn id khách hàng để truyền lên controller -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${error}"></span>
+<!--      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>-->
+    </div>
     <input type="hidden" name="customerId" th:value="${customer.id}">
 
     <div class="mb-3">
@@ -26,7 +30,7 @@
     </div>
     <div class="mb-3">
       <label class="form-label">Số tiền:</label>
-      <input type="number" name="amount" class="form-control" step="0.01" required>
+      <input type="number" name="amount" class="form-control"  required>
     </div>
     <div class="mb-3">
       <label class="form-label">Loại Công Nợ:</label>

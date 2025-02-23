@@ -47,14 +47,17 @@ private StoreRepository storeRepository;
     // Xử lý thêm nợ
     @PostMapping("/add")
     public String addDebt(@RequestParam("customerId") Long customerId,
-                         // BindingResult result,
+                          // BindingResult result,
                           Model model,
-                    //      RedirectAttributes redirectAttributes,
+                          //      RedirectAttributes redirectAttributes,
                           @RequestParam("amount") double amount,
                           @RequestParam("type") DebtRecord.DebtType type,
-                          HttpSession session) {
+                          HttpSession session, RedirectAttributes redirectAttributes) {
         Store store = (Store) session.getAttribute("store");
-
+       if(amount < 0  ){
+           redirectAttributes.addFlashAttribute("error", "Số tiền nợ không hợp lệ");
+           return "redirect:/debt/add?customerId=" + customerId;
+       }
         Customer customer = customerRepository.findByIdAndStoreId(customerId, store.getId());
      //   model.addAttribute("store", store);
         if (customer != null) {
