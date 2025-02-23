@@ -38,10 +38,10 @@
             <input type="date" id="search-created-date-min" class="form-control" placeholder="Từ" />
             <input type="date" id="search-created-date-max" class="form-control mt-1" placeholder="Đến" />
         </th>
-        <th>
-            <input type="date" id="search-updated-date-min" class="form-control" placeholder="Từ" />
-            <input type="date" id="search-updated-date-max" class="form-control mt-1" placeholder="Đến" />
-        </th>
+<!--        <th>-->
+<!--            <input type="date" id="search-updated-date-min" class="form-control" placeholder="Từ" />-->
+<!--            <input type="date" id="search-updated-date-max" class="form-control mt-1" placeholder="Đến" />-->
+<!--        </th>-->
         <th><button id="clearFilter" class="btn btn-warning">Bỏ lọc</button></th>
     </tr>
     </thead>
@@ -51,7 +51,7 @@
       <td th:text="${debt.amount}"></td>
       <td th:text="${debt.type}"></td>
       <td th:text="${#temporals.format(debt.createdAt, 'dd-MM-yyyy')}"></td>
-      <td th:text="${#temporals.format(debt.updatedAt, 'dd-MM-yyyy')}"></td>
+<!--      <td th:text="${#temporals.format(debt.updatedAt, 'dd-MM-yyyy')}"></td>-->
     </tr>
     </tbody>
   </table>
@@ -74,8 +74,8 @@
             let searchType = document.getElementById("search-type").value.trim();
             let searchCreatedDateMin = document.getElementById("search-created-date-min").value.trim();
             let searchCreatedDateMax = document.getElementById("search-created-date-max").value.trim();
-            let searchUpdatedDateMin = document.getElementById("search-updated-date-min").value.trim();
-            let searchUpdatedDateMax = document.getElementById("search-updated-date-max").value.trim();
+           // let searchUpdatedDateMin = document.getElementById("search-updated-date-min").value.trim();
+          //  let searchUpdatedDateMax = document.getElementById("search-updated-date-max").value.trim();
 
             let filteredRows = rows.filter(row => {
                 let cells = row.getElementsByTagName("td");
@@ -84,7 +84,7 @@
                 let amount = parseFloat(cells[1].innerText) || 0;
                 let type = cells[2].innerText.trim();
                 let createdDate = formatDate(cells[3].innerText.trim());
-                let updatedDate = formatDate(cells[4].innerText.trim());
+             //   let updatedDate = formatDate(cells[4].innerText.trim());
 
                 let matches = true;
 
@@ -104,8 +104,8 @@
                 if (searchCreatedDateMax && createdDate > formatDate(searchCreatedDateMax)) matches = false;
 
                 // Kiểm tra Ngày cập nhật (theo khoảng)
-                if (searchUpdatedDateMin && updatedDate < formatDate(searchUpdatedDateMin)) matches = false;
-                if (searchUpdatedDateMax && updatedDate > formatDate(searchUpdatedDateMax)) matches = false;
+                // if (searchUpdatedDateMin && updatedDate < formatDate(searchUpdatedDateMin)) matches = false;
+                // if (searchUpdatedDateMax && updatedDate > formatDate(searchUpdatedDateMax)) matches = false;
 
                 return matches;
             });
