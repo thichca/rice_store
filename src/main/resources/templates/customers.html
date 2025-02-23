@@ -117,14 +117,35 @@
         if (searchName && !name.includes(searchName)) matches = false;
         if (searchPhone && !phone.includes(searchPhone)) matches = false;
         if (searchAddress && !address.includes(searchAddress)) matches = false;
+        // Kiểm tra Ngày tạo
+        // Chuyển đổi ngày trong bảng (đã được chuyển đổi thành yyyy-MM-dd bởi formatDate) thành đối tượng Date
+        let createdDateObj = new Date(createdDate);
+        // Chuyển đổi giá trị từ input (đã có định dạng yyyy-MM-dd) thành đối tượng Date
+        let searchCreatedDateMinObj = searchCreatedDateMin ? new Date(searchCreatedDateMin) : null;
+        let searchCreatedDateMaxObj = searchCreatedDateMax ? new Date(searchCreatedDateMax) : null;
 
-        // Kiểm tra Ngày tạo (theo khoảng)
-        if (searchCreatedDateMin && createdDate < formatDate(searchCreatedDateMin)) matches = false;
-        if (searchCreatedDateMax && createdDate > formatDate(searchCreatedDateMax)) matches = false;
+        if (searchCreatedDateMinObj && createdDateObj < searchCreatedDateMinObj) matches = false;
+        if (searchCreatedDateMaxObj && createdDateObj > searchCreatedDateMaxObj) matches = false;
 
-        // Kiểm tra Ngày cập nhật (theo khoảng)
-        if (searchUpdatedDateMin && updatedDate < formatDate(searchUpdatedDateMin)) matches = false;
-        if (searchUpdatedDateMax && updatedDate > formatDate(searchUpdatedDateMax)) matches = false;
+
+
+        // // Kiểm tra Ngày tạo (theo khoảng)
+        // if (searchCreatedDateMin && createdDate < formatDate(searchCreatedDateMin)) matches = false;
+        // if (searchCreatedDateMax && createdDate > formatDate(searchCreatedDateMax)) matches = false;
+
+        // // Kiểm tra Ngày cập nhật (theo khoảng)
+        // if (searchUpdatedDateMin && updatedDate < formatDate(searchUpdatedDateMin)) matches = false;
+        // if (searchUpdatedDateMax && updatedDate > formatDate(searchUpdatedDateMax)) matches = false;
+
+        //Kiểm tra Ngày cập nhật
+        // Chuyển đổi ngày trong bảng (đã được chuyển đổi thành yyyy-MM-dd bởi formatDate) thành đối tượng Date
+        let updatedDateObj = new Date(updatedDate);
+       // Chuyển đổi giá trị từ input (đã có định dạng yyyy-MM-dd) thành đối tượng Date
+        let searchUpdatedDateMinObj = searchUpdatedDateMin ? new Date(searchUpdatedDateMin) : null;
+        let searchUpdatedDateMaxObj = searchUpdatedDateMax ? new Date(searchUpdatedDateMax) : null;
+
+        if (searchUpdatedDateMinObj && updatedDateObj < searchUpdatedDateMinObj) matches = false;
+        if (searchUpdatedDateMaxObj && updatedDateObj > searchUpdatedDateMaxObj) matches = false;
 
         return matches;
       });
