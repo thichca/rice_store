@@ -5,15 +5,12 @@
     <title>
         Đăng nhập
     </title>
-    <script src="https://cdn.tailwindcss.com">
-    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen">
 <div class="bg-gray-800 rounded-lg shadow-lg flex max-w-4xl w-full">
     <div class="w-1/2 hidden md:block">
-        <img alt="Woman with curly hair wearing glasses and a maroon off-shoulder sweater, holding an iPad and smiling"
-             class="rounded-l-lg object-cover h-full w-full" height="800"
+        <img class="rounded-l-lg object-cover h-full w-full" height="800"
              src="https://storage.googleapis.com/a1aa/image/S_m9ApEBwOZ6kqms4SwsVU5-k7G4gMxiT4wpykF7tGI.jpg"
              width="600"/>
     </div>
@@ -30,20 +27,21 @@
         </h2>
         <form th:action="@{/login}" method="post">
             <div class="mb-4">
-                <label class="block text-gray-400 mb-2" for="username">
+                <label class="block text-gray-400 mb-2" for="userNameLogin">
                     Tên đăng nhập
                 </label>
                 <input class="w-full p-3 rounded bg-[#333] text-white border border-gray-600 focus:outline-none focus:border-gray-400"
-                       id="username" name="username" placeholder="Tên đăng nhập" type="text"/>
+                       id="userNameLogin" name="username" placeholder="Tên đăng nhập" type="text"/>
             </div>
             <div class="mb-6">
-                <label class="block text-gray-400 mb-2" for="password">
+                <label class="block text-gray-400 mb-2" for="passwordLogin">
                     Mật khẩu
                 </label>
                 <input class="w-full p-3 rounded bg-[#333] text-white border border-gray-600 focus:outline-none focus:border-gray-400"
-                       id="password" name="password" placeholder="Mật khẩu" type="password"/>
+                       id="passwordLogin" name="password" placeholder="Mật khẩu" type="password"/>
             </div>
-            <button class="w-full p-3 rounded bg-blue-600 text-white font-bold hover:bg-gray-800 transition duration-200">
+            <button name="login"
+                    class="w-full p-3 rounded bg-blue-600 text-white font-bold hover:bg-gray-800 transition duration-200">
                 Đăng nhập
             </button>
         </form>
@@ -67,6 +65,8 @@
             </a>
         </div>
     </div>
+    <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
+<div th:replace="~{fragments/script :: script}"></div>
 </body>
 </html>

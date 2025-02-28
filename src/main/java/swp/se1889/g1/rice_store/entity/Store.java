@@ -13,9 +13,6 @@ public class Store {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_id", nullable = false, unique = true)
-    private Long userId;
-
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -60,9 +57,8 @@ public class Store {
     public Store() {
     }
 
-    public Store(Long id, Long userId, String name, String address, String phone, String email, String note, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy, boolean isDelete) {
+    public Store(Long id, String name, String address, String phone, String email, String note, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy, boolean isDelete) {
         this.id = id;
-        this.userId = userId;
         this.name = name;
         this.address = address;
         this.phone = phone;
@@ -82,15 +78,7 @@ public class Store {
     public void setId(Long id) {
         this.id = id;
     }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
+    
     public String getName() {
         return name;
     }

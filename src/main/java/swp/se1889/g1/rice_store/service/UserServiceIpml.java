@@ -46,7 +46,7 @@ public class UserServiceIpml implements UserService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                rolesToAuthorities(user) // Thay đổi từ user.getRoles() sang user.getRole()
+                rolesToAuthorities(user)
         );
     }
 
@@ -64,13 +64,17 @@ public class UserServiceIpml implements UserService {
         return user != null ? user.getId() : null;
     }
 
+    public Long getCurrentStoreId() {
+        User user = getCurrentUser();
+        return user != null ? user.getStoreId() : null;
+    }
+
     public void updateUser(User user) {
         userRepository.save(user);
     }
 
-    private String getCurrentUsername() {
+    public String getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null ? authentication.getName() : "guest";
     }
 }
-

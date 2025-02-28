@@ -26,25 +26,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(
-                        configurer -> configurer
-                                .requestMatchers("/register", "/login").permitAll()
-                                .anyRequest().authenticated()
-                ).formLogin(
-                        form -> form.loginPage("/login")
-                                .loginProcessingUrl("/login")
-                                .defaultSuccessUrl("/store", true)
-                                .permitAll()
-                )
-                .logout(
-                        logout -> logout
-                                .invalidateHttpSession(true)
-                                .deleteCookies("JSESSIONID")
-                                .permitAll()
-                ).exceptionHandling(
-                        configurer -> configurer.accessDeniedPage("/login")
-                );
-
+        http.authorizeHttpRequests(configurer -> configurer
+                        .requestMatchers("/register", "/login", "/assets/**").permitAll()
+                        .anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/store", true)
+                        .permitAll())
+                .logout(logout -> logout.permitAll())
+                .exceptionHandling(configurer -> configurer.accessDeniedPage("/login"));
         return http.build();
     }
 }
