@@ -7,6 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-6">
+<div class="absolute bottom-6 right-6">
+    <a th:href="@{/manageStores}"
+       class="bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition duration-300">
+        Quản lý cửa hàng
+    </a>
+</div>
 <div class="text-center mb-6">
     <h1 class="text-2xl font-semibold mb-2 text-gray-800">Hệ Thống Quản Lý Cửa Hàng Gạo</h1>
     <p class="text-gray-600">Vui lòng chọn một cửa hàng hoặc tạo mới nếu bạn chưa có.</p>
@@ -15,8 +21,8 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
     <th:block th:each="store : ${stores}">
         <form th:action="@{/home}" method="post" class="w-full">
-            <input type="hidden" name="userId" th:value="${store.userId}">
             <input type="hidden" name="storeName" th:value="${store.name}">
+            <input type="hidden" name="createdBy" th:value="${store.createdBy}">
             <button type="submit"
                     class="border rounded-lg p-6 flex flex-col items-center bg-white shadow-md hover:shadow-lg transition duration-300 cursor-pointer relative w-full">
                 <div class="bg-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mb-2">
@@ -35,6 +41,8 @@
             <p class="font-semibold text-gray-700">Tạo mới</p>
         </a>
     </div>
+    <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
+<div th:replace="~{fragments/script :: script}"></div>
 </body>
 </html>

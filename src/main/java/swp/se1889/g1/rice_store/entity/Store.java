@@ -13,9 +13,6 @@ public class Store {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_id", nullable = false, unique = true)
-    private Long userId;
-
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -43,8 +40,8 @@ public class Store {
     @Column(name = "updated_by")
     private String updatedBy;
 
-    @Column(name = "is_delete")
-    private boolean isDelete;
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
 
     @PrePersist
     protected void onCreate() {
@@ -60,9 +57,8 @@ public class Store {
     public Store() {
     }
 
-    public Store(Long id, Long userId, String name, String address, String phone, String email, String note, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy, boolean isDelete) {
+    public Store(Long id, String name, String address, String phone, String email, String note, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy, boolean isDeleted) {
         this.id = id;
-        this.userId = userId;
         this.name = name;
         this.address = address;
         this.phone = phone;
@@ -72,7 +68,7 @@ public class Store {
         this.updatedAt = updatedAt;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
-        this.isDelete = isDelete;
+        this.isDeleted = isDeleted;
     }
 
     public Long getId() {
@@ -81,14 +77,6 @@ public class Store {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 
     public String getName() {
@@ -163,11 +151,11 @@ public class Store {
         this.updatedBy = updatedBy;
     }
 
-    public boolean isDelete() {
-        return isDelete;
+    public boolean isDeleted() {
+        return isDeleted;
     }
 
-    public void setDelete(boolean delete) {
-        isDelete = delete;
+    public void setDelete(boolean deleted) {
+        isDeleted = deleted;
     }
 }

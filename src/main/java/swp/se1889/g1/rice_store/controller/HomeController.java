@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.service.StoreService;
-import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
 @Controller
 public class HomeController {
@@ -17,14 +16,12 @@ public class HomeController {
     @Autowired
     private StoreService storeService;
 
-    @Autowired
-    private UserServiceIpml userService;
-
     @PostMapping("/home")
     public String storeSelection(@RequestParam("storeName") String name,
-                                 @RequestParam("userId") Long userId,
-                                 Model model, HttpSession session) {
-        Store store = storeService.findByNameAndUserId(name, userId);
+                                 @RequestParam("createdBy") String createdBy,
+                                 HttpSession session,
+                                 Model model) {
+        Store store = storeService.getStoreByNameAndCreatedBy(name, createdBy);
         session.setAttribute("store", store);
         model.addAttribute("store", store);
         return "home";
@@ -35,5 +32,12 @@ public class HomeController {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
         return "home";
+    }
+
+    @GetMapping("/baseFE")
+    public String getBaseFE(HttpSession session, Model model) {
+        Store store = (Store) session.getAttribute("store");
+        model.addAttribute("store", store);
+        return "baseFE";
     }
 }

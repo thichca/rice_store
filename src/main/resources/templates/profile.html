@@ -16,19 +16,17 @@
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold">
-                <span th:text="${user != null ? (user.role == 'ROLE_OWNER' ? 'Cửa hàng' : 'Người dùng') : ''}"></span>
+                <span>Hồ sơ người dùng</span>
             </h2>
         </div>
 
         <form th:action="@{/updateInfo}" method="post">
             <div class="grid grid-cols-2 gap-6 mb-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700"
-                           th:text="${user != null} ? (${user.role == 'ROLE_OWNER'} ? 'Tên cửa hàng' : 'Tên người dùng') : ''">
-                    </label>
+                    <label class="block text-sm font-medium text-gray-700">Tên người dùng</label>
 
-                    <input type="text" name="storeName"
-                           th:value="${user != null ? (user.role == 'ROLE_OWNER' ? (store != null ? store.name : '') : (user != null ? user.storeName : '')) : ''}"
+                    <input type="text" name="name"
+                           th:value="${user != null ? user.name : ''}"
                            class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                 </div>
                 <div>
@@ -51,22 +49,25 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Điện thoại</label>
-                    <input type="text" name="phone" th:value="${user != null ? user.phone : ''}"
+                    <input type="text" name="phone"
+                           th:value="${user != null ? user.phone : ''}"
                            class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" name="email" th:value="${user != null ? user.email : ''}"
+                    <input type="email" name="email"
+                           th:value="${user != null ? user.email : ''}"
                            class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Ghi chú</label>
-                    <textarea name="note" th:text="${user != null ? user.note : ''}"
+                    <textarea name="note"
+                              th:value="${user != null ? user.note : ''}"
                               class="mt-1 block w-full border-b border-gray-300 focus:border-b-2 focus:border-blue-500 outline-none transition duration-300 h-24"></textarea>
                 </div>
             </div>
             <div class="flex justify-end mb-6">
-                <button class="bg-green-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-600">
+                <button name="save" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600">
                     <i class="fas fa-save"></i> Lưu thay đổi
                 </button>
             </div>
@@ -109,7 +110,7 @@
                         </div>
                     </div>
                     <div class="flex justify-end mt-6">
-                        <button class="bg-green-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-600">
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600">
                             <i class="fas fa-save"></i> Lưu
                         </button>
                     </div>
@@ -117,24 +118,8 @@
             </form>
         </div>
     </div>
-    <div th:if="${success}"
-         class="alert-fixed fixed top-5 right-5 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-2 animate-fadeIn">
-        <i class="fas fa-check-circle"></i>
-        <span th:text="${success}"></span>
-        <button onclick="this.parentElement.remove()" class="ml-4 text-white">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-    <div th:if="${error}"
-         class="alert-fixed fixed top-5 right-5 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-2 animate-fadeIn">
-        <i class="fas fa-exclamation-circle"></i>
-        <span th:text="${error}"></span>
-        <button onclick="this.parentElement.remove()" class="ml-4 text-white">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
+    <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
-
 <div th:replace="~{fragments/script :: script}"></div>
 </body>
 </html>
