@@ -3,7 +3,6 @@ package swp.se1889.g1.rice_store.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,7 +14,6 @@ import swp.se1889.g1.rice_store.dto.ChangePasswordDTO;
 import swp.se1889.g1.rice_store.dto.UserDTO;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
-import swp.se1889.g1.rice_store.service.StoreService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
 @Controller
@@ -23,9 +21,6 @@ public class ProfileController {
 
     @Autowired
     private UserServiceIpml userServiceIpml;
-
-    @Autowired
-    private StoreService storeService;
 
     @GetMapping("/profile")
     public String profile(HttpSession session, Model model) {
@@ -39,9 +34,7 @@ public class ProfileController {
     @PostMapping("/updateInfo")
     public String updateInfo(@Valid UserDTO userDTO,
                              BindingResult bindingResult,
-                             RedirectAttributes redirectAttributes,
-                             HttpSession session,
-                             Model model) {
+                             RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             for (FieldError fieldError : bindingResult.getFieldErrors()) {
                 redirectAttributes.addFlashAttribute("error", fieldError.getDefaultMessage());
@@ -49,28 +42,14 @@ public class ProfileController {
             return "redirect:/profile";
         }
 
+        boolean hasError = userServiceIpml.validateUserInfor(userDTO, redirectAttributes);
+        if (!hasError) {
+            return "redirect:/profile";
+        }
+
         try {
-            User currentUser = userServiceIpml.getCurrentUser();
-            currentUser.setStoreName(userDTO.getStoreName());
-            currentUser.setAddress(userDTO.getAddress());
-            currentUser.setPhone(userDTO.getPhone());
-            currentUser.setEmail(userDTO.getEmail());
-            currentUser.setNote(userDTO.getNote());
-            userServiceIpml.updateUser(currentUser);
-
-            if (currentUser.getRole().equals("ROLE_OWNER")) {
-                Store store = (Store) session.getAttribute("store");
-                store.setName(userDTO.getStoreName());
-                store.setAddress(userDTO.getAddress());
-                store.setPhone(userDTO.getPhone());
-                store.setEmail(userDTO.getEmail());
-                store.setNote(userDTO.getNote());
-                storeService.updateStore(store);
-                session.setAttribute("store", store);
-                model.addAttribute("store", store);
-            }
-
-            redirectAttributes.addFlashAttribute("success", "Cập nhật thành công!");
+            userServiceIpml.updateUserInfor(userDTO);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
         }
@@ -82,14 +61,6 @@ public class ProfileController {
                                  BindingResult bindingResult,
                                  RedirectAttributes redirectAttributes) {
 
-        User user = userServiceIpml.getCurrentUser();
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-        if (!passwordEncoder.matches(changePasswordDTO.getCurrentPassword(), user.getPassword())) {
-            redirectAttributes.addFlashAttribute("error", "Mật khẩu hiện tại không đúng");
-            return "redirect:/profile";
-        }
-
         if (bindingResult.hasErrors()) {
             for (FieldError fieldError : bindingResult.getFieldErrors()) {
                 redirectAttributes.addFlashAttribute("error", fieldError.getDefaultMessage());
@@ -97,15 +68,17 @@ public class ProfileController {
             return "redirect:/profile";
         }
 
-        if (!changePasswordDTO.getNewPassword().equals(changePasswordDTO.getConfirmNewPassword())) {
-            redirectAttributes.addFlashAttribute("error", "Mật khẩu nhập lại không khớp");
+        boolean hasError = userServiceIpml.validateUpdatePassword(changePasswordDTO, redirectAttributes);
+        if (!hasError) {
             return "redirect:/profile";
         }
 
-        user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
-        userServiceIpml.updateUser(user);
-
-        redirectAttributes.addFlashAttribute("success", "Cập nhật mật khẩu thành công!");
+        try {
+            userServiceIpml.updateUserPassword(changePasswordDTO);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật mật khẩu thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
+        }
         return "redirect:/profile";
     }
 }

@@ -29,8 +29,8 @@ public class StoreController {
         String username = userService.getCurrentUsername();
         List<Store> stores = storeService.getStoresByUserName(username);
 
-        if (userService.getCurrentStoreId() != null) {
-            Store store = storeService.findStoreByStoreId(userService.getCurrentStoreId());
+        if (userService.getCurrentCreatedBy() != null) {
+            Store store = storeService.findStoreByStoreId(userService.getCurrentCreatedBy());
             if (store != null && !stores.contains(store)) {
                 stores.add(store);
             }
@@ -42,6 +42,14 @@ public class StoreController {
     @GetMapping("/createStore")
     public String createStoreForm() {
         return "createStore";
+    }
+
+    @GetMapping("/manageStores")
+    public String manageStores(Model model) {
+        String username = userService.getCurrentUsername();
+        List<Store> stores = storeService.getStoresByUserName(username);
+        model.addAttribute("stores", stores);
+        return "manageStores";
     }
 
     @PostMapping("/createStore")

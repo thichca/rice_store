@@ -34,7 +34,11 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/store", true)
                         .permitAll())
-                .logout(logout -> logout.permitAll())
+                .logout(logout -> logout
+                        .permitAll()
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .logoutSuccessUrl("/login"))
                 .exceptionHandling(configurer -> configurer.accessDeniedPage("/login"));
         return http.build();
     }

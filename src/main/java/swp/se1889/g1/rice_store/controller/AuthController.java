@@ -63,7 +63,7 @@ public class AuthController {
         newUser.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         newUser.setEmail(registerDTO.getEmail());
         newUser.setRole("ROLE_OWNER");
-        newUser.setStoreName("");
+        newUser.setName("");
         newUser.setAddress("");
         newUser.setPhone("");
         userRepository.save(newUser);

@@ -7,7 +7,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import swp.se1889.g1.rice_store.dto.ChangePasswordDTO;
+import swp.se1889.g1.rice_store.dto.UserDTO;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.UserRepository;
 import swp.se1889.g1.rice_store.service.Iservice.UserService;
@@ -59,18 +63,60 @@ public class UserServiceIpml implements UserService {
         return userRepository.findByUsername(username);
     }
 
-    public Long getCurrentUserId() {
-        User user = getCurrentUser();
-        return user != null ? user.getId() : null;
+    public Long getCurrentCreatedBy() {
+        User currentUser = getCurrentUser();
+        return currentUser != null ? currentUser.getCreatedBy() : null;
     }
 
-    public Long getCurrentStoreId() {
-        User user = getCurrentUser();
-        return user != null ? user.getStoreId() : null;
+    public boolean validateUserInfor(UserDTO userDTO, RedirectAttributes redirectAttributes) {
+        boolean hasError = false;
+        if (userRepository.findByEmail(userDTO.getEmail()) != null) {
+            redirectAttributes.addFlashAttribute("error", "Email đã tồn tại");
+            hasError = true;
+        }
+
+        if (userRepository.findByPhone(userDTO.getPhone()) != null) {
+            redirectAttributes.addFlashAttribute("error", "Số điện thoại đã tồn tại");
+            hasError = true;
+        }
+
+        return hasError;
     }
 
-    public void updateUser(User user) {
-        userRepository.save(user);
+    public boolean validateUpdatePassword(ChangePasswordDTO changePasswordDTO, RedirectAttributes redirectAttributes) {
+        boolean hasError = false;
+        User user = getCurrentUser();
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        if (!passwordEncoder.matches(changePasswordDTO.getCurrentPassword(), user.getPassword())) {
+            redirectAttributes.addFlashAttribute("error", "Mật khẩu hiện tại không đúng");
+            hasError = true;
+        }
+
+        if (!changePasswordDTO.getNewPassword().equals(changePasswordDTO.getConfirmNewPassword())) {
+            redirectAttributes.addFlashAttribute("error", "Mật khẩu nhập lại không khớp");
+            hasError = true;
+        }
+
+        return hasError;
+    }
+
+    public void updateUserInfor(UserDTO userDTO) {
+        User currentUser = getCurrentUser();
+        currentUser.setEmail(userDTO.getEmail());
+        currentUser.setPhone(userDTO.getPhone());
+        currentUser.setName(userDTO.getName());
+        currentUser.setAddress(userDTO.getAddress());
+        currentUser.setNote(userDTO.getNote());
+
+        userRepository.save(currentUser);
+    }
+
+    public void updateUserPassword(ChangePasswordDTO changePasswordDTO) {
+        User currentUser = getCurrentUser();
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        currentUser.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+        userRepository.save(currentUser);
     }
 
     public String getCurrentUsername() {

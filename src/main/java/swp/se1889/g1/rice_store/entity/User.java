@@ -25,8 +25,8 @@ public class User {
     @Column(name = "role", nullable = false)
     private String role;
 
-    @Column(name = "store_name")
-    private String storeName;
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "address")
     private String address;
@@ -37,9 +37,6 @@ public class User {
     @Column(name = "note")
     private String note;
 
-    @Column(name = "store_id")
-    private Long storeId;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -47,13 +44,13 @@ public class User {
     private LocalDateTime updatedAt;
 
     @Column(name = "created_by")
-    private String createdBy;
+    private long createdBy;
 
     @Column(name = "updated_by")
-    private String updatedBy;
+    private long updatedBy;
 
-    @Column(name = "is_delete")
-    private boolean isDelete;
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
 
     @PrePersist
     protected void onCreate() {
@@ -66,26 +63,24 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
-
     public User() {
     }
 
-    public User(long id, String username, String password, String email, String role, String storeName, String address, String phone, String note, Long storeId, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy, boolean isDelete) {
+    public User(long id, String username, String password, String email, String role, String name, String address, String phone, String note, LocalDateTime createdAt, LocalDateTime updatedAt, long createdBy, long updatedBy, boolean isDeleted) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
         this.role = role;
-        this.storeName = storeName;
+        this.name = name;
         this.address = address;
         this.phone = phone;
         this.note = note;
-        this.storeId = storeId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
-        this.isDelete = isDelete;
+        this.isDeleted = isDeleted;
     }
 
     public long getId() {
@@ -128,12 +123,12 @@ public class User {
         this.role = role;
     }
 
-    public String getStoreName() {
-        return storeName;
+    public String getName() {
+        return name;
     }
 
-    public void setStoreName(String storeName) {
-        this.storeName = storeName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAddress() {
@@ -160,14 +155,6 @@ public class User {
         this.note = note;
     }
 
-    public Long getStoreId() {
-        return storeId;
-    }
-
-    public void setStoreId(Long storeId) {
-        this.storeId = storeId;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -184,27 +171,27 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public String getCreatedBy() {
+    public long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(String createdBy) {
+    public void setCreatedBy(long createdBy) {
         this.createdBy = createdBy;
     }
 
-    public String getUpdatedBy() {
+    public long getUpdatedBy() {
         return updatedBy;
     }
 
-    public void setUpdatedBy(String updatedBy) {
+    public void setUpdatedBy(long updatedBy) {
         this.updatedBy = updatedBy;
     }
 
-    public boolean isDelete() {
-        return isDelete;
+    public boolean isDeleted() {
+        return isDeleted;
     }
 
-    public void setDelete(boolean delete) {
-        isDelete = delete;
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

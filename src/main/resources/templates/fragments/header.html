@@ -41,9 +41,11 @@
                                 sơ</a>
                             <a th:href="@{/store}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Thay
                                 đổi cửa hàng</a>
-                            <a href="#" onclick="logout();"
-                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Đăng
-                                xuất</a>
+                            <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <form action="#" th:action="@{/logout}" method="POST">
+                                    <input type="submit" class="btn btn-info" value="Đăng xuất"/>
+                                </form>
+                            </a>
                         </div>
                     </div>
                 </a>

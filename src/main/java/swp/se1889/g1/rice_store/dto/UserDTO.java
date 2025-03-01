@@ -7,8 +7,8 @@ public class UserDTO {
     @Pattern(regexp = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$", message = "Định dạng email không hợp lệ")
     private String email;
 
-    @Size(max = 50, message = "Tên cửa hàng không được dài quá 50 ký tự")
-    private String storeName;
+    @Size(max = 50, message = "Tên không được dài quá 50 ký tự")
+    private String name;
 
     @Size(max = 255, message = "Địa chỉ không được dài quá 255 ký tự")
     private String address;
@@ -27,12 +27,12 @@ public class UserDTO {
         this.email = email;
     }
 
-    public String getStoreName() {
-        return storeName;
+    public String getName() {
+        return name;
     }
 
-    public void setStoreName(String storeName) {
-        this.storeName = storeName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAddress() {
