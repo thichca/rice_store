@@ -16,14 +16,16 @@ public class CustomerDTO {
     private String name;
 
     @NotBlank(message = "Số điện thoại không được để trống")
-    @Pattern(regexp = "\\d{10,15}", message = "Số điện thoại phải có từ 10 đến 15 số")
+    @Pattern(regexp = "0\\d{9}", message = "Số điện thoại phải có đúng 10 số và bắt đầu bằng 0")
+
     private String phone;
 
+    @NotBlank(message = "Địa chỉ không được để trống")
     @Size(max = 255, message = "Địa chỉ không được dài quá 255 ký tự")
     private String address;
 
+    @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không hợp lệ")
-    @Size(max = 255, message = "Email không được dài quá 255 ký tự")
     private String email;
 
     private BigDecimal debtBalance = BigDecimal.ZERO;

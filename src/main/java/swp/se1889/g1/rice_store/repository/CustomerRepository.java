@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     List<Customer> findByCreatedBy(User createdBy);
     Optional<Customer> findById(Long id);
+    List<Customer> findByPhone(String phone);
+
 }
