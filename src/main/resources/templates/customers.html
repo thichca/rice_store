@@ -242,14 +242,16 @@
                             <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-blue-700 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
-                                    data-icon='<i class="fas fa-info"></i>'>
+                                    data-icon='<i class="fas fa-info"></i>'
+                                    th:onclick="|window.location.href='@{/debt/detail(customerId=${customer.id})}'|">
                                 <i class="fas fa-info mr-1"></i> Chi tiết
                             </button>
 
                             <button class="w-1/2 bg-white border border-green-500 text-green-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-green-500 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-plus mr-1"></i> Thêm phiếu nợ'
-                                    data-icon='<i class="fas fa-plus"></i>'>
+                                    data-icon='<i class="fas fa-plus"></i>'
+                                    th:onclick="|window.location.href='@{/debt/add(customerId=${customer.id})}'|">
                                 <i class="fas fa-plus mr-1"></i> Thêm phiếu nợ
                             </button>
 

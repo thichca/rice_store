@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Nợ</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-6">
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-center mb-6">Thêm Nợ</h1>
+    <form th:action="@{/debt/add}" method="post" onsubmit="return validateForm()">
+        <div id="errorAlert" class="alert alert-danger" role="alert"></div>
+        <input type="hidden" name="customerId" th:value="${customer.id}">
+        <div class="mb-4">
+            <label for="debtorName" class="block text-sm font-medium text-gray-700">Tên người nợ:</label>
+            <input type="text" id="debtorName" name="debtorName" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.name}" readonly>
+        </div>
+        <div class="mb-4">
+            <label for="debtorNames" class="block text-sm font-medium text-gray-700">Số điện thoại:</label>
+            <input type="text" id="debtorNames" name="debtorphone" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.phone}" readonly>
+        </div>
+        <div class="mb-4">
+            <label for="address" class="block text-sm font-medium text-gray-700">Địa chỉ:</label>
+            <input type="text" id="address" name="debtoraddress" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.address}" readonly>
+        </div>
+        <div class="mb-4">
+            <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
+            <input type="text" id="email" name="debtorEmail" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.email}" readonly>
+        </div>
+        <div class="mb-4">
+            <label for="amount" class="block text-sm font-medium text-gray-700">Số tiền:</label>
+            <input type="number" id="amount" name="amount" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+               oninput="validateAmount()" >
+            <p id="amountError" class="text-red-500 hidden">Số tiền phải lớn hơn 0.</p>
+        </div>
+        <div class="mb-4">
+            <label for="type" class="block text-sm font-medium text-gray-700">Loại Công Nợ:</label>
+            <select name="type" id="type" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                <option value="GHI_NO">Ghi nợ</option>
+                <option value="TRA_NO">Trả nợ</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="note" class="block text-sm font-medium text-gray-700">Mô tả:</label>
+            <textarea id="note" name="note" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 rounded hover:bg-green-600">Thêm Nợ</button><br><br>
+        <button type="button" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600" th:onclick="|window.location.href='@{/customers}'|">Hủy</button>
+    </form>
+</div>
+<script>
+    function validateAmount() {
+        let amountInput = document.getElementById("amount");
+        let amount = amountInput.value.trim();
+        let errorText = document.getElementById("amountError");
+
+        if (amount === "" || parseFloat(amount) <= 0) {
+            errorText.textContent = "Số tiền phải lớn hơn 0.";
+            errorText.classList.remove("hidden");
+            amountInput.classList.add("border-red-500");
+        } else {
+            errorText.classList.add("hidden");
+            amountInput.classList.remove("border-red-500");
+        }
+    }
+
+    function validateForm() {
+        validateAmount();
+        let errorText = document.getElementById("amountError");
+
+        // Nếu có lỗi thì ngăn form submit
+        return errorText.classList.contains("hidden");
+    }
+</script>
+</script>
+</body>
+</html>

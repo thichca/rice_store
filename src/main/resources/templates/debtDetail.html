@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+  <meta charset="UTF-8">
+  <title>Example</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+
+</head>
+<body class="bg-gray-100 p-4">
+
+
+<div class="w-full">
+
+  <div th:replace="~{fragments/header :: header}"></div>
+
+  <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
+
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-semibold" th:text="${customer.name}"></h1>
+      <button  class="bg-blue-500 text-white px-4 py-2 rounded flex items-center"
+               th:onclick="|window.location.href='@{/debt/add(customerId=${customer.id})}'|">
+        <i class="fas fa-plus mr-2"></i> THÊM PHIẾU NỢ
+      </button>
+    </div>
+
+    <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">0</span> bản ghi</p>
+
+
+    <div class="relative overflow-x-auto max-h-[500px]">
+      <table class="table-auto border-collapse border w-full">
+        <thead class="bg-gray-100 sticky top-0 z-10" id="tableHeader">
+
+        <tr class="bg-gray-100">
+          <th class="border p-2 relative">Id
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Ghi chú
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Loại nợ
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Số tiền
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Ngày lập phiếu
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Hành động
+            <div class="resizer"></div>
+          </th>
+        </tr>
+        <tr class="bg-gray-50">
+          <th class="border p-2">
+            <div class="flex w-full gap-1">
+              <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
+                     style="font-weight: normal;" id="search-id-min" >
+              <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
+                     style="font-weight: normal;" id="search-id-max" >
+            </div>
+          </th>
+
+          <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-note" ></td>
+          <td class="border p-2">
+                 <select class="border rounded p-1 w-full" id="search-type" >
+                   <option value="">Tất cả</option>
+                   <option value="GHI_NO">Ghi nợ</option>
+                   <option value="TRA_NO">Trả nợ</option>
+                 </select>
+          </td>
+          <th class="border p-2">
+            <div class="flex w-full gap-1">
+              <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
+                     style="font-weight: normal;" id="search-debt-min" >
+              <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
+                     style="font-weight: normal;" id="search-debt-max" >
+            </div>
+          </th>
+          <th class="border p-2">
+            <div class="flex w-full gap-1">
+              <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
+                     style="font-weight: normal;" id="search-date-min" >
+              <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
+                     style="font-weight: normal;" id="search-date-max" >
+            </div>
+          </th>
+
+          <td class="border p-2">
+            <div class="flex gap-2 w-full">
+              <button  id="clearFilters" class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-red-500 hover:text-white transition duration-200"
+                      data-full='<i class="fas fa-times mr-1"></i> Bỏ lọc'
+                      data-icon='<i class="fas fa-times"></i>'>
+                <i class="fas fa-times mr-1"></i> Bỏ lọc
+              </button>
+              <button id="toggleButtons" class="w-1/2 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                hover:bg-blue-500 hover:text-white transition duration-200">
+                <i class="fas fa-angle-right mr-1"></i> Thu gọn
+              </button>
+            </div>
+          </td>
+
+        </tr>
+        </thead>
+
+
+        <tbody id="tableBody">
+        <tr th:each="debt,x : ${debtRecords}">
+<!--          <td class="border p-2" th:text="${x.index+1}"></td>-->
+          <td class="border p-2" th:text="${debt.id}"></td>
+          <td class="border p-2" th:text="${debt.note}"></td>
+          <td class="border p-2" th:text="${debt.type}"></td>
+          <td class="border p-2" th:text="${debt.amount}"></td>
+          <td class="border p-2" th:text="${#temporals.format(debt.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+          <td class="border p-2">
+            <button class="w-32 h-10 text-lg font-semibold bg-blue-500 text-white px-4 py-2 rounded flex items-center justify-center hover:bg-blue-700 transition duration-200"
+                    th:attr="onclick=|showDetail('${debt.id}', '${debt.note}', '${debt.type}', '${debt.amount}', '${#temporals.format(debt.createdAt, 'dd/MM/yyyy HH:mm:ss')}')|"
+                    data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
+                    data-icon='<i class="fas fa-info"></i>'>
+              <i class="fas fa-info mr-1"></i> Chi tiết
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="w-full flex justify-center items-center mt-4 gap-12">
+      <button id="prevPage"
+              class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+        Trước
+      </button>
+
+      <div class="flex items-center">
+        <span>Trang</span>
+        <input type="text" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1">
+        <span id="totalPages">/ 1</span>
+      </div>
+
+      <select id="recordsPerPage" class="border rounded px-4 py-2">
+        <option value="5" selected>5 Bản ghi</option>
+        <option value="10" >10 Bản ghi</option>
+        <option value="15">15 Bản ghi</option>
+      </select>
+
+
+      <button id="nextPage"
+              class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+        Sau
+      </button>
+    </div>
+  </div>
+</div>
+<!-- Modal Chi Tiết -->
+<div id="detailModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+  <div class="p-4 bg-white rounded-lg shadow-md w-80">
+    <h2 class="text-center text-lg font-bold mb-2">Chi tiết Phiếu Nợ</h2>
+
+    <div class="space-y-2">
+      <div>
+        <label class="text-sm font-semibold">ID:</label>
+        <input type="text" id="detailId" class="border p-1 w-full text-sm" readonly>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold">Ghi chú:</label>
+        <input type="text" id="detailNote" class="border p-1 w-full text-sm" readonly>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold">Loại nợ:</label>
+        <input type="text" id="detailType" class="border p-1 w-full text-sm" readonly>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold">Số tiền:</label>
+        <input type="text" id="detailAmount" class="border p-1 w-full text-sm" readonly>
+      </div>
+
+      <div>
+        <label class="text-sm font-semibold">Ngày lập phiếu:</label>
+        <input type="text" id="detailDate" class="border p-1 w-full text-sm" readonly>
+      </div>
+    </div>
+
+    <button onclick="closeModal()" class="mt-3 w-full p-2 bg-red-500 text-white text-sm rounded">Đóng</button>
+  </div>
+</div>
+
+<div th:replace="~{fragments/script :: script}"></div>
+<script>
+  function showDetail(id, note, type, amount, date) {
+    // Giảm z-index của thead để không đè lên modal
+    document.querySelector("thead").style.zIndex = "0";
+    // Hiển thị modal
+    document.getElementById("detailModal").style.display = "flex";
+    document.getElementById("detailId").value = id;
+    document.getElementById("detailNote").value = note || "Không có ghi chú";
+    document.getElementById("detailType").value = type;
+    document.getElementById("detailAmount").value = amount;
+    document.getElementById("detailDate").value = date;
+
+    document.getElementById("detailModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    // Khôi phục z-index của thead khi đóng modal
+    document.querySelector("thead").style.zIndex = "2";
+
+    // Ẩn modal
+    document.getElementById("detailModal").style.display = "none";
+  }
+
+
+
+</script>
+
+</body>
+</html>
