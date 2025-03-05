@@ -2,6 +2,7 @@ package swp.se1889.g1.rice_store.controller;
 
 //import swp.se1889.g1.rice_store.entity.DebtsRecord;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
 import swp.se1889.g1.rice_store.entity.DebtRecords;
+import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.service.DebtRecordService;
 
 import java.math.BigDecimal;
@@ -53,8 +55,10 @@ public class DebtRecordController {
 
     // Hiển thị trang chi tiết phiếu nợ theo customer id
     @GetMapping("/detail")
-    public String showDebtDetail(@RequestParam("customerId") Long customerId, Model model) {
+    public String showDebtDetail(@RequestParam("customerId") Long customerId, Model model , HttpSession session) {
         CustomerDTO customer = customerService.getCustomerById(customerId);
+        Store store = (Store) session.getAttribute("store");
+        model.addAttribute("store", store);
         List<DebtRecords> debtRecords = debtRecordService.getDebtDetailsByCustomerId(customerId);
         model.addAttribute("debtRecords", debtRecords);
         model.addAttribute("customer", customer);

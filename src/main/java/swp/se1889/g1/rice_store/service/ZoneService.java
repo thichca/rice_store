@@ -54,6 +54,7 @@ public class ZoneService {
         zone.setStore(store);
         zone.setAddress(zoneDTO.getAddress());
         zone.setCreatedBy(currentUser);
+        zone.setQuantity(0);
         zone.setQuantity(zoneDTO.getQuantity());
         zone.setCreatedAt(LocalDateTime.now());
         zone.setUpdatedAt(LocalDateTime.now());
