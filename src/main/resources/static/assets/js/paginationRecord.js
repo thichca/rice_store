@@ -4,7 +4,7 @@
     modal.classList.toggle("hidden");
 }
 
-    document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const tableBody = document.getElementById("tableBody");
     const rows = Array.from(tableBody.querySelectorAll("tr"));
     const recordsPerPageSelect = document.getElementById("recordsPerPage");
@@ -136,4 +136,5 @@
 });
 
     applyFiltersAndPaginate();
+    updatePagination();
 });

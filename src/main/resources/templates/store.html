@@ -23,7 +23,7 @@
         <form th:action="@{/home}" method="post" class="w-full">
             <input type="hidden" name="storeName" th:value="${store.name}">
             <input type="hidden" name="createdBy" th:value="${store.createdBy}">
-            <button type="submit"
+            <button name="store" type="submit"
                     class="border rounded-lg p-6 flex flex-col items-center bg-white shadow-md hover:shadow-lg transition duration-300 cursor-pointer relative w-full">
                 <div class="bg-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mb-2">
                     <span th:text="${store.name != null and store.name.length() > 0 ? store.name.charAt(0) : '?'}"></span>
