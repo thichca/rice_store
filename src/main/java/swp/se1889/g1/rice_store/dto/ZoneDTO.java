@@ -29,6 +29,15 @@ public class ZoneDTO {
 
     @NotNull(message = "Cửa hàng không được để trống")
     private Long storeId;
+    private Long productId;
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
 
     public Long getId() {
         return id;

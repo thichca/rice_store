@@ -4,10 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import swp.se1889.g1.rice_store.dto.ProductDTO;
 import swp.se1889.g1.rice_store.dto.ZoneDTO;
+import swp.se1889.g1.rice_store.entity.Product;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.entity.Zone;
+import swp.se1889.g1.rice_store.repository.ProductRepository;
 import swp.se1889.g1.rice_store.repository.StoreRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
 import swp.se1889.g1.rice_store.repository.ZoneRepository;
@@ -27,6 +30,11 @@ public class ZoneService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private ProductService productService;
+
 
     public List<Zone> getAllZones() {
         return zoneRepository.findAll();
@@ -37,9 +45,7 @@ public class ZoneService {
 
     }
 
-    public List<Zone> getZonesByStoreId(Long storeId) {
-        Store store = storeRepository.findById(storeId).orElse(null);
-
+    public List<Zone> getZonesByStoreId(Store store) {
         return zoneRepository.findByStoreAndIsDeletedFalse(store);
     }
 
@@ -84,4 +90,38 @@ public class ZoneService {
         }
         return null;
     }
+    public void addInventory(Zone zone, Product product, int quantity) {
+        if (zone == null || product == null) {
+            throw new RuntimeException("Zone hoặc Product không hợp lệ");
+        }
+
+        if (zone.getProduct() == null) {
+            zone.setProduct(product);
+            zone.setQuantity(quantity);
+        } else if (zone.getProduct().getId().equals(product.getId())) {
+            zone.setQuantity(zone.getQuantity() + quantity);
+        } else {
+            throw new RuntimeException("Khu vực đã chứa sản phẩm khác. Không thể thay đổi sản phẩm.");
+        }
+
+        zone.setUpdatedAt(LocalDateTime.now());
+        zoneRepository.save(zone);
+    }
+//    public void updateZoneInventory(Zone zone, ProductDTO product, int quantity) {
+//        if (zone.getProduct() == null) {
+//            // Nếu zone chưa có sản phẩm nào, gán product_id mới
+//            zone.setProduct(productRepository.findById(product.getId()).orElse(null));
+//            zone.setQuantity(quantity);
+//        } else if (zone.getProduct().getId().equals(product.getId())) {
+//            // Nếu zone đã có cùng sản phẩm, chỉ tăng số lượng
+//            zone.setQuantity(zone.getQuantity() + quantity);
+//        } else {
+//            throw new RuntimeException("Khu vực đã chứa sản phẩm khác. Không thể thay đổi sản phẩm.");
+//        }
+//
+//        zone.setUpdatedAt(LocalDateTime.now());
+//        zoneRepository.save(zone);
+//    }
+
+
 }

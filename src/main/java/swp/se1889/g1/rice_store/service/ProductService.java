@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -38,6 +39,13 @@ public class ProductService {
     /**
      * Lấy thông tin chi tiết sản phẩm theo ID
      */
+    public Product getProduct(Long id){
+        Optional<Product> productOpt = productRepository.findById(id);
+        if (productOpt.isPresent()) {
+            return productOpt.get();
+        }
+        throw new RuntimeException("Không tìm thấy sản phẩm có ID: " + id);
+    }
     public ProductDTO getProductById(Long id) {
         Optional<Product> productOpt = productRepository.findById(id);
         if (productOpt.isPresent()) {
@@ -46,7 +54,9 @@ public class ProductService {
         }
         throw new RuntimeException("Không tìm thấy sản phẩm có ID: " + id);
     }
-
+   public List<Product> getAllProduct(){
+        return productRepository.findAll();
+   }
     /**
      * Thêm sản phẩm mới
      */

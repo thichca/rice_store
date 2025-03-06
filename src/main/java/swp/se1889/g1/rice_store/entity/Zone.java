@@ -3,6 +3,7 @@ package swp.se1889.g1.rice_store.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
+import swp.se1889.g1.rice_store.dto.ProductDTO;
 
 import java.time.LocalDateTime;
 
