@@ -2,12 +2,15 @@ package swp.se1889.g1.rice_store.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1889.g1.rice_store.dto.StoreDTO;
 import swp.se1889.g1.rice_store.entity.Store;
@@ -25,30 +28,47 @@ public class StoreController {
     private UserServiceIpml userService;
 
     @GetMapping({"/", "/store"})
-    public String getStores(Model model) {
+    public String getStores(@RequestParam(defaultValue = "0") int page,
+                            @RequestParam(defaultValue = "5") int size,
+                            Model model) {
         String username = userService.getCurrentUsername();
-        List<Store> stores = storeService.getStoresByUserName(username);
+        Page<Store> storePage = storeService.getStoresByUserName(username, page, size);
 
         if (userService.getCurrentCreatedBy() != null) {
             Store store = storeService.findStoreByStoreId(userService.getCurrentCreatedBy());
-            if (store != null && !stores.contains(store)) {
-                stores.add(store);
+            if (store != null && !storePage.getContent().contains(store)) {
+                storePage.getContent().add(store);
             }
         }
-        model.addAttribute("stores", stores);
+
+        model.addAttribute("stores", storePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", storePage.getTotalPages());
+        model.addAttribute("totalItems", storePage.getTotalElements());
+        model.addAttribute("recordsPerPage", size);
+
         return "store";
     }
 
     @GetMapping("/createStore")
-    public String createStoreForm() {
+    public String createStoreForm(Model model) {
+        model.addAttribute("page", "createStore");
         return "createStore";
     }
 
     @GetMapping("/manageStores")
-    public String manageStores(Model model) {
+    public String manageStores(@RequestParam(defaultValue = "0") int page,
+                               @RequestParam(defaultValue = "10") int size,
+                               Model model) {
         String username = userService.getCurrentUsername();
-        List<Store> stores = storeService.getStoresByUserName(username);
-        model.addAttribute("stores", stores);
+        Page<Store> storePage = storeService.getStoresByUserName(username, page, size);
+
+        model.addAttribute("stores", storePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", storePage.getTotalPages());
+        model.addAttribute("totalItems", storePage.getTotalElements());
+        model.addAttribute("recordsPerPage", size);
+
         return "manageStores";
     }
 
@@ -76,4 +96,52 @@ public class StoreController {
         }
         return "redirect:/store";
     }
+
+    @GetMapping("/deleteStore/{storeId}")
+    public String deleteStore(@PathVariable Long storeId, RedirectAttributes redirectAttributes) {
+        try {
+            storeService.deleteStore(storeId);
+            redirectAttributes.addFlashAttribute("success", "Cửa hàng đã được xóa!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi xóa cửa hàng!");
+        }
+        return "redirect:/manageStores";
+    }
+
+    @GetMapping("/updateStore/{id}")
+    public String showUpdateForm(@PathVariable Long id, Model model) {
+        Store store = storeService.findStoreByStoreId(id);
+        if (store == null) {
+            return "redirect:/manageStores";
+        }
+        model.addAttribute("store", store);
+        return "updateStore";
+    }
+
+    @PostMapping("/updateStore")
+    public String updateStore(@RequestParam Long storeId,
+                              @Valid StoreDTO storeDTO,
+                              BindingResult bindingResult,
+                              RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            for (FieldError fieldError : bindingResult.getFieldErrors()) {
+                redirectAttributes.addFlashAttribute("error", fieldError.getDefaultMessage());
+            }
+            return "redirect:/updateStore/" + storeId;
+
+        }
+
+        try {
+            Store store = storeService.updateStore(storeId, storeDTO, redirectAttributes);
+            if (store == null) {
+                return "redirect:/updateStore/" + storeId;
+            }
+            redirectAttributes.addFlashAttribute("success", "Cập nhật cửa hàng thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+        return "redirect:/manageStores";
+    }
+
+
 }
