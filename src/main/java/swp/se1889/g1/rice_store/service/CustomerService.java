@@ -72,6 +72,12 @@ public class CustomerService {
             throw new RuntimeException("Không thể xác định người dùng hiện tại.");
         }
 
+        // Kiểm tra số điện thoại đã tồn tại hay chưa
+        List<Customer> existingCustomers = customerRepository.findByPhone(customerDTO.getPhone());
+        if (!existingCustomers.isEmpty()) {
+            throw new RuntimeException("Số điện thoại đã tồn tại, vui lòng nhập số khác.");
+        }
+
         Customer customer = new Customer();
         customer.setName(customerDTO.getName());
         customer.setPhone(customerDTO.getPhone());
@@ -81,8 +87,11 @@ public class CustomerService {
         customer.setCreatedBy(currentUser);
         customer.setCreatedAt(LocalDateTime.now());
         customer.setUpdatedAt(LocalDateTime.now());
+
         customerRepository.save(customer);
     }
+
+
 
     // Lấy thông tin người dùng hiện tại từ SecurityContext
     private User getCurrentUser() {

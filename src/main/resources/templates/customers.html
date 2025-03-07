@@ -4,14 +4,41 @@
     <meta charset="UTF-8">
     <title>Example</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+<style>
+    #errorModal {
+        z-index: 1000; /* Đảm bảo modal luôn ở trên cùng */
+    }
 
+    #errorModal .bg-white {
+        z-index: 1001; /* Hộp thông báo bên trong modal */
+    }
+
+    .bg-gray-900.bg-opacity-50 {
+        z-index: 999; /* Lớp nền mờ của modal */
+    }
+
+</style>
 </head>
 <body class="bg-gray-100 p-4">
+<div id="errorModal" class="hidden fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
+    <div class="bg-white p-6 rounded-lg shadow-2xl w-[400px] relative">
+        <h2 class="text-xl font-semibold mb-4 text-center text-red-600">Lỗi khi thêm khách hàng</h2>
+        <div id="errorModalContent" class="text-red-500"></div>
+        <div class="flex justify-end mt-4">
+            <button class="bg-gray-400 text-white px-4 py-2 rounded" onclick="toggleModal('errorModal')">Đóng</button>
+        </div>
+    </div>
+</div>
+
 
 
 <div class="w-full">
 
     <div th:replace="~{fragments/header :: header}"></div>
+    <div th:if="${errorMessage}" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
 
     <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
 
@@ -25,32 +52,37 @@
         <div id="addCustomerModal" class="hidden fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
             <div class="bg-white p-6 rounded-lg shadow-2xl w-[400px] relative z-50">
                 <h2 class="text-xl font-semibold mb-4 text-center">Thêm Khách Hàng</h2>
-                <form th:action="@{/customers/add}" th:object="${newCustomer}" method="post">
+                <form th:action="@{/customers/add}" th:object="${newCustomer}" method="post" onsubmit="submitCustomerForm(event)">
                     <div class="mb-3">
                         <label class="block text-gray-700 font-medium">Tên khách hàng</label>
-                        <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{name}" required>
+                        <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{name}" >
+                        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-red-500"></span>
                     </div>
+
                     <div class="mb-3">
                         <label class="block text-gray-700 font-medium">Số điện thoại</label>
-                        <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{phone}" required>
+                        <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{phone}" >
+                        <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="text-red-500"></span>
                     </div>
+
                     <div class="mb-3">
                         <label class="block text-gray-700 font-medium">Địa chỉ</label>
-                        <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{address}">
+                        <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{address}" >
+                        <span th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="text-red-500"></span>
                     </div>
+
                     <div class="mb-3">
                         <label class="block text-gray-700 font-medium">Email</label>
-                        <input type="email" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{email}">
+                        <input type="email" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{email}" >
+                        <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500"></span>
                     </div>
-                    <div class="mb-3">
-                        <label class="block text-gray-700 font-medium">Dư nợ</label>
-                        <input type="number" step="0.01" class="border p-2 w-full rounded bg-gray-200 text-gray-700" th:field="*{debtBalance}" value="0.0" readonly>
-                    </div>
+
                     <div class="flex justify-end mt-4 gap-3">
-                        <button type="button" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition" onclick="toggleModal('addCustomerModal')">Hủy</button>
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Lưu</button>
+                        <button type="button" class="bg-gray-400 text-white px-4 py-2 rounded" onclick="toggleModal('addCustomerModal')">Hủy</button>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Lưu</button>
                     </div>
                 </form>
+
             </div>
         </div>
 
@@ -210,14 +242,16 @@
                             <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-blue-700 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
-                                    data-icon='<i class="fas fa-info"></i>'>
+                                    data-icon='<i class="fas fa-info"></i>'
+                                    th:onclick="|window.location.href='@{/debt/detail(customerId=${customer.id})}'|">
                                 <i class="fas fa-info mr-1"></i> Chi tiết
                             </button>
 
                             <button class="w-1/2 bg-white border border-green-500 text-green-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-green-500 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-plus mr-1"></i> Thêm phiếu nợ'
-                                    data-icon='<i class="fas fa-plus"></i>'>
+                                    data-icon='<i class="fas fa-plus"></i>'
+                                    th:onclick="|window.location.href='@{/debt/add(customerId=${customer.id})}'|">
                                 <i class="fas fa-plus mr-1"></i> Thêm phiếu nợ
                             </button>
 
@@ -259,5 +293,44 @@
     </div>
 </div>
 <div th:replace="~{fragments/script :: script}"></div>
+<script>
+    async function submitCustomerForm(event) {
+        event.preventDefault();  // Ngăn form reload trang
+
+        let form = event.target;
+        let formData = new FormData(form);
+
+        let response = await fetch(form.action, {
+            method: form.method,
+            body: formData
+        });
+
+        let result = await response.json();
+
+        if (!response.ok) {
+            let errorMessage = "<ul>";
+            if (result.errorMessage) {
+                errorMessage += `<li>${result.errorMessage}</li>`;
+            } else {
+                for (const [field, message] of Object.entries(result)) {
+                    errorMessage += `<li>${message}</li>`;
+                }
+            }
+            errorMessage += "</ul>";
+
+            document.getElementById("errorModalContent").innerHTML = errorMessage;
+            toggleModal("errorModal");
+        } else {
+            alert(result.message);
+            location.reload();
+        }
+    }
+
+    function toggleModal(modalId) {
+        let modal = document.getElementById(modalId);
+        modal.classList.toggle("hidden");
+    }
+</script>
+
 </body>
 </html>

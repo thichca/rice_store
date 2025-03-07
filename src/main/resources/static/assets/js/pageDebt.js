@@ -5,7 +5,8 @@ function toggleModal(modalId) {
 
 document.addEventListener("DOMContentLoaded", function () {
     const tableBody = document.getElementById("tableBody");
-    const rows = Array.from(tableBody.querySelectorAll("tr"));
+   // const inputs = document.querySelectorAll("input , select");
+    const rows = Array.from(tableBody.querySelectorAll("tr" ));
     const recordsPerPageSelect = document.getElementById("recordsPerPage");
     const currentPageInput = document.getElementById("currentPage");
     const totalPagesSpan = document.getElementById("totalPages");
@@ -21,43 +22,38 @@ document.addEventListener("DOMContentLoaded", function () {
     function applyFiltersAndPaginate() {
         let searchIdMin = parseInt(document.getElementById("search-id-min").value.trim()) || null;
         let searchIdMax = parseInt(document.getElementById("search-id-max").value.trim()) || null;
-        let searchName = document.getElementById("search-name").value.trim().toLowerCase();
-        let searchPhone = document.getElementById("search-phone").value.trim().toLowerCase();
-        let searchAddress = document.getElementById("search-address").value.trim().toLowerCase();
-        let searchEmail = document.getElementById("search-email").value.trim().toLowerCase();
+        let searchNote = document.getElementById("search-note").value.trim().toLowerCase();
+        let searchType = document.getElementById("search-type").value.trim() ;
         let searchDebtMin = parseFloat(document.getElementById("search-debt-min").value.trim()) || null;
         let searchDebtMax = parseFloat(document.getElementById("search-debt-max").value.trim()) || null;
-        let searchCreatedDateMin = document.getElementById("search-created-date-min").value.trim();
-        let searchCreatedDateMax = document.getElementById("search-created-date-max").value.trim();
-        let searchUpdatedDateMin = document.getElementById("search-updated-date-min").value.trim();
-        let searchUpdatedDateMax = document.getElementById("search-updated-date-max").value.trim();
+        let searchCreatedDateMin = document.getElementById("search-date-min").value.trim();
+        let searchCreatedDateMax = document.getElementById("search-date-max").value.trim();
+
 
         filteredRows = rows.filter(row => {
             let cells = row.getElementsByTagName("td");
 
             let id = parseInt(cells[0].innerText) || 0;
-            let name = cells[1].innerText.trim().toLowerCase();
-            let address = cells[2].innerText.trim().toLowerCase();
-            let phone = cells[3].innerText.trim().toLowerCase();
-            let email = cells[4].innerText.trim().toLowerCase();
-            let debt = parseFloat(cells[5].innerText) || 0;
-            let createdDate = new Date(cells[6].innerText.trim());
-            let updatedDate = new Date(cells[7].innerText.trim());
+            let note = cells[1].innerText.trim().toLowerCase();
+            let type = cells[2].innerText.trim().toLowerCase();
+            let amount = cells[3].innerText.trim().toLowerCase();
+            let createdDate = new Date(cells[4].innerText.trim());
+
 
             let matches = true;
 
             if (searchIdMin !== null && id < searchIdMin) matches = false;
             if (searchIdMax !== null && id > searchIdMax) matches = false;
-            if (searchName && !name.includes(searchName)) matches = false;
-            if (searchPhone && !phone.includes(searchPhone)) matches = false;
-            if (searchAddress && !address.includes(searchAddress)) matches = false;
-            if (searchEmail && !email.includes(searchEmail)) matches = false;
-            if (searchDebtMin !== null && debt < searchDebtMin) matches = false;
-            if (searchDebtMax !== null && debt > searchDebtMax) matches = false;
+            if (searchNote && !note.includes(searchNote)) matches = false;
+            if (searchType && type.toLowerCase() !== searchType.toLowerCase()) matches = false;
+
+
+            if (searchDebtMin !== null && amount < searchDebtMin) matches = false;
+            if (searchDebtMax !== null && amount > searchDebtMax) matches = false;
             if (searchCreatedDateMin && createdDate < new Date(searchCreatedDateMin)) matches = false;
             if (searchCreatedDateMax && createdDate > new Date(searchCreatedDateMax)) matches = false;
-            if (searchUpdatedDateMin && updatedDate < new Date(searchUpdatedDateMin)) matches = false;
-            if (searchUpdatedDateMax && updatedDate > new Date(searchUpdatedDateMax)) matches = false;
+            // if (searchUpdatedDateMin && updatedDate < new Date(searchUpdatedDateMin)) matches = false;
+            // if (searchUpdatedDateMax && updatedDate > new Date(searchUpdatedDateMax)) matches = false;
 
             return matches;
         });
@@ -66,6 +62,14 @@ document.addEventListener("DOMContentLoaded", function () {
         currentPage = 1;
         updatePagination();
     }
+    document.getElementById("search-type").addEventListener("change", function () {
+        applyFiltersAndPaginate(); // Gọi lại hàm lọc ngay khi thay đổi loại nợ
+    });
+    document.getElementById("clearFilters").addEventListener("click", function () {
+        document.getElementById("search-type").value = ""; // Xóa giá trị loại nợ
+        applyFiltersAndPaginate(); // Gọi lại hàm lọc để lấy danh sách đầy đủ
+    });
+
 
     function updatePagination() {
         let totalPages = Math.max(1, Math.ceil(filteredRows.length / recordsPerPage));
@@ -141,5 +145,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     applyFiltersAndPaginate();
-    updatePagination();
 });
