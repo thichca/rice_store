@@ -13,5 +13,6 @@ import java.util.Optional;
 public interface ZoneRepository extends JpaRepository<Zone, Long> {
     Optional<Zone> findByIdAndIsDeletedFalse(Long id);
     List<Zone> findByStoreAndIsDeletedFalse(Store store);
+   // List<Zone> findByNameContainingIgnoreCaseAndStoreAndIsDeletedFalse(String keyword, Store store);
 
 }

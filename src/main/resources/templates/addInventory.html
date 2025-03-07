@@ -9,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 </head>
 <body class="bg-gray-100 p-6">
+<div th:replace="~{fragments/header :: header}"></div><br><br>
 <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
     <h1 class="text-2xl font-bold text-center mb-6">Nhập Kho</h1>
     <form th:action="@{/zone/addInventory}" method="post">
@@ -43,12 +44,33 @@
 
 <script>
     $(document).ready(function() {
-        $('.select2').select2({
-            width: '100%',
-            placeholder: "Chọn mục",
-            allowClear: true
+        $('#zone').select2({
+            ajax: {
+                url: '/zone/api/zones/search',
+                dataType: 'json',
+                delay: 250,
+                data: params => ({ query: params.term }),
+                processResults: data => ({ results: data }),
+                cache: true
+            },
+            placeholder: "Chọn khu vực",
+            minimumInputLength: 1
+        });
+
+        $('#product').select2({
+            ajax: {
+                url: '/zone/api/products/search',
+                dataType: 'json',
+                delay: 250,
+                data: params => ({ query: params.term }),
+                processResults: data => ({ results: data }),
+                cache: true
+            },
+            placeholder: "Chọn sản phẩm",
+            minimumInputLength: 1
         });
     });
 </script>
+
 </body>
 </html>
