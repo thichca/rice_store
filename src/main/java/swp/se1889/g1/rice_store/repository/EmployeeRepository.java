@@ -15,5 +15,4 @@ public interface EmployeeRepository extends JpaRepository<User, Long> {
     List<User> findByCreatedByAndRole(long createdBy, String role);
     List<User> findAllByCreatedByAndRoleAndIsDeleted(long createdBy, String role, boolean isDelete);
 
-
 }
