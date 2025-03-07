@@ -43,7 +43,7 @@ public class ProfileController {
         }
 
         boolean hasError = userServiceIpml.validateUserInfor(userDTO, redirectAttributes);
-        if (!hasError) {
+        if (hasError) {
             return "redirect:/profile";
         }
 
