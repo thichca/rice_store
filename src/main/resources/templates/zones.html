@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <title>Example</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <!-- Thêm Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Thêm Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 </head>
 <body class="bg-gray-100 p-4">
 
 
-<div class="fixed top-0 left-0 w-full">
+<div class="w-full">
     <div th:replace="~{fragments/header :: header}"></div>
 
     <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
@@ -27,7 +32,7 @@
             </button>
             </div>
         </div>
-        <p class="text-gray-600 mb-4">Tổng cộng: 25 bản ghi</p>
+        <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">0</span> bản ghi</p>
 
         <div class="overflow-x-auto">
             <table class="table-auto border-collapse border w-full">
@@ -59,28 +64,28 @@
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
                             <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;">
+                                   style="font-weight: normal;" id="search-zoneid-min">
                             <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;">
+                                   style="font-weight: normal;" id="search-zoneid-max">
                         </div>
                     </th>
 
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1"></td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1"></td>
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zonename"></td>
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zoneaddress"></td>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
                             <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;">
+                                   style="font-weight: normal;" id="search-date-zonemin">
                             <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;">
+                                   style="font-weight: normal;" id="search-date-zonemax">
                         </div>
                     </th>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
                             <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;">
+                                   style="font-weight: normal;" id="search-update-zonemin">
                             <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;">
+                                   style="font-weight: normal;" id="search-update-zonemax">
                         </div>
                     </th>
                     <td class="border p-2">
@@ -153,18 +158,17 @@
             </div>
 
             <select id="recordsPerPage" class="border rounded px-4 py-2">
-                <option value="10">10 Bản ghi</option>
-                <option value="20">20 Bản ghi</option>
-                <option value="50">50 Bản ghi</option>
+                <option value="5" selected>5 Bản ghi</option>
+                <option value="10" >10 Bản ghi</option>
+                <option value="15">15 Bản ghi</option>
             </select>
+
 
             <button id="nextPage"
                     class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
                 Sau
             </button>
         </div>
-
-
     </div>
 </div>
 

@@ -37,7 +37,9 @@ public class ProductService {
     }
 
 
-
+public Product getProductToDelete(Long id){
+        return  productRepository.findById(id).orElse(null);
+}
 
     /**
      * Lấy thông tin chi tiết sản phẩm theo ID
@@ -110,12 +112,9 @@ public class ProductService {
      * Xóa sản phẩm theo ID
      */
     public void deleteProduct(Long id) {
-        Optional<Product> productOpt = productRepository.findById(id);
-        if (productOpt.isPresent()) {
-            productRepository.delete(productOpt.get());
-        } else {
-            throw new RuntimeException("Không tìm thấy sản phẩm để xóa!");
-        }
+        Product product = getProductToDelete(id);
+        product.setDeleted(true);
+        productRepository.save(product);
     }
 
     /**

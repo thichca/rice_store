@@ -3,7 +3,7 @@ function toggleModal(modalId) {
     modal.classList.toggle("hidden");
 }
 document.addEventListener("DOMContentLoaded", function () {
-    flatpickr("#search-date-min", {
+    flatpickr("#search-date-zonemin", {
         locale: {
             firstDayOfWeek: 1,
             weekdays: {
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
         dateFormat: "d/m/Y H:i",
 
     });
-    flatpickr("#search-date-max", {
+    flatpickr("#search-date-zonemax", {
         locale: {
             firstDayOfWeek: 1,
             weekdays: {
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
         enableTime: true,
         dateFormat: "d/m/Y H:i",
     });
-    flatpickr("#search-update-min", {
+    flatpickr("#search-update-zonemin", {
         locale: {
             firstDayOfWeek: 1,
             weekdays: {
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
         enableTime: true,
         dateFormat: "d/m/Y H:i",
     });
-    flatpickr("#search-update-max", {
+    flatpickr("#search-update-zonemax", {
         locale: {
             firstDayOfWeek: 1,
             weekdays: {
@@ -83,43 +83,38 @@ document.addEventListener("DOMContentLoaded", function () {
     const prevPageButton = document.getElementById("prevPage");
     const nextPageButton = document.getElementById("nextPage");
     const recordCountSpan = document.getElementById("recordCount");
-    const searchInputs = document.querySelectorAll("thead input , thead select");
+    const searchInputs = document.querySelectorAll("thead input ");
 
     let recordsPerPage = parseInt(recordsPerPageSelect.value);
     let currentPage = 1;
     let filteredRows = [...rows]; // Ban đầu danh sách lọc là toàn bộ dữ liệu
 
     function applyFiltersAndPaginate() {
-        let searchIdMin = parseInt(document.getElementById("search-id-min").value.trim()) || null;
-        let searchIdMax = parseInt(document.getElementById("search-id-max").value.trim()) || null;
-        let searchNote = document.getElementById("search-note").value.trim().toLowerCase();
-        let searchType = document.getElementById("search-type").value.trim() ;
-        let searchDebtMin = parseFloat(document.getElementById("search-debt-min").value.trim()) || null;
-        let searchDebtMax = parseFloat(document.getElementById("search-debt-max").value.trim()) || null;
-        let searchCreatedDateMin = document.getElementById("search-date-min").value.trim();
-        let searchCreatedDateMax = document.getElementById("search-date-max").value.trim();
-        let searUpdateMin = document.getElementById("search-update-min").value.trim();
-        let searchUpdateMax = document.getElementById("search-update-max").value.trim();
+        let searchIdMin = parseInt(document.getElementById("search-zoneid-min").value.trim()) || null;
+        let searchIdMax = parseInt(document.getElementById("search-zoneid-max").value.trim()) || null;
+        let searchName = document.getElementById("search-zonename").value.trim().toLowerCase();
+        let searchAddress = document.getElementById("search-zoneaddress").value.trim().toLowerCase() ;
+        let searchCreatedDateMin = document.getElementById("search-date-zonemin").value.trim();
+        let searchCreatedDateMax = document.getElementById("search-date-zonemax").value.trim();
+        let searUpdateMin = document.getElementById("search-update-zonemin").value.trim();
+        let searchUpdateMax = document.getElementById("search-update-zonemax").value.trim();
 
         filteredRows = rows.filter(row => {
             let cells = row.getElementsByTagName("td");
 
             let id = parseInt(cells[0].innerText) || 0;
-            let note = cells[1].innerText.trim().toLowerCase();
-            let type = cells[2].innerText.trim().toLowerCase();
-            let amount = cells[3].innerText.trim().toLowerCase();
-            let createdDate = new Date(cells[4].innerText.trim());
-            let updateDate = new Date(cells[5].innerText.trim());
+            let name = cells[1].innerText.trim().toLowerCase();
+            let address = cells[2].innerText.trim().toLowerCase();
+            let createdDate = new Date(cells[3].innerText.trim());
+            let updateDate = new Date(cells[4].innerText.trim());
 
 
             let matches = true;
 
             if (searchIdMin !== null && id < searchIdMin) matches = false;
             if (searchIdMax !== null && id > searchIdMax) matches = false;
-            if (searchNote && !note.includes(searchNote)) matches = false;
-            if (searchType && type.toLowerCase() !== searchType.toLowerCase()) matches = false;
-            if (searchDebtMin !== null && amount < searchDebtMin) matches = false;
-            if (searchDebtMax !== null && amount > searchDebtMax) matches = false;
+            if (searchName && !name.includes(searchName)) matches = false;
+            if(searchAddress && !address.includes(searchAddress)) matches = false;
             if (searchCreatedDateMin && createdDate < new Date(searchCreatedDateMin)) matches = false;
             if (searchCreatedDateMax && createdDate > new Date(searchCreatedDateMax)) matches = false;
             if(searUpdateMin && updateDate < new Date(searUpdateMin)) matches = false;
@@ -131,15 +126,6 @@ document.addEventListener("DOMContentLoaded", function () {
         currentPage = 1;
         updatePagination();
     }
-    document.getElementById("search-type").addEventListener("change", function () {
-        applyFiltersAndPaginate(); // Gọi lại hàm lọc ngay khi thay đổi loại nợ
-    });
-    document.getElementById("clearFilters").addEventListener("click", function () {
-        document.getElementById("search-type").value = ""; // Xóa giá trị loại nợ
-        applyFiltersAndPaginate(); // Gọi lại hàm lọc để lấy danh sách đầy đủ
-    });
-    // document.getElementById("search-date-min").addEventListener("change", applyFiltersAndPaginate);
-    // document.getElementById("search-date-max").addEventListener("change", applyFiltersAndPaginate);
 
     function updatePagination() {
         let totalPages = Math.max(1, Math.ceil(filteredRows.length / recordsPerPage));
@@ -216,3 +202,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
     applyFiltersAndPaginate();
 });
+s
