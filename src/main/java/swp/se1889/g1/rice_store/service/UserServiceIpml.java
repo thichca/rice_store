@@ -71,16 +71,21 @@ public class UserServiceIpml implements UserService {
 
     public boolean validateUserInfor(UserDTO userDTO, RedirectAttributes redirectAttributes) {
         boolean hasError = false;
-        if (userRepository.findByEmail(userDTO.getEmail()) != null) {
-            redirectAttributes.addFlashAttribute("error", "Email đã tồn tại");
-            hasError = true;
+        User currentUser = getCurrentUser();
+
+        if (currentUser != null && !userDTO.getEmail().equals(currentUser.getEmail())) {
+            if (userRepository.findByEmail(userDTO.getEmail()) != null) {
+                redirectAttributes.addFlashAttribute("error", "Email đã tồn tại");
+                hasError = true;
+            }
         }
 
-        if (userRepository.findByPhone(userDTO.getPhone()) != null) {
-            redirectAttributes.addFlashAttribute("error", "Số điện thoại đã tồn tại");
-            hasError = true;
+        if (currentUser != null && !userDTO.getPhone().equals(currentUser.getPhone())) {
+            if (userRepository.findByPhone(userDTO.getPhone()) != null) {
+                redirectAttributes.addFlashAttribute("error", "Số điện thoại đã tồn tại");
+                hasError = true;
+            }
         }
-
         return hasError;
     }
 
