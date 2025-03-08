@@ -31,6 +31,23 @@ public class CustomerDTO {
     private BigDecimal debtBalance = BigDecimal.ZERO;
     private LocalDateTime createdAt;  // Ngày tạo
     private LocalDateTime updatedAt;  // Ngày cập nhật
+    private String createdBy; // Người thêm
+    private String updatedBy; // Người sửa
+
+    public CustomerDTO(Long id, String name, String phone, String address, String email, BigDecimal debtBalance, String createdBy, String updatedBy) {
+        this.id = id;
+        this.name = name;
+        this.phone = phone;
+        this.address = address;
+        this.email = email;
+        this.debtBalance = debtBalance;
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
+    }
+    public CustomerDTO(){
+
+    }
+
 
 
     // Getters và Setters
@@ -97,4 +114,18 @@ public class CustomerDTO {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+    public String getCreatedBy() {
+        return createdBy;
+    }
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+
 }
