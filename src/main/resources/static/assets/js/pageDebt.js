@@ -98,8 +98,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let searchDebtMax = parseFloat(document.getElementById("search-debt-max").value.trim()) || null;
         let searchCreatedDateMin = document.getElementById("search-date-min").value.trim();
         let searchCreatedDateMax = document.getElementById("search-date-max").value.trim();
-        let searUpdateMin = document.getElementById("search-update-min").value.trim();
-        let searchUpdateMax = document.getElementById("search-update-max").value.trim();
 
         filteredRows = rows.filter(row => {
             let cells = row.getElementsByTagName("td");
@@ -109,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let type = cells[2].innerText.trim().toLowerCase();
             let amount = cells[3].innerText.trim().toLowerCase();
             let createdDate = new Date(cells[4].innerText.trim());
-            let updateDate = new Date(cells[5].innerText.trim());
+
 
 
             let matches = true;
@@ -122,8 +120,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (searchDebtMax !== null && amount > searchDebtMax) matches = false;
             if (searchCreatedDateMin && createdDate < new Date(searchCreatedDateMin)) matches = false;
             if (searchCreatedDateMax && createdDate > new Date(searchCreatedDateMax)) matches = false;
-            if(searUpdateMin && updateDate < new Date(searUpdateMin)) matches = false;
-            if(searchUpdateMax && updateDate > new Date(searchUpdateMax)) matches = false;
             return matches;
         });
 
