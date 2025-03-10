@@ -33,7 +33,7 @@ public class DebtRecordService {
 //        return debtRecordRepository.findDebtRecordsByPage(customerId , page, size);
 //}
     // Phương thức thêm mới một bản ghi nợ
-    public void addDebt(DebtRecords debtRecord) {
+    public DebtRecords addDebt(DebtRecords debtRecord) {
         // return debtRecordRepository.save(debtRecord);
         User currentUser = getCurrentUser();
         if(currentUser == null) {
@@ -52,6 +52,7 @@ public class DebtRecordService {
         } else {
             throw new RuntimeException("Không tìm thấy khách hàng để cập nhật số dư nợ!");
         }
+        return  debtRecord;
     }
 
     // Phương thức lấy danh sách chi tiết nợ theo customer id

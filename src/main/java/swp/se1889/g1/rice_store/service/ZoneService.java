@@ -52,7 +52,7 @@ public class ZoneService {
         return zoneRepository.findByStoreAndIsDeletedFalse(store);
     }
 
-    public void createZone(ZoneDTO zoneDTO, Store store) {
+    public Zone createZone(ZoneDTO zoneDTO, Store store) {
         User currentUser = getCurrentUser();
         if (currentUser == null) {
             throw new RuntimeException("Không tìm thấy thông tin người dùng");
@@ -68,21 +68,24 @@ public class ZoneService {
         zone.setCreatedAt(LocalDateTime.now());
         zone.setUpdatedAt(LocalDateTime.now());
         zoneRepository.save(zone);
+        return zone;
     }
 
-    public void updateZone(ZoneDTO zoneDTO, Store store) {
+    public Zone updateZone(ZoneDTO zoneDTO, Store store) {
         Zone zone = getZoneById(zoneDTO.getId());
         zone.setName(zoneDTO.getName());
         zone.setAddress(zoneDTO.getAddress());
         zone.setStore(store);
         zone.setUpdatedAt(LocalDateTime.now());
         zoneRepository.save(zone);
+        return zone;
     }
 
-    public void deleteZone(Long id) {
+    public Zone deleteZone(Long id) {
         Zone zone = getZoneById(id);
         zone.setIsDeleted(true);
         zoneRepository.save(zone);
+        return zone;
     }
 
     private User getCurrentUser() {
@@ -94,7 +97,7 @@ public class ZoneService {
         return null;
     }
 
-    public void addInventory(Zone zone, Product product, int quantity ) {
+    public Zone addInventory(Zone zone, Product product, int quantity ) {
         if (zone == null || product == null) {
             throw new RuntimeException("Zone hoặc Product không hợp lệ");
         }
@@ -106,5 +109,6 @@ public class ZoneService {
         }
         zone.setUpdatedAt(LocalDateTime.now());
         zoneRepository.save(zone);
+        return zone;
     }
 }

@@ -132,8 +132,8 @@
                                     th:onclick="|window.location.href='@{/zone/edit/{id}(id=${zone.id})}'|">
                                 <i class="fas fa-pencil-alt mr-1"></i> Sửa
                             </button>
-                            <button class="w-1/2 bg-white border border-green-500 text-green-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-green-500 hover:text-white transition duration-200"
+                            <button class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-red-500 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-trash-alt mr-1"></i> Xoá'
                                     data-icon='<i class="fas fa-trash-alt"></i>'
                                     th:onclick="|if(confirm('Bạn có chắc muốn xóa khu vực này?')) window.location.href='@{/zone/delete/{id}(id=${zone.id})}'|">
@@ -170,6 +170,7 @@
             </button>
         </div>
     </div>
+    <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
 
 
