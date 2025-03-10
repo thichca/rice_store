@@ -37,7 +37,9 @@ public class ProductService {
         return List.of();
     }
 
-
+    public List<Product> searchProductsByName(String name) {
+        return productRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(name);
+    }
 
     public Product getProductToDelete(Long id){
         return  productRepository.findById(id).orElse(null);

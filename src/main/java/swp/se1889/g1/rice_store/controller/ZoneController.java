@@ -150,8 +150,10 @@ public class ZoneController {
             return "redirect:/zone/addInventory";
         }
         if (zone.getProduct() != null && !zone.getProduct().getId().equals(product.getId())) {
-            model.addAttribute("error", "Kho đã chứa một sản phẩm khác. Không thể thay đổi sản phẩm.");
-            return "redirect:/zone/addInventory";
+            if (!zone.getProduct().isDeleted()) {
+                model.addAttribute("error", "Kho đã chứa một sản phẩm khác. Không thể thay đổi sản phẩm.");
+                return "redirect:/zone/addInventory";
+            }
         }
 
         Zone zone1 = zoneService.addInventory(zone, product, quantity);
@@ -166,8 +168,8 @@ public class ZoneController {
     public List<Map<String, Object>> searchZones(@RequestParam("query") String query, HttpSession session) {
         Store store = (Store) session.getAttribute("store");
         if (store == null) return new ArrayList<>();
-        return zoneService.getZonesByStoreId(store).stream()
-                .filter(zone -> zone.getName().toLowerCase().contains(query.toLowerCase()))
+
+        return zoneService.searchZonesByName(store, query).stream()
                 .map(zone -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("id", zone.getId());
@@ -181,8 +183,7 @@ public class ZoneController {
     @GetMapping("/api/products/search")
     @ResponseBody
     public List<Map<String, Object>> searchProducts(@RequestParam("query") String query) {
-        return productRepository.findAll().stream()
-                .filter(product -> product.getName().toLowerCase().contains(query.toLowerCase()))
+        return productService.searchProductsByName(query).stream()
                 .map(product -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("id", product.getId());

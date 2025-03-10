@@ -17,11 +17,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findById(Long id);
     List<Product> findByIsDeletedFalse();
     List<Product> findByCreatedByAndIsDeletedFalse(User createdBy);
+    List<Product> findByIsDeletedFalseAndNameContainingIgnoreCase(String name);
     @Query("SELECT new map(p.id as productId, p.name as productName, p.description as description, " +
             "p.price as price, z.id as zoneId, z.name as zoneName, z.quantity as quantity) " +
             "FROM Product p JOIN Zone z ON p.id = z.product.id " +
             "WHERE p.isDeleted = false AND z.isDeleted = false")
     List<Map<String, Object>> findAllProductsWithZones();
+    Optional<Product> findByNameAndIsDeletedTrue(String name);
 
 
 }

@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface ZoneRepository extends JpaRepository<Zone, Long> {
     Optional<Zone> findByIdAndIsDeletedFalse(Long id);
     List<Zone> findByStoreAndIsDeletedFalse(Store store);
-   // List<Zone> findByNameContainingIgnoreCaseAndStoreAndIsDeletedFalse(String keyword, Store store);
+
+   // Tìm khu vực theo tên và chỉ lấy những khu vực chưa bị xóa
+   List<Zone> findByNameContainingIgnoreCaseAndStoreAndIsDeletedFalse(String name, Store store);
 
 }

@@ -46,7 +46,9 @@ public class ZoneService {
         return zoneRepository.findByIdAndIsDeletedFalse(id).orElse(null);
 
     }
-
+    public List<Zone> searchZonesByName(Store store, String name) {
+        return zoneRepository.findByNameContainingIgnoreCaseAndStoreAndIsDeletedFalse(name, store);
+    }
 
     public List<Zone> getZonesByStoreId(Store store) {
         return zoneRepository.findByStoreAndIsDeletedFalse(store);
@@ -97,18 +99,32 @@ public class ZoneService {
         return null;
     }
 
-    public Zone addInventory(Zone zone, Product product, int quantity ) {
+    public Zone addInventory(Zone zone, Product product, int quantity) {
         if (zone == null || product == null) {
             throw new RuntimeException("Zone hoặc Product không hợp lệ");
         }
-        if (zone.getProduct() == null) {
-            zone.setProduct(product);
-            zone.setQuantity(quantity);
-        } else if (zone.getProduct().getId().equals(product.getId())) {
+
+        // Nếu kho đã có một sản phẩm nhưng sản phẩm đó bị xóa (isDeleted = true), thay thế bằng sản phẩm mới
+        if (zone.getProduct() != null && zone.getProduct().isDeleted()) {
+            zone.setProduct(product); // Gán sản phẩm mới vào kho
+            zone.setQuantity(quantity); // Đặt lại số lượng mới
+        }
+        // Nếu kho đang chứa sản phẩm trùng với sản phẩm mới, cộng dồn số lượng
+        else if (zone.getProduct() != null && zone.getProduct().getId().equals(product.getId())) {
             zone.setQuantity(zone.getQuantity() + quantity);
         }
+        // Nếu kho đã có sản phẩm khác (chưa bị xóa), không cho phép thay đổi sản phẩm
+        else if (zone.getProduct() != null) {
+            throw new RuntimeException("Kho đã chứa một sản phẩm khác. Không thể thay đổi sản phẩm.");
+        }
+        // Nếu kho chưa có sản phẩm, thêm sản phẩm mới
+        else {
+            zone.setProduct(product);
+            zone.setQuantity(quantity);
+        }
+
         zone.setUpdatedAt(LocalDateTime.now());
-        zoneRepository.save(zone);
-        return zone;
+        return zoneRepository.save(zone);
     }
+
 }
