@@ -14,6 +14,7 @@ import swp.se1889.g1.rice_store.service.ProductService;
 import jakarta.validation.Valid;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -85,4 +86,19 @@ public class ProductController {
         productService.deleteProduct(id);
         return "redirect:/products";
     }
-}
+
+
+
+
+        /**
+         * 📌 Hiển thị trang danh sách sản phẩm và khu vực (zones)
+         */
+        @GetMapping("/zones")
+        public String getProductsWithZones(Model model) {
+            List<Map<String, Object>> productWithZones = productService.getAllProductsWithZones();
+            model.addAttribute("productWithZones", productWithZones);
+            return "products_with_zones";  // Trả về trang Thymeleaf "products_with_zones.html"
+        }
+    }
+
+

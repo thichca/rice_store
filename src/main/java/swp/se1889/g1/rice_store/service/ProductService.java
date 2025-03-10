@@ -13,6 +13,7 @@ import swp.se1889.g1.rice_store.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,13 +32,14 @@ public class ProductService {
     public List<Product> getProductsByCurrentUser() {
         User currentUser = getCurrentUser();
         if (currentUser != null) {
-            return productRepository.findByCreatedBy(currentUser);
+            return productRepository.findByCreatedByAndIsDeletedFalse(currentUser);
         }
         return List.of();
     }
 
 
-public Product getProductToDelete(Long id){
+
+    public Product getProductToDelete(Long id){
         return  productRepository.findById(id).orElse(null);
 }
 
@@ -59,9 +61,10 @@ public Product getProductToDelete(Long id){
         }
         throw new RuntimeException("Không tìm thấy sản phẩm có ID: " + id);
     }
-   public List<Product> getAllProduct(){
-        return productRepository.findAll();
-   }
+    public List<Product> getAllProduct(){
+        return productRepository.findByIsDeletedFalse();
+    }
+
     /**
      * Thêm sản phẩm mới
      */
@@ -127,5 +130,10 @@ public Product getProductToDelete(Long id){
             return userRepository.findByUsername(username);
         }
         return null;
+    }
+
+
+    public List<Map<String, Object>> getAllProductsWithZones() {
+        return productRepository.findAllProductsWithZones();
     }
 }
