@@ -51,10 +51,8 @@
     </button>
 
     <div class="flex items-center">
-        <span>Trang</span>
-        <input type="text" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1"
-               th:value="${currentPage + 1}">
-        <span th:text="'/ ' + ${totalPages}"></span>
+        <span th:text="${currentPage + 1}"></span>
+        <span th:text="'/' + ${totalPages}"></span>
     </div>
 
     <button id="nextPage" th:disabled="${currentPage + 1 >= totalPages}"

@@ -34,13 +34,6 @@ public class StoreController {
         String username = userService.getCurrentUsername();
         Page<Store> storePage = storeService.getStoresByUserName(username, page, size);
 
-        if (userService.getCurrentCreatedBy() != null) {
-            Store store = storeService.findStoreByStoreId(userService.getCurrentCreatedBy());
-            if (store != null && !storePage.getContent().contains(store)) {
-                storePage.getContent().add(store);
-            }
-        }
-
         model.addAttribute("stores", storePage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", storePage.getTotalPages());
