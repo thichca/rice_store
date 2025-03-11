@@ -44,14 +44,9 @@ public class EmployeeController {
         model.addAttribute("trangthai", trangthai);
         return "employees";
     }
-
     @GetMapping("/{id}")
-    public String deleteOrRestoreEmployee(RedirectAttributes redirectAttributes, @PathVariable("id") Long id, Model model, BindingResult result, HttpSession session) {
+    public String deleteOrRestoreEmployee(RedirectAttributes redirectAttributes, @PathVariable("id") Long id, Model model, HttpSession session) {
         Store store = (Store) session.getAttribute("store");
-
-        if (result.hasErrors()) {
-            return "redirect:/manage";
-        }
 
         if (store == null) {
             return "redirect:/store";
@@ -61,34 +56,15 @@ public class EmployeeController {
 
         employeeService.deleteAndRestoreEmployee(id);
         model.addAttribute("store", store);
-        if( !check){
+        if (!check) {
             redirectAttributes.addFlashAttribute("success", "Xóa nhân viên thành công!");
-        } else{
+        } else {
             redirectAttributes.addFlashAttribute("success", "Khôi phục nhân viên thành công!");
         }
 
         return "redirect:/employees";
     }
 
-
-    //List employee
-//    @GetMapping("")
-//    public String employee(Model model, HttpSession session) {
-//        Store store = (Store) session.getAttribute("store");
-//        if (store == null) {
-//            return "redirect:/store";
-//        }
-//        List<User> employees;
-//        if(true){
-//             employees = employeeService.getEmployees(store.getId(), "ROLE_EMPLOYEE");
-//        } else {
-//            employees = employeeService.getEmployeesActive(store.getId(), "ROLE_EMPLOYEE", true);
-//        }
-//
-//        model.addAttribute("employees", employees);
-//        model.addAttribute("store", store);
-//        return "employees";
-//    }
 
     //page add employee
     @GetMapping("/addEmployee")

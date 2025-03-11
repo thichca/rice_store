@@ -15,9 +15,9 @@
     <div th:replace="~{fragments/header :: header}"></div>
 
     <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h5>Thêm mới nhân viên</h5>
+        <div class="bg-white shadow-lg rounded-lg p-6"> <!-- Thay class "card" bằng lớp của Tailwind -->
+            <div class="border-b pb-4">
+                <h5 class="text-xl font-semibold">Thêm mới nhân viên</h5>
             </div>
             <div class="card-body">
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -29,54 +29,52 @@
                 </ul>
                 <div class="tab-content mt-3">
                     <div class="tab-pane fade show active" id="info" role="tabpanel">
-                                <form th:action="@{/employees/addEmployee}" th:object="${newEmployee}" method="post">
-                                    <div class="mb-3">
-                                        <label class="block text-gray-700 font-medium">Tên đăng nhập</label>
-                                        <input name="username" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
-                                               th:field="*{userName}" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="block text-gray-700 font-medium">Password</label>
-                                        <input name="password" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
-                                               th:field="*{password}" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="block text-gray-700 font-medium">Email</label>
-                                        <input name="email" type="email" class="border p-2 w-full rounded focus:outline-blue-500"
-                                               th:field="*{email}">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="block text-gray-700 font-medium">Tên nhân viên</label>
-                                        <input name="name" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
-                                               th:field="*{name}" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="block text-gray-700 font-medium">Địa chỉ</label>
-                                        <input name="address" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
-                                               th:field="*{address}">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="block text-gray-700 font-medium">Số điện thoại</label>
-                                        <input name="phone" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
-                                               th:field="*{phone}" required>
-                                    </div>
-                                    <div class="text-right">
-                                        <button name="submit" type="submit"
-                                                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Thêm
-                                            nhân viên
-                                        </button>
-                                        <a href="/employees"
-                                           class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Bỏ qua</a>
-                                    </div>
-                                </form>
-
+                        <form th:action="@{/employees/addEmployee}" th:object="${newEmployee}" method="post">
+                            <div class="mb-3">
+                                <label class="block text-gray-700 font-medium">Tên đăng nhập</label>
+                                <input name="username" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
+                                       th:field="*{userName}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-gray-700 font-medium">Password</label>
+                                <input name="password" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
+                                       th:field="*{password}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-gray-700 font-medium">Email</label>
+                                <input name="email" type="email" class="border p-2 w-full rounded focus:outline-blue-500"
+                                       th:field="*{email}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-gray-700 font-medium">Tên nhân viên</label>
+                                <input name="name" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
+                                       th:field="*{name}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-gray-700 font-medium">Địa chỉ</label>
+                                <input name="address" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
+                                       th:field="*{address}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-gray-700 font-medium">Số điện thoại</label>
+                                <input name="phone" type="text" class="border p-2 w-full rounded focus:outline-blue-500"
+                                       th:field="*{phone}" required>
+                            </div>
+                            <div class="text-right">
+                                <button name="submit" type="submit"
+                                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Thêm
+                                    nhân viên
+                                </button>
+                                <a href="/employees"
+                                   class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Bỏ qua</a>
+                            </div>
+                        </form>
                     </div>
                     <div th:replace="~{fragments/noti :: noti}"></div>
                 </div>
             </div>
         </div>
     </div>
-
 
     <div th:replace="~{fragments/script :: script}"></div>
 </div>
