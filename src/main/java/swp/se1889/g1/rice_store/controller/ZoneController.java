@@ -151,7 +151,7 @@ public class ZoneController {
         }
         if (zone.getProduct() != null && !zone.getProduct().getId().equals(product.getId())) {
             if (!zone.getProduct().isDeleted()) {
-                model.addAttribute("error", "Kho đã chứa một sản phẩm khác. Không thể thay đổi sản phẩm.");
+                redirectAttributes.addFlashAttribute("error", "Kho đã chứa một sản phẩm khác. Không thể thay đổi sản phẩm.");
                 return "redirect:/zone/addInventory";
             }
         }
