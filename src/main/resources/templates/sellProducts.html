@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+  <meta charset="UTF-8">
+  <title>Example</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100 p-4">
+
+<div class="fixed top-0 left-0 w-full">
+  <div th:replace="~{fragments/header :: header}"></div>
+  <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
+
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-semibold">Danh sách người nợ</h1>
+      <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
+
+        <i class="fas fa-plus mr-2"></i> THÊM NGƯỜI NỢ
+      </button>
+    </div>
+    <form th:action="@{/zones}" method="get" class="mb-4 flex items-center">
+      <select name="searchType" class="border rounded px-2 py-1 mr-2">
+        <option value="name">Tên sản phẩm</option>
+        <option value="description">Mô tả</option>
+      </select>
+      <input type="text" name="keyword" class="border rounded px-2 py-1 mr-2" placeholder="Nhập từ khóa...">
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Tìm kiếm</button>
+    </form>
+
+    <p class="text-gray-600 mb-4">Tổng cộng: <span th:text="${totalItems}"></span> bản ghi</p>
+
+
+    <div class="overflow-x-auto">
+      <table class="table-auto border-collapse border w-full">
+        <thead>
+          <th class="border p-2 relative">Tên Sản Phẩm
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Mô tả
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Giá
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Khu vực
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Số lượng
+            <div class="resizer"></div>
+          </th>
+        </tr>
+        </thead>
+
+        <tbody id="tableBody">
+        <tr th:each="item : ${productWithZones}">
+          <td class="border p-2" th:text="${item['productName']}"></td>
+          <td class="border p-2" th:text="${item['description']}"></td>
+          <td class="border p-2" th:text="${item['price']}"></td>
+          <td class="border p-2" th:text="${item['zoneName']}"></td>
+          <td class="border p-2" th:text="${item['quantity']}"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="w-full flex justify-center items-center mt-4 gap-2" th:if="${totalPages > 0}">
+      <!-- Nút "Trước" -->
+      <a th:if="${currentPage > 0}"
+         th:href="@{/products(page=${currentPage - 1}, size=5)}"
+         class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+        Trước
+      </a>
+
+      <!-- Hiển thị danh sách số trang -->
+      <th:block th:if="${totalPages > 1}">
+        <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
+          <a th:href="@{/zones(page=${pageNumber}, size=5)}"
+             th:text="${pageNumber + 1}"
+             th:classappend="${pageNumber == currentPage} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-400 hover:text-white'"
+             class="px-4 py-2 rounded transition duration-200">
+          </a>
+        </th:block>
+      </th:block>
+
+      <!-- Nếu chỉ có 1 trang, chỉ hiển thị số 1 -->
+      <th:block th:if="${totalPages == 1}">
+        <span class="bg-blue-500 text-white px-4 py-2 rounded">1</span>
+      </th:block>
+
+      <!-- Nút "Sau" -->
+      <a th:if="${currentPage + 1 < totalPages}"
+         th:href="@{/zones(page=${currentPage + 1}, size=5)}"
+         class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+        Sau
+      </a>
+    </div>
+
+
+
+  </div>
+</div>
+
+
+<div th:replace="~{fragments/script :: script}"></div>
+</body>
+</html>
