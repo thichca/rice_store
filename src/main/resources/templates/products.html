@@ -32,7 +32,7 @@
 
 
 
-<div class="w-full">
+<div class=" top-0 left-0 w-full">
 
     <div th:replace="~{fragments/header :: header}"></div>
     <div th:if="${errorMessage}" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
@@ -61,7 +61,7 @@
 
                     <div class="mb-3">
                         <label class="block text-gray-700 font-medium">Mô tả</label>
-                        <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{description}">
+                        <textarea type="text" class="border p-2 w-full rounded focus:outline-blue-500" rows="4" th:field="*{description}"></textarea>
                         <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-red-500"></span>
                     </div>
 
@@ -80,7 +80,35 @@
 
             </div>
         </div>
-
+        <!-- Modal Chi tiết chung -->
+        <div id="detailProductModal" class="hidden fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
+            <div class="bg-white p-6 rounded-lg shadow-2xl w-[400px] relative z-50">
+                <h2 class="text-xl font-semibold mb-4 text-center">Chi tiết Sản phẩm</h2>
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-medium">Tên sản phẩm</label>
+                    <input type="text" id="detailName" class="border p-2 w-full rounded bg-gray-100" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-medium">Mô tả</label>
+                    <textarea id="detailDescription" class="border p-2 w-full rounded bg-gray-100" rows="4" readonly></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-medium">Giá</label>
+                    <input type="text" id="detailPrice" class="border p-2 w-full rounded bg-gray-100" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-medium">Ngày tạo</label>
+                    <input type="text" id="detailCreatedAt" class="border p-2 w-full rounded bg-gray-100" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-medium">Ngày cập nhật</label>
+                    <input type="text" id="detailUpdatedAt" class="border p-2 w-full rounded bg-gray-100" readonly>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button type="button" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition" onclick="toggleModal('detailProductModal')">Đóng</button>
+                </div>
+            </div>
+        </div>
 
         <div th:each="product : ${products}">
             <!-- Modal Chỉnh Sửa SẢN PHẨM -->
@@ -97,7 +125,7 @@
 
                         <div class="mb-3">
                             <label class="block text-gray-700 font-medium">Mô tả</label>
-                            <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" name="description" th:value="${product.description}" required>
+                            <textarea type="text" class="border p-2 w-full rounded focus:outline-blue-500" rows="4" name="description" th:text="${product.description}" required></textarea>
                         </div>
 
                         <div class="mb-3">
@@ -117,121 +145,81 @@
         </div>
 
 
+        <p class="text-gray-600 mb-4">
+            Tổng cộng: <span th:text="${totalItems}"></span> bản ghi
+        </p>
+        <form th:action="@{/products}" method="get" class="mb-4 flex items-center">
+            <select name="searchType" class="border rounded px-2 py-1 mr-2">
+                <option value="name">Tên sản phẩm</option>
+                <option value="description">Mô tả</option>
+                <option value="price">Giá</option>
+            </select>
+            <input type="text" name="keyword" class="border rounded px-2 py-1 mr-2" placeholder="Nhập từ khóa...">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Tìm kiếm</button>
+        </form>
 
-        <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">0</span> bản ghi</p>
+
 
 
         <div class="relative overflow-x-auto max-h-[500px]">
             <table class="table-auto border-collapse border w-full">
                 <thead class="bg-gray-100 sticky top-0 z-10">
 
-                <tr class="bg-gray-100">
-                    <th class="border p-2 relative">Id
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Tên sản phẩm
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Mô tả
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Giá
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Ngày tạo
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Cập nhật
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative w-[340px]">Hành động
-                        <div class="resizer"></div>
-                    </th>
 
-                </tr>
-
-                <tr class="bg-gray-50">
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-id-min" >
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-id-max">
-                        </div>
-                    </th>
-
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-name"></td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-description"></td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-price"></td>
+                <th class="border p-2 relative">Tên sản phẩm
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative">Mô tả
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative">Giá
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative">Ngày tạo
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative">Cập nhật
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative w-[340px]">Hành động
+                    <div class="resizer"></div>
+                </th>
 
 
-
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-created-date-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-created-date-max">
-                        </div>
-                    </th>
-
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-updated-date-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-updated-date-max">
-                        </div>
-                    </th>
-
-                    <td class="border p-2">
-                        <div class="flex gap-2 w-full">
-                            <button id="clearFilters" class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-red-500 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-times mr-1"></i> Bỏ lọc'
-                                    data-icon='<i class="fas fa-times"></i>'>
-                                <i class="fas fa-times mr-1"></i> Bỏ lọc
-                            </button>
-
-
-                            <button id="toggleButtons" class="w-1/2 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                hover:bg-blue-500 hover:text-white transition duration-200">
-                                <i class="fas fa-angle-right mr-1"></i> Thu gọn
-                            </button>
-                        </div>
-                    </td>
-
-                </tr>
                 </thead>
 
                 <tbody id="tableBody">
                 <tr th:each="product,x : ${products}">
-                    <td class="border p-2" th:text="${x.index+1}"></td>
                     <td class="border p-2" th:text="${product.name}"></td>
                     <td class="border p-2" th:text="${product.description}"></td>
                     <td class="border p-2" th:text="${product.price}"></td>
                     <td class="border p-2" th:text="${#temporals.format(product.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                     <td class="border p-2" th:text="${#temporals.format(product.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                    <td class="border p-2">
+                    <td class="border p-1">
                         <div class="flex gap-2 w-full">
-                            <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-blue-700 hover:text-white transition duration-200"
+                            <button class="w-1/3 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
+                hover:bg-blue-700 hover:text-white transition duration-200"
+                                    th:onclick="|showProductDetail(${product.id})|"
                                     data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
                                     data-icon='<i class="fas fa-info"></i>'>
                                 <i class="fas fa-info mr-1"></i> Chi tiết
                             </button>
 
-                            <button class="w-1/2 bg-white border border-green-500 text-green-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-green-500 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-plus mr-1"></i> Xóa'
-                                    data-icon='<i class="fas fa-plus"></i>'
-                                    th:onclick="|if(confirm('Bạn có chắc muốn xóa khu vực này?')) window.location.href='@{/delete/{id}(id=${product.id})}'|">
-                                <i class="fas fa-plus mr-1"></i> Xóa
-                            </button>
-
-                            <button class="w-1/4 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center"
+                            <button class="w-1/3 bg-blue-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-blue-500 hover:text-white transition duration-200"
+                                    data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
+                                    data-icon='<i class="fas fa-pencil-alt"></i>'
                                     th:onclick="|toggleModal('editProductModal-' + ${product.id})|">
                                 <i class="fas fa-pencil-alt mr-1"></i> Sửa
+                            </button>
+
+                            <button class="w-1/3 bg-red-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                     hover:bg-red-700 hover:text-white transition duration-200"
+                                    th:onclick="|if(confirm('Bạn có chắc muốn xóa khu vực này?')) window.location.href='@{/delete/{id}(id=${product.id})}'|"
+
+                                    data-full='<i class="fas fa-trash mr-1"></i> Xóa'
+                                    data-icon='<i class="fas fa-trash"></i>'>
+                                <i class="fas fa-trash mr-1"></i> Xóa
                             </button>
 
                         </div>
@@ -240,71 +228,126 @@
                 </tbody>
             </table>
         </div>
-        <div class="w-full flex justify-center items-center mt-4 gap-12">
-            <button id="prevPage"
-                    class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+        <div class="w-full flex justify-center items-center mt-4 gap-2" th:if="${totalPages > 0}">
+            <!-- Nút "Trước" -->
+            <a th:if="${currentPage > 0}"
+               th:href="@{/products(page=${currentPage - 1}, size=5, searchType=${searchType}, keyword=${keyword})}"
+               class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
                 Trước
-            </button>
+            </a>
 
-            <div class="flex items-center">
-                <span>Trang</span>
-                <input type="text" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1">
-                <span id="totalPages">/ 1</span>
-            </div>
+            <!-- Hiển thị danh sách số trang -->
+            <th:block th:if="${totalPages > 1}">
+                <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/products(page=${pageNumber}, size=5, searchType=${searchType}, keyword=${keyword})}"
+                       th:text="${pageNumber + 1}"
+                       th:classappend="${pageNumber == currentPage} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-400 hover:text-white'"
+                       class="px-4 py-2 rounded transition duration-200">
+                    </a>
+                </th:block>
+            </th:block>
 
-            <select id="recordsPerPage" class="border rounded px-4 py-2">
-                <option value="5" selected>5 Bản ghi</option>
-                <option value="10" >10 Bản ghi</option>
-                <option value="15">15 Bản ghi</option>
-            </select>
+            <!-- Nếu chỉ có 1 trang, chỉ hiển thị số 1 -->
+            <th:block th:if="${totalPages == 1}">
+                <span class="bg-blue-500 text-white px-4 py-2 rounded">1</span>
+            </th:block>
 
-
-            <button id="nextPage"
-                    class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+            <!-- Nút "Sau" -->
+            <a th:if="${currentPage + 1 < totalPages}"
+               th:href="@{/products(page=${currentPage + 1}, size=5, searchType=${searchType}, keyword=${keyword})}"
+               class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
                 Sau
-            </button>
+            </a>
         </div>
+
+
+        <div th:replace="~{fragments/script :: script}"></div>
     </div>
-</div>
-<div th:replace="~{fragments/script :: script}"></div>
-<script>
-    async function submitProductForm(event) {
-        event.preventDefault();  // Ngăn form reload trang
+    <script>
+        async function submitProductForm(event) {
+            event.preventDefault();  // Ngăn form reload trang
 
-        let form = event.target;
-        let formData = new FormData(form);
+            let form = event.target;
+            let formData = new FormData(form);
 
-        let response = await fetch(form.action, {
-            method: form.method,
-            body: formData
-        });
+            let response = await fetch(form.action, {
+                method: form.method,
+                body: formData
+            });
 
-        let result = await response.json();
+            let result = await response.json();
 
-        if (!response.ok) {
-            let errorMessage = "<ul>";
-            if (result.errorMessage) {
-                errorMessage += `<li>${result.errorMessage}</li>`;
-            } else {
-                for (const [field, message] of Object.entries(result)) {
-                    errorMessage += `<li>${message}</li>`;
+            if (!response.ok) {
+                let errorMessage = "<ul>";
+                if (result.errorMessage) {
+                    errorMessage += `<li>${result.errorMessage}</li>`;
+                } else {
+                    for (const [field, message] of Object.entries(result)) {
+                        errorMessage += `<li>${message}</li>`;
+                    }
                 }
+                errorMessage += "</ul>";
+
+                document.getElementById("errorModalContent").innerHTML = errorMessage;
+                toggleModal("errorModal");
+            } else {
+                alert(result.message);
+                location.reload();
             }
-            errorMessage += "</ul>";
-
-            document.getElementById("errorModalContent").innerHTML = errorMessage;
-            toggleModal("errorModal");
-        } else {
-            alert(result.message);
-            location.reload();
         }
-    }
 
-    function toggleModal(modalId) {
-        let modal = document.getElementById(modalId);
-        modal.classList.toggle("hidden");
-    }
-</script>
+        function toggleModal(modalId) {
+            let modal = document.getElementById(modalId);
+            modal.classList.toggle("hidden");
+        }
+    </script>
+    <script>
+        async function showProductDetail(productId) {
+            try {
+                let response = await fetch(`/edit-product/${productId}`);
+                let product = await response.json();
 
+                document.getElementById("detailName").value = product.name;
+                document.getElementById("detailDescription").value = product.description;
+                document.getElementById("detailPrice").value = product.price;
+
+                // Định dạng ngày giờ
+                let createdAt = new Date(product.createdAt).toLocaleString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                let updatedAt = new Date(product.updatedAt).toLocaleString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
+                document.getElementById("detailCreatedAt").value = createdAt;
+                document.getElementById("detailUpdatedAt").value = updatedAt;
+
+                toggleModal("detailProductModal");
+            } catch (error) {
+                console.error("Lỗi khi lấy thông tin sản phẩm:", error);
+                alert("Không thể tải thông tin sản phẩm!");
+            }
+        }
+
+        function toggleModal(modalId) {
+            let modal = document.getElementById(modalId);
+            modal.classList.toggle("hidden");
+        }
+    </script>
+
+
+
+</div>
 </body>
+
 </html>

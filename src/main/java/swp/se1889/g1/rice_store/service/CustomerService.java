@@ -37,7 +37,7 @@ public class CustomerService {
         Optional<Customer> customerOpt = customerRepository.findById(id);
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            CustomerDTO customerDTO = new CustomerDTO(
+            return new CustomerDTO(
                     customer.getId(),
                     customer.getName(),
                     customer.getPhone(),
@@ -47,7 +47,6 @@ public class CustomerService {
                     customer.getCreatedBy().getUsername(), // Lấy username của người tạo
                     customer.getUpdatedBy() // Lấy username của người sửa (có thể null)
             );
-            return customerDTO;
         }
         throw new RuntimeException("Không tìm thấy khách hàng có ID: " + id);
     }
@@ -100,7 +99,7 @@ public class CustomerService {
         customer.setUpdatedAt(LocalDateTime.now());
 
         // ✅ Khi tạo, "Người sửa" cũng là người tạo
-        customer.setUpdatedBy(currentUser.getUsername());
+//        customer.setUpdatedBy(currentUser.getUsername());
 
         customerRepository.save(customer);
     }

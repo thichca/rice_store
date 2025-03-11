@@ -1,11 +1,15 @@
 package swp.se1889.g1.rice_store.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import swp.se1889.g1.rice_store.dto.ProductDTO;
 import swp.se1889.g1.rice_store.entity.Product;
+import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.ProductRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
@@ -27,34 +31,26 @@ public class ProductService {
     private UserRepository userRepository;
 
     /**
-     * Lấy danh sách sản phẩm của người dùng hiện tại
+     * 📌 Lấy danh sách sản phẩm theo user với phân trang
      */
-    public List<Product> getProductsByCurrentUser() {
+    public Page<Product> getProductsByCurrentUser(int page, int size) {
         User currentUser = getCurrentUser();
         if (currentUser != null) {
-            return productRepository.findByCreatedByAndIsDeletedFalse(currentUser);
+            Pageable pageable = PageRequest.of(page, size);
+            return productRepository.findByCreatedByAndIsDeletedFalse(currentUser, pageable);
         }
-        return List.of();
+        return Page.empty();
     }
 
-    public List<Product> searchProductsByName(String name) {
-        return productRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(name);
-    }
+
 
     public Product getProductToDelete(Long id){
         return  productRepository.findById(id).orElse(null);
-}
+    }
 
     /**
      * Lấy thông tin chi tiết sản phẩm theo ID
      */
-    public Product getProduct(Long id){
-        Optional<Product> productOpt = productRepository.findById(id);
-        if (productOpt.isPresent()) {
-            return productOpt.get();
-        }
-        throw new RuntimeException("Không tìm thấy sản phẩm có ID: " + id);
-    }
     public ProductDTO getProductById(Long id) {
         Optional<Product> productOpt = productRepository.findById(id);
         if (productOpt.isPresent()) {
@@ -62,9 +58,6 @@ public class ProductService {
             return new ProductDTO(product); // Dùng constructor DTO thay vì set thủ công
         }
         throw new RuntimeException("Không tìm thấy sản phẩm có ID: " + id);
-    }
-    public List<Product> getAllProduct(){
-        return productRepository.findByIsDeletedFalse();
     }
 
     /**
@@ -107,6 +100,11 @@ public class ProductService {
             product.setDescription(productDTO.getDescription());
             product.setPrice(productDTO.getPrice());
             product.setUpdatedAt(LocalDateTime.now());
+            // ✅ Cập nhật thông tin "Người sửa"
+            User currentUser = getCurrentUser();
+            if (currentUser != null) {
+                product.setUpdatedBy(currentUser.getUsername());
+            }
             productRepository.save(product);
         } else {
             throw new RuntimeException("Không tìm thấy sản phẩm để cập nhật!");
@@ -135,7 +133,46 @@ public class ProductService {
     }
 
 
-    public List<Map<String, Object>> getAllProductsWithZones() {
-        return productRepository.findAllProductsWithZones();
+    public Page<Map<String, Object>> getAllProductsWithZones(Long storeId,int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findAllProductsWithZones(storeId, pageable );
     }
+    public Page<Map<String, Object>> searchProductsWithZones(Long storeId, String searchType, String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        if ("description".equals(searchType)) {
+            return productRepository.findProductsByDescription(storeId, "%" + keyword + "%", pageable);
+        } else {
+            return productRepository.findProductsByName(storeId, "%" + keyword + "%", pageable);
+        }
+    }
+    public Page<Product> searchProducts(String searchType, String keyword, int page, int size) {
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            throw new RuntimeException("Không thể xác định người dùng hiện tại.");
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        String name = null;
+        String description = null;
+        BigDecimal price = null;
+
+        if ("name".equals(searchType)) {
+            name = keyword;
+        } else if ("description".equals(searchType)) {
+            description = keyword;
+        } else if ("price".equals(searchType)) {
+            try {
+                price = new BigDecimal(keyword);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Giá phải là số hợp lệ.");
+            }
+        }
+
+        return productRepository.searchProductsByUser(currentUser, name, description, price, pageable);
+    }
+
+
+
 }

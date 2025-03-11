@@ -32,9 +32,9 @@
 
 
 
-<div class="w-full">
+<div class=" top-0 left-0 w-full">
 
-    <div th:replace="~{fragments/header :: header}"></div>
+    <div  th:replace="~{fragments/header :: header}"></div>
     <div th:if="${errorMessage}" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
         <span th:text="${errorMessage}"></span>
     </div>
@@ -130,7 +130,7 @@
         <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">0</span> bản ghi</p>
 
 
-        <div class="relative overflow-x-auto max-h-[500px]">
+        <div class="relative  overflow-x-auto max-h-[500px]">
             <table class="table-auto border-collapse border w-full">
                 <thead class="bg-gray-100 sticky top-0 z-10">
 
@@ -283,7 +283,7 @@
             </button>
         </div>
     </div>
-<div th:replace="~{fragments/noti :: noti}"></div>
+
 </div>
 <div th:replace="~{fragments/script :: script}"></div>
 
