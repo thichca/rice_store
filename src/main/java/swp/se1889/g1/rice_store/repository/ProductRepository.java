@@ -66,6 +66,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                        @Param("description") String description,
                                        @Param("price") BigDecimal price,
                                        Pageable pageable);
+    List<Product> findByIsDeletedFalseAndNameContainingIgnoreCase(String name);
 }
 
 

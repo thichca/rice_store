@@ -41,6 +41,9 @@ public class ProductService {
         }
         return Page.empty();
     }
+    public List<Product> searchProductsByName(String name) {
+        return productRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(name);
+    }
 
 
 
