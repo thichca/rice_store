@@ -76,14 +76,14 @@
                     Khách hàng
                 </a>
 
-                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" th:href="@{/employees}">
-                    <i class="fas fa-users mr-2"></i> Nhân viên
-                </a>
-
-                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" href="#">
-                    <i class="fas fa-dollar-sign mr-2">
+                <a th:name="employee" class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" th:href="@{/employees}">
+                    <i class="fas fa-users mr-2">
                     </i>
-                    Công nợ
+                    Nhân viên
+                </a>
+                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" th:href="@{/zone}">
+                    <i class="fa-thin fa-warehouse"></i>
+                    Khu vực
                 </a>
             </div>
             <a class="flex items-center text-white px-3 py-2 rounded-md bg-blue-700" href="#">

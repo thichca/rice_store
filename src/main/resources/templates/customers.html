@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <title>Example</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-<style>
-    #errorModal {
-        z-index: 1000; /* Đảm bảo modal luôn ở trên cùng */
-    }
+    <style>
+        #errorModal {
+            z-index: 1000; /* Đảm bảo modal luôn ở trên cùng */
+        }
 
-    #errorModal .bg-white {
-        z-index: 1001; /* Hộp thông báo bên trong modal */
-    }
+        #errorModal .bg-white {
+            z-index: 1001; /* Hộp thông báo bên trong modal */
+        }
 
-    .bg-gray-900.bg-opacity-50 {
-        z-index: 999; /* Lớp nền mờ của modal */
-    }
+        .bg-gray-900.bg-opacity-50 {
+            z-index: 999; /* Lớp nền mờ của modal */
+        }
 
-</style>
+    </style>
 </head>
 <body class="bg-gray-100 p-4">
 <div id="errorModal" class="hidden fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
@@ -32,9 +32,9 @@
 
 
 
-<div class="w-full">
+<div class=" top-0 left-0 w-full">
 
-    <div th:replace="~{fragments/header :: header}"></div>
+    <div  th:replace="~{fragments/header :: header}"></div>
     <div th:if="${errorMessage}" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
         <span th:text="${errorMessage}"></span>
     </div>
@@ -130,7 +130,7 @@
         <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">0</span> bản ghi</p>
 
 
-        <div class="relative overflow-x-auto max-h-[500px]">
+        <div class="relative  overflow-x-auto max-h-[500px]">
             <table class="table-auto border-collapse border w-full">
                 <thead class="bg-gray-100 sticky top-0 z-10">
 
@@ -153,12 +153,14 @@
                     <th class="border p-2 relative">Tổng nợ
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative">Ngày tạo
+                    <th class="border p-2 relative">Người thêm
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative">Cập nhật
+                    <th class="border p-2 relative">Người sửa
                         <div class="resizer"></div>
                     </th>
+
+
                     <th class="border p-2 relative w-[340px]">Hành động
                         <div class="resizer"></div>
                     </th>
@@ -188,24 +190,9 @@
                                    style="font-weight: normal;" id="search-debt-max">
                         </div>
                     </th>
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-createdby"></td>
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-updateby"></td>
 
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-created-date-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-created-date-max">
-                        </div>
-                    </th>
-
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-updated-date-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-updated-date-max">
-                        </div>
-                    </th>
 
                     <td class="border p-2">
                         <div class="flex gap-2 w-full">
@@ -235,8 +222,10 @@
                     <td class="border p-2" th:text="${customer.phone}"></td>
                     <td class="border p-2" th:text="${customer.email}"></td>
                     <td class="border p-2" th:text="${customer.debtBalance}"></td>
-                    <td class="border p-2" th:text="${#temporals.format(customer.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                    <td class="border p-2" th:text="${#temporals.format(customer.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                    <td class="border p-2" th:text="${customer.createdBy}"></td>  <!-- Hiển thị người thêm -->
+                    <td class="border p-2" th:text="${customer.updatedBy}"></td>  <!-- Hiển thị người sửa -->
+
+
                     <td class="border p-2">
                         <div class="flex gap-2 w-full">
                             <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
@@ -255,7 +244,10 @@
                                 <i class="fas fa-plus mr-1"></i> Thêm phiếu nợ
                             </button>
 
-                            <button class="w-1/4 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center"
+                            <button class="w-1/4 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-yellow-500 hover:text-white transition duration-200"
+                                    data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
+                                    data-icon='<i class="fas fa-pencil-alt"></i>'
                                     th:onclick="|toggleModal('editCustomerModal-' + ${customer.id})|">
                                 <i class="fas fa-pencil-alt mr-1"></i> Sửa
                             </button>
@@ -291,46 +283,10 @@
             </button>
         </div>
     </div>
+
 </div>
 <div th:replace="~{fragments/script :: script}"></div>
-<script>
-    async function submitCustomerForm(event) {
-        event.preventDefault();  // Ngăn form reload trang
 
-        let form = event.target;
-        let formData = new FormData(form);
-
-        let response = await fetch(form.action, {
-            method: form.method,
-            body: formData
-        });
-
-        let result = await response.json();
-
-        if (!response.ok) {
-            let errorMessage = "<ul>";
-            if (result.errorMessage) {
-                errorMessage += `<li>${result.errorMessage}</li>`;
-            } else {
-                for (const [field, message] of Object.entries(result)) {
-                    errorMessage += `<li>${message}</li>`;
-                }
-            }
-            errorMessage += "</ul>";
-
-            document.getElementById("errorModalContent").innerHTML = errorMessage;
-            toggleModal("errorModal");
-        } else {
-            alert(result.message);
-            location.reload();
-        }
-    }
-
-    function toggleModal(modalId) {
-        let modal = document.getElementById(modalId);
-        modal.classList.toggle("hidden");
-    }
-</script>
 
 </body>
 </html>

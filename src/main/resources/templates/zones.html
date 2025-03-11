@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>Example</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <!-- Thêm Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Thêm Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+</head>
+<body class="bg-gray-100 p-4">
+
+
+<div class="w-full">
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
+
+        <div class="flex justify-between items-center mb-4">
+
+            <h1 class="text-2xl font-semibold">Danh sách khu vực</h1>
+            <div class="flex gap-4">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center"
+                    th:onclick="|window.location.href='@{/zone/add}'|" >
+                <i class="fas fa-plus mr-2"></i> THÊM KHU VỰC
+            </button>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center"
+                    th:onclick="|window.location.href='@{/zone/addInventory}'|" >
+                <i class="fas fa-plus mr-2"></i> NHẬP KHO
+            </button>
+            </div>
+        </div>
+        <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">0</span> bản ghi</p>
+
+        <div class="overflow-x-auto">
+            <table class="table-auto border-collapse border w-full">
+                <thead>
+                <tr class="bg-gray-100">
+                    <th class="border p-2 relative">Id
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Tên
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Địa chỉ
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Ngày tạo
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Ngày cập nhật
+                        <div class="resizer"></div>
+                    </th>
+
+                    <th class="border p-2 relative w-[340px]">Hành động
+                        <div class="resizer"></div>
+                    </th>
+
+                </tr>
+
+                <tr class="bg-gray-50">
+                    <th class="border p-2">
+                        <div class="flex w-full gap-1">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
+                                   style="font-weight: normal;" id="search-zoneid-min">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
+                                   style="font-weight: normal;" id="search-zoneid-max">
+                        </div>
+                    </th>
+
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zonename"></td>
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zoneaddress"></td>
+                    <th class="border p-2">
+                        <div class="flex w-full gap-1">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
+                                   style="font-weight: normal;" id="search-date-zonemin">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
+                                   style="font-weight: normal;" id="search-date-zonemax">
+                        </div>
+                    </th>
+                    <th class="border p-2">
+                        <div class="flex w-full gap-1">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
+                                   style="font-weight: normal;" id="search-update-zonemin">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
+                                   style="font-weight: normal;" id="search-update-zonemax">
+                        </div>
+                    </th>
+                    <td class="border p-2">
+                        <div class="flex gap-2 w-full">
+                            <button id="clearFilters" class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-red-500 hover:text-white transition duration-200"
+                                    data-full='<i class="fas fa-times mr-1"></i> Bỏ lọc'
+                                    data-icon='<i class="fas fa-times"></i>'>
+                                <i class="fas fa-times mr-1"></i> Bỏ lọc
+                            </button>
+
+                            <button id="toggleButtons" class="w-1/2 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                hover:bg-blue-500 hover:text-white transition duration-200">
+                                <i class="fas fa-angle-right mr-1"></i> Thu gọn
+                            </button>
+                        </div>
+                    </td>
+
+                </tr>
+                </thead>
+
+                <tbody id="tableBody">
+                <tr th:each="zone : ${zones}">
+                    <td class="border p-2" th:text="${zone.id}"></td>
+                    <td class="border p-2" th:text="${zone.name}"></td>
+                    <td class="border p-2" th:text="${zone.address}"></td>
+                    <td class="border p-2" th:text="${#temporals.format(zone.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                    <td class="border p-2" th:text="${#temporals.format(zone.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+
+                    <td class="border p-2">
+                        <div class="flex gap-2 w-full">
+                            <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-blue-700 hover:text-white transition duration-200"
+                                    data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
+                                    data-icon='<i class="fas fa-info"></i>'
+                                    th:onclick="|window.location.href='@{/zone/detail/{id}(id=${zone.id})}'|">
+
+                                <i class="fas fa-info mr-1"></i> Chi tiết
+                            </button>
+                            <button class="w-1/4 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-yellow-500 hover:text-white transition duration-200"
+                                    data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
+                                    data-icon='<i class="fas fa-pencil-alt"></i>'
+                                    th:onclick="|window.location.href='@{/zone/edit/{id}(id=${zone.id})}'|">
+                                <i class="fas fa-pencil-alt mr-1"></i> Sửa
+                            </button>
+                            <button class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-red-500 hover:text-white transition duration-200"
+                                    data-full='<i class="fas fa-trash-alt mr-1"></i> Xoá'
+                                    data-icon='<i class="fas fa-trash-alt"></i>'
+                                    th:onclick="|if(confirm('Bạn có chắc muốn xóa khu vực này?')) window.location.href='@{/zone/delete/{id}(id=${zone.id})}'|">
+                                <i class="fas fa-trash-alt mr-1"></i> Xóa
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="w-full flex justify-center items-center mt-4 gap-12">
+            <button id="prevPage"
+                    class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+                Trước
+            </button>
+
+            <div class="flex items-center">
+                <span>Trang</span>
+                <input type="text" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1">
+                <span id="totalPages">/ 1</span>
+            </div>
+
+            <select id="recordsPerPage" class="border rounded px-4 py-2">
+                <option value="5" selected>5 Bản ghi</option>
+                <option value="10" >10 Bản ghi</option>
+                <option value="15">15 Bản ghi</option>
+            </select>
+
+
+            <button id="nextPage"
+                    class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+                Sau
+            </button>
+        </div>
+    </div>
+    <div th:replace="~{fragments/noti :: noti}"></div>
+</div>
+
+
+<div th:replace="~{fragments/script :: script}"></div>
+</body>
+</html>

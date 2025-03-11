@@ -12,9 +12,9 @@ import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.service.CustomerService;
 
 import jakarta.validation.Valid;
-
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -23,22 +23,24 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
-    // Hiển thị danh sách khách hàng của người dùng đăng nhập
+    // 🟢 Hiển thị danh sách khách hàng
     @GetMapping("/customers")
     public String getCustomers(Model model, HttpSession session) {
         if (!model.containsAttribute("newCustomer")) {
-            model.addAttribute("newCustomer", new CustomerDTO());  // Đảm bảo không bị null
+            model.addAttribute("newCustomer", new CustomerDTO());
         }
+
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
+
+        // ✅ Truyền danh sách khách hàng trực tiếp từ service
         model.addAttribute("customers", customerService.getCustomersByCurrentUser());
         model.addAttribute("editCustomer", new CustomerDTO());
 
         return "customers";
     }
 
-
-    // Xử lý thêm khách hàng mới
+    // 🟢 Xử lý thêm khách hàng mới
     @PostMapping("/customers/add")
     @ResponseBody
     public ResponseEntity<?> addCustomer(@Valid @ModelAttribute("newCustomer") CustomerDTO customerDTO,
@@ -46,7 +48,7 @@ public class CustomerController {
         if (result.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return ResponseEntity.badRequest().body(errors);  // Trả về lỗi dưới dạng JSON
+            return ResponseEntity.badRequest().body(errors);
         }
 
         try {
@@ -57,22 +59,35 @@ public class CustomerController {
         }
     }
 
-
-
-    // API lấy thông tin khách hàng để chỉnh sửa
+    // 🟢 API lấy thông tin khách hàng để chỉnh sửa
     @GetMapping("/edit-customer/{id}")
     @ResponseBody
-    public CustomerDTO getCustomerForEdit(@PathVariable Long id) {
-        return customerService.getCustomerById(id);
+    public ResponseEntity<?> getCustomerForEdit(@PathVariable Long id) {
+        try {
+            CustomerDTO customerDTO = customerService.getCustomerById(id);
+            return ResponseEntity.ok(customerDTO);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("errorMessage", e.getMessage()));
+        }
     }
+
+    // 🟢 Cập nhật khách hàng
     @PostMapping("/customers/update")
-    public String updateCustomer(@Valid @ModelAttribute("editCustomer") CustomerDTO customerDTO, BindingResult result, Model model) {
+    public String updateCustomer(@Valid @ModelAttribute("editCustomer") CustomerDTO customerDTO,
+                                 BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("customers", customerService.getCustomersByCurrentUser());
             return "customers";
         }
-        customerService.updateCustomer(customerDTO);
+
+        try {
+            customerService.updateCustomer(customerDTO);
+        } catch (RuntimeException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("customers", customerService.getCustomersByCurrentUser());
+            return "customers";
+        }
+
         return "redirect:/customers";
     }
-
 }

@@ -58,12 +58,18 @@
 
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-2xl font-semibold">Danh sách nhân viên</h1>
-            <a  href="/employees/addEmployee">
-                <button name="addEmployee" id="showFormButton" class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
+            <a href="/employees/addEmployee" >
+                <button name="addEmployee" id="showFormButton"
+                        class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
                     <i class="fas fa-plus mr-2"></i> Thêm Nhân viên
                 </button>
             </a>
         </div>
+        <a href="/shifts/schedule" >
+            <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
+                <i class="fas fa-calendar mr-2"></i> Lịch làm Nhân viên
+            </button>
+        </a>
         <div class="flex justify-between items-center mb-4">
             <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">0</span> bản ghi</p>
             <div class="w-1/6 mb-4 bg-white rounded-lg p-4">
@@ -80,12 +86,14 @@
 
         </div>
 
-        <div id="overlay1" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div class="w-11/12 md:w-2/3 lg:w-1/2 bg-white p-6 rounded-lg shadow-lg">
+        <div id="overlay1" class="hidden inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div class="w-11/12 md:w-2/3 lg:w-1/2 bg-white p-6 rounded-lg shadow-lg max-h-screen overflow-y-auto">
+
+
                 <div class="border-b pb-3 mb-3">
-                    <h5 class="text-lg font-semibold">Thêm mới nhân viên</h5>
+                    <h5 class="text-lg font-semibold">Thông tin nhân viên</h5>
                 </div>
-                <ul class="flex border-b">
+                <ul class="border-b">
                     <li class="mr-1">
                         <button class="bg-white inline-block py-2 px-4 text-blue-500 border-b-2 border-blue-500 focus:outline-none"
                                 id="info-tab1">Thông tin
@@ -175,9 +183,6 @@
                     <th class="border p-2 relative">Email
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative">Tổng nợ
-                        <div class="resizer"></div>
-                    </th>
                     <th class="border p-2 relative">Ngày tạo
                         <div class="resizer"></div>
                     </th>
@@ -205,14 +210,6 @@
                     <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-phone"></td>
                     <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-email"></td>
 
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-debt-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-debt-max">
-                        </div>
-                    </th>
 
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
@@ -261,40 +258,59 @@
                     <td class="border p-2" th:text="${employee.getAddress()}"></td>
                     <td class="border p-2" th:text="${employee.getPhone()}"></td>
                     <td class="border p-2" th:text="${employee.getEmail()}"></td>
-                    <td class="border p-2"></td>
                     <td class="border p-2" th:text="${employee.getCreatedAt()}"></td>
                     <td class="border p-2" th:text="${employee.getUpdatedAt()}"></td>
                     <td class="border p-2">
                         <div class="flex gap-2 w-full">
-                            <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-blue-700 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
-                                    data-icon='<i class="fas fa-info"></i>'>
-                                <i class="fas fa-info mr-1"></i> Chi tiết
-                            </button>
+                            <!--                            <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn-->
+                            <!--                                    hover:bg-blue-700 hover:text-white transition duration-200"-->
+                            <!--                                    data-full='<i class="fas fa-info mr-1"></i> Chi tiết'-->
+                            <!--                                    data-icon='<i class="fas fa-info"></i>'>-->
+                            <!--                                <i class="fas fa-info mr-1"></i> Chi tiết-->
+                            <!--                            </button>-->
 
-<!--                            <div th:if="${!employee.isDelete()}" class="w-1/2 ">-->
-<!--                                <form th:action="@{/manage/{id}(id=${employee.getId()})}" method="post"-->
-<!--                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">-->
-<!--                                    <button type="submit"-->
-<!--                                            class=" bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center toggle-btn button-xoa space-x-2 hover:bg-red-600 transition duration-200">-->
-<!--                                        <i class="fas fa-trash-alt"></i>-->
-<!--                                        <span>Xóa</span>-->
-<!--                                    </button>-->
-<!--                                </form>-->
-<!--                            </div>-->
-<!--                            <div th:unless="${!employee.isDelete()}" class="w-1/2">-->
-<!--                                <form th:action="@{/manage/{id}(id=${employee.getId()})}" method="get"-->
-<!--                                      onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục?');">-->
-<!--                                    <button type="submit" class=" bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center toggle-btn button-khoi-phuc space-x-2-->
-<!--                                            hover:bg-green-600 hover:text-white transition duration-200">-->
-<!--                                        <i class="fas fa-undo mr-1"></i> <span>Khôi Phục</span>-->
-<!--                                    </button>-->
-<!--                                </form>-->
-<!--                            </div>-->
+
+                            <form th:if="${!employee.isDeleted()}" class="w-1/2 "
+                                  th:action="@{/employees/{id}(id=${employee.getId()})}" method="get"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
+                            <button type="submit"
+
+                                class="w-full bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center
+                                toggle-btn button-xoa space-x-2
+                                hover:bg-red-600 transition duration-200"
+                                data-full='<i class="fas fa-trash-alt"></i> Xóa'
+                                data-icon='<i class="fas fa-trash-alt"></i>'>
+                                <i class="fas fa-trash-alt"></i>
+                                <span>Xóa</span>
+                            </button>
+                            </form>
+
+                            <form th:action="@{/employees/{id}(id=${employee.getId()})}" method="get"
+                                  th:unless="${!employee.isDeleted()}" class="w-1/2"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục?');">
+                                <button
+                                        type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center toggle-btn button-khoi-phuc space-x-2
+                                            hover:bg-green-600 hover:text-white transition duration-200"
+                                        data-full='<i class="fas fa-undo mr-1"></i> Khôi Phục'
+                                        data-icon='<i class="fas fa-undo mr-1-alt"></i>'>
+                                    <i class="fas fa-undo mr-1"></i> <span>Khôi Phục</span>
+                                </button>
+
+                            </form>
+                            <!--                            <div th:unless="${!employee.isDeleted()}" class="w-1/2">-->
+                            <!--                                <form th:action="@{/employees/{id}(id=${employee.getId()})}" method="get"-->
+                            <!--                                      onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục?');">-->
+                            <!--                                    <button type="submit" class=" bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center toggle-btn button-khoi-phuc space-x-2-->
+                            <!--                                            hover:bg-green-600 hover:text-white transition duration-200"-->
+                            <!--                                            data-full='<i class="fas fa-undo mr-1"></i> Khôi Phục'-->
+                            <!--                                            data-icon='<i class="fas fa-undo mr-1-alt"></i>'>-->
+                            <!--                                        <i class="fas fa-undo mr-1"></i> <span>Khôi Phục</span>-->
+                            <!--                                    </button>-->
+                            <!--                                </form>-->
+                            <!--                            </div>-->
 
                             <button
-                                    class="showFormButton1 w-1/4 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    class="showFormButton1 w-1/2 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-yellow-500 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
                                     data-icon='<i class="fas fa-pencil-alt"></i>'>
@@ -335,7 +351,6 @@
 </div>
 
 <div th:replace="~{fragments/script :: script}"></div>
-<script th:src="@{/assets/js/paginationRecord.js}"></script>
 
 <script>
     var overlay1 = document.getElementById("overlay1");
@@ -353,7 +368,6 @@
             var email = row.cells[4].textContent;
             var phone = row.cells[3].textContent;
 
-            console.log("ID nhân viên:", employeeId);
 
             // Gán giá trị vào form trong overlay
             document.querySelector("#overlay1 input[name='username']").value = username;

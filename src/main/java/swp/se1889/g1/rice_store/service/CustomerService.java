@@ -23,32 +23,35 @@ public class CustomerService {
     @Autowired
     private UserRepository userRepository;
 
-    // Lấy danh sách khách hàng của người dùng hiện tại
-    public List<Customer> getCustomersByCurrentUser() {
+    // 🟢 Lấy danh sách khách hàng của người dùng hiện tại
+    public List<CustomerDTO> getCustomersByCurrentUser() {
         User currentUser = getCurrentUser();
         if (currentUser != null) {
-            return customerRepository.findByCreatedBy(currentUser);
+            return customerRepository.findCustomersByCurrentUser(currentUser);
         }
         return List.of();
     }
-    // Lấy thông tin khách hàng theo ID
+
+    // 🟢 Lấy thông tin khách hàng theo ID (Cập nhật để lấy username của người sửa)
     public CustomerDTO getCustomerById(Long id) {
         Optional<Customer> customerOpt = customerRepository.findById(id);
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            CustomerDTO customerDTO = new CustomerDTO();
-            customerDTO.setId(customer.getId());
-            customerDTO.setName(customer.getName());
-            customerDTO.setPhone(customer.getPhone());
-            customerDTO.setAddress(customer.getAddress());
-            customerDTO.setEmail(customer.getEmail());
-            customerDTO.setDebtBalance(customer.getDebtBalance());
-            return customerDTO;
+            return new CustomerDTO(
+                    customer.getId(),
+                    customer.getName(),
+                    customer.getPhone(),
+                    customer.getAddress(),
+                    customer.getEmail(),
+                    customer.getDebtBalance(),
+                    customer.getCreatedBy().getUsername(), // Lấy username của người tạo
+                    customer.getUpdatedBy() // Lấy username của người sửa (có thể null)
+            );
         }
         throw new RuntimeException("Không tìm thấy khách hàng có ID: " + id);
     }
 
-    // Cập nhật thông tin khách hàng
+    // 🟢 Cập nhật thông tin khách hàng (Thêm updatedBy)
     public void updateCustomer(CustomerDTO customerDTO) {
         Optional<Customer> customerOpt = customerRepository.findById(customerDTO.getId());
         if (customerOpt.isPresent()) {
@@ -59,13 +62,20 @@ public class CustomerService {
             customer.setEmail(customerDTO.getEmail());
             customer.setDebtBalance(customerDTO.getDebtBalance());
             customer.setUpdatedAt(LocalDateTime.now());
+
+            // ✅ Cập nhật thông tin "Người sửa"
+            User currentUser = getCurrentUser();
+            if (currentUser != null) {
+                customer.setUpdatedBy(currentUser.getUsername());
+            }
+
             customerRepository.save(customer);
         } else {
             throw new RuntimeException("Không tìm thấy khách hàng để cập nhật!");
         }
     }
 
-    // Tạo khách hàng mới
+    // 🟢 Tạo khách hàng mới (Đảm bảo có updatedBy khi tạo)
     public void createCustomer(CustomerDTO customerDTO) {
         User currentUser = getCurrentUser();
         if (currentUser == null) {
@@ -88,12 +98,13 @@ public class CustomerService {
         customer.setCreatedAt(LocalDateTime.now());
         customer.setUpdatedAt(LocalDateTime.now());
 
+        // ✅ Khi tạo, "Người sửa" cũng là người tạo
+//        customer.setUpdatedBy(currentUser.getUsername());
+
         customerRepository.save(customer);
     }
 
-
-
-    // Lấy thông tin người dùng hiện tại từ SecurityContext
+    // 🟢 Lấy thông tin người dùng hiện tại từ SecurityContext
     private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
