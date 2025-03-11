@@ -18,6 +18,7 @@ import swp.se1889.g1.rice_store.service.Iservice.UserService;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class UserServiceIpml implements UserService {
@@ -127,5 +128,10 @@ public class UserServiceIpml implements UserService {
     public String getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null ? authentication.getName() : "guest";
+    }
+
+
+    public List<User> getAllActiveUsers() {
+        return userRepository.findByIsDeletedFalse();
     }
 }
