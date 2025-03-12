@@ -50,7 +50,7 @@ public class EmployeeService {
 
         User user = new User();
         user.setUsername(employeeDTO.getUserName());
-        user.setPassword(employeeDTO.getPassword());
+        user.setPassword(passwordEncoder.encode(employeeDTO.getPassword()));
         user.setEmail(employeeDTO.getEmail());
         user.setRole("ROLE_EMPLOYEE");
         user.setName(employeeDTO.getName());

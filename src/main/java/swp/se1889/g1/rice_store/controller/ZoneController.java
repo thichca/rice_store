@@ -47,7 +47,19 @@ public class ZoneController {
     public String createZone(@ModelAttribute("zone") ZoneDTO zone , HttpSession session , Model model , RedirectAttributes redirectAttributes) {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
-      Zone zone2 =  zoneService.createZone(zone , store);
+
+        // Lấy danh sách khu vực trong cửa hàng
+        List<Zone> existingZones = zoneService.getZonesByStoreId(store);
+
+        // Kiểm tra nếu tên khu vực đã tồn tại
+        boolean isDuplicate = existingZones.stream()
+                .anyMatch(z -> z.getName().equalsIgnoreCase(zone.getName()));
+
+        if (isDuplicate) {
+            redirectAttributes.addFlashAttribute("error", "Tên khu vực đã tồn tại. Vui lòng chọn tên khác.");
+            return "redirect:/zone/add"; // Quay lại trang thêm khu vực
+        }
+        Zone zone2 =  zoneService.createZone(zone , store);
       if(zone2 != null){
           redirectAttributes.addFlashAttribute("success", "Thêm khu vực thành công");
       }
