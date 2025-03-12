@@ -32,10 +32,11 @@
             </button>
             <br><br>
             <button type="button" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600"
-                    th:onclick="|window.location.href='@{/zone}'|">Hủy
+                    th:onclick="|window.location.href='@{/owner/zone}'|">Hủy
             </button>
         </form>
     </div>
+    <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
 
 <div th:replace="~{fragments/script :: script}"></div>

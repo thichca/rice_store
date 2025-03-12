@@ -62,6 +62,21 @@ public class ZoneController {
     public String createZone(@ModelAttribute("zone") ZoneDTO zone, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
+        List<Zone> existingZones = zoneService.getZonesByStoreId(store);
+        boolean isDuplicate = existingZones.stream()
+                .anyMatch(z -> z.getName().equalsIgnoreCase(zone.getName()));
+
+        if (isDuplicate) {
+            redirectAttributes.addFlashAttribute("error", "Tên khu vực đã tồn tại. Vui lòng chọn tên khác.");
+            return "redirect:/owner/zone/add"; // Quay lại trang thêm khu vực
+        }
+        boolean isDuplicate1 = existingZones.stream()
+                .anyMatch(z -> z.getAddress().equalsIgnoreCase(zone.getAddress()));
+
+        if (isDuplicate1) {
+            redirectAttributes.addFlashAttribute("error", "Địa chỉ khu vực đã tồn tại. Vui lòng chọn tên khác.");
+            return "redirect:/owner/zone/add"; // Quay lại trang thêm khu vực
+        }
         Zone zone2 = zoneService.createZone(zone, store);
         if (zone2 != null) {
             redirectAttributes.addFlashAttribute("success", "Thêm khu vực thành công");
@@ -93,6 +108,14 @@ public class ZoneController {
             return "redirect:/owner/zone";
         }
         // Kiểm tra nếu tên mới đã tồn tại trong danh sách khu vực (trừ chính nó)
+        boolean isDuplicate1 = zones.stream()
+                .anyMatch(z -> !z.getId().equals(id) && z.getAddress().equalsIgnoreCase(zone.getAddress()));
+
+        if (isDuplicate1) {
+            redirectAttributes.addFlashAttribute("error", "Địa chỉ khu vực đã tồn tại. Vui lòng chọn tên khác.");
+            return "redirect:/owner/zone/edit/" + id;
+        }
+
         boolean isDuplicate = zones.stream()
                 .anyMatch(z -> !z.getId().equals(id) && z.getName().equalsIgnoreCase(zone.getName()));
 
