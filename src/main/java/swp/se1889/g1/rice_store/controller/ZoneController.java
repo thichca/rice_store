@@ -59,6 +59,13 @@ public class ZoneController {
             redirectAttributes.addFlashAttribute("error", "Tên khu vực đã tồn tại. Vui lòng chọn tên khác.");
             return "redirect:/zone/add"; // Quay lại trang thêm khu vực
         }
+        boolean isDuplicate1 = existingZones.stream()
+                .anyMatch(z -> z.getAddress().equalsIgnoreCase(zone.getAddress()));
+
+        if (isDuplicate1) {
+            redirectAttributes.addFlashAttribute("error", "Địa chỉ khu vực đã tồn tại. Vui lòng chọn tên khác.");
+            return "redirect:/zone/add"; // Quay lại trang thêm khu vực
+        }
         Zone zone2 =  zoneService.createZone(zone , store);
       if(zone2 != null){
           redirectAttributes.addFlashAttribute("success", "Thêm khu vực thành công");

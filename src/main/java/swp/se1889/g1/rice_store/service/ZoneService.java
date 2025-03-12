@@ -121,9 +121,10 @@ public class ZoneService {
         else {
             zone.setProduct(product);
             zone.setQuantity(quantity);
+
         }
 
-        zone.setUpdatedAt(LocalDateTime.now());
+        zone.setCreatedAt(LocalDateTime.now());
         return zoneRepository.save(zone);
     }
 

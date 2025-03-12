@@ -31,8 +31,8 @@
 
     <!-- Ngày tạo -->
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Ngày Cập Nhật:</label>
-        <p th:text="${zone.updatedAt != null ? #temporals.format(zone.updatedAt, 'dd/MM/yyyy HH:mm:ss') : 'Tạm trống'}"
+        <label class="block text-sm font-medium text-gray-700">Ngày Tạo:</label>
+        <p th:text="${zone.createdAt != null ? #temporals.format(zone.createdAt, 'dd/MM/yyyy HH:mm:ss') : 'Tạm trống'}"
            class="mt-1 block w-full border border-gray-300 rounded-md p-2"></p>
     </div>
 
