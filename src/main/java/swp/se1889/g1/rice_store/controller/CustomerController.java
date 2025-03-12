@@ -9,9 +9,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
 import swp.se1889.g1.rice_store.entity.Store;
+import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.service.CustomerService;
 
 import jakarta.validation.Valid;
+import swp.se1889.g1.rice_store.service.UserServiceIpml;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +26,9 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
+    @Autowired
+    private UserServiceIpml userService;
+
     // 🟢 Hiển thị danh sách khách hàng
     @GetMapping("/customers")
     public String getCustomers(Model model, HttpSession session) {
@@ -32,6 +38,9 @@ public class CustomerController {
 
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
+
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
 
         // ✅ Truyền danh sách khách hàng trực tiếp từ service
         model.addAttribute("customers", customerService.getCustomersByCurrentUser());
