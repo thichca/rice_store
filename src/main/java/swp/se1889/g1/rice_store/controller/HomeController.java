@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import swp.se1889.g1.rice_store.entity.Store;
+import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.service.StoreService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
@@ -28,6 +29,8 @@ public class HomeController {
         Store store = storeService.getStoreByNameAndCreatedBy(name, createdBy);
         session.setAttribute("store", store);
         model.addAttribute("store", store);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
         return "home";
     }
 
@@ -35,6 +38,8 @@ public class HomeController {
     public String getHome(HttpSession session, Model model) {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
         return "home";
     }
 

@@ -17,8 +17,6 @@ import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.service.StoreService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
-import java.util.List;
-
 @Controller
 public class StoreController {
     @Autowired
@@ -27,7 +25,7 @@ public class StoreController {
     @Autowired
     private UserServiceIpml userService;
 
-    @GetMapping({"/", "/store"})
+    @GetMapping("owner/store")
     public String getStores(@RequestParam(defaultValue = "0") int page,
                             @RequestParam(defaultValue = "5") int size,
                             Model model) {
@@ -43,13 +41,13 @@ public class StoreController {
         return "store";
     }
 
-    @GetMapping("/createStore")
+    @GetMapping("owner/createStore")
     public String createStoreForm(Model model) {
         model.addAttribute("page", "createStore");
         return "createStore";
     }
 
-    @GetMapping("/manageStores")
+    @GetMapping("owner/manageStores")
     public String manageStores(@RequestParam(defaultValue = "0") int page,
                                @RequestParam(defaultValue = "10") int size,
                                Model model) {
@@ -74,20 +72,20 @@ public class StoreController {
             for (FieldError fieldError : bindingResult.getFieldErrors()) {
                 redirectAttributes.addFlashAttribute("error", fieldError.getDefaultMessage());
             }
-            return "redirect:/createStore";
+            return "redirect:/owner/createStore";
         }
 
         try {
             Store store = storeService.createStore(storeDTO, redirectAttributes);
             if (store == null) {
-                return "redirect:/createStore";
+                return "redirect:/owner/createStore";
             }
             model.addAttribute("store", store);
             redirectAttributes.addFlashAttribute("success", "Tạo cửa hàng thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
         }
-        return "redirect:/store";
+        return "redirect:/owner/store";
     }
 
     @GetMapping("/deleteStore/{storeId}")
@@ -98,10 +96,10 @@ public class StoreController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi xóa cửa hàng!");
         }
-        return "redirect:/manageStores";
+        return "redirect:/owner/manageStores";
     }
 
-    @GetMapping("/updateStore/{id}")
+    @GetMapping("owner/updateStore/{id}")
     public String showUpdateForm(@PathVariable Long id, Model model) {
         Store store = storeService.findStoreByStoreId(id);
         if (store == null) {
@@ -120,20 +118,20 @@ public class StoreController {
             for (FieldError fieldError : bindingResult.getFieldErrors()) {
                 redirectAttributes.addFlashAttribute("error", fieldError.getDefaultMessage());
             }
-            return "redirect:/updateStore/" + storeId;
+            return "redirect:/owner/updateStore/" + storeId;
 
         }
 
         try {
             Store store = storeService.updateStore(storeId, storeDTO, redirectAttributes);
             if (store == null) {
-                return "redirect:/updateStore/" + storeId;
+                return "redirect:/owner/updateStore/" + storeId;
             }
             redirectAttributes.addFlashAttribute("success", "Cập nhật cửa hàng thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
         }
-        return "redirect:/manageStores";
+        return "redirect:/owner/manageStores";
     }
 
 

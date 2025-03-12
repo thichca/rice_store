@@ -11,9 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import swp.se1889.g1.rice_store.dto.ProductDTO;
 import swp.se1889.g1.rice_store.entity.Product;
 import swp.se1889.g1.rice_store.entity.Store;
+import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.service.ProductService;
 
 import jakarta.validation.Valid;
+import swp.se1889.g1.rice_store.service.UserServiceIpml;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,10 +28,13 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private UserServiceIpml userService;
+
     /**
      * 📌 Hiển thị danh sách sản phẩm của người dùng đăng nhập
      */
-    @GetMapping("/products")
+    @GetMapping("owner/products")
     public String getProducts(@RequestParam(required = false) String searchType,
                               @RequestParam(required = false) String keyword,
                               @RequestParam(defaultValue = "0") int page,
@@ -61,6 +67,9 @@ public class ProductController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("editProduct", new ProductDTO());
 
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
+
         return "products";
     }
 
@@ -68,7 +77,7 @@ public class ProductController {
     /**
      * 📌 Hiển thị trang danh sách sản phẩm và khu vực (zones)
      */
-    @GetMapping("/zones")
+    @GetMapping("/owner/zones")
     public String getProductsWithZones(Model model, HttpSession session,
                                        @RequestParam(defaultValue = "0") int page,
                                        @RequestParam(defaultValue = "5") int size,
@@ -91,6 +100,9 @@ public class ProductController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productWithZones.getTotalPages());
         model.addAttribute("totalItems", productWithZones.getTotalElements());
+
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
 
         return "sellProducts";
     }
@@ -142,8 +154,9 @@ public class ProductController {
             return "products";
         }
         productService.updateProduct(productDTO);
-        return "redirect:/products?page=" + page + "&size=" + size;
+        return "redirect:/owner/products?page=" + page + "&size=" + size;
     }
+
     /**
      * 📌 Xóa sản phẩm theo ID
      */
@@ -152,10 +165,8 @@ public class ProductController {
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "5") int size) {
         productService.deleteProduct(id);
-        return "redirect:/products?page=" + page + "&size=" + size;
+        return "redirect:/owner/products?page=" + page + "&size=" + size;
     }
-
-
 
 
 }

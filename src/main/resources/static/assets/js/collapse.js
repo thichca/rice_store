@@ -20,7 +20,7 @@ document.getElementById("toggleButtons").addEventListener("click", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     const toggleButton = document.getElementById("toggleButtons");
-    const actionCells = document.querySelectorAll("td:nth-child(6), th:nth-child(6)");
+    const actionCells = document.querySelectorAll("td:nth-child(8), th:nth-child(8)");
     let isCollapsed = false;
 
     toggleButton.addEventListener("click", function () {
@@ -35,11 +35,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    const clearButton = document.getElementById("clearFilters");
-    clearButton.addEventListener("click", function () {
-        document.querySelectorAll("tr.bg-gray-50 input").forEach(input => {
-            input.value = "";
-        });
-    });
-});

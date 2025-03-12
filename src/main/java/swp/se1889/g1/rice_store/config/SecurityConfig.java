@@ -35,7 +35,7 @@ public class SecurityConfig {
             } else if (role.contains("ROLE_EMPLOYEE")) {
                 response.sendRedirect("/employee/home");
             } else if (role.contains("ROLE_OWNER")) {
-                response.sendRedirect("/store");
+                response.sendRedirect("owner/store");
             } else {
                 response.sendRedirect("/home");
             }
@@ -46,6 +46,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(configurer -> configurer
                         .requestMatchers("/register", "/login", "/assets/**").permitAll()
+                        .requestMatchers("owner/**").hasRole("OWNER")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")

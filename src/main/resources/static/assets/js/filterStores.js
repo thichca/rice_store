@@ -53,12 +53,26 @@ function filterStores() {
             row.style.display = 'none';
         }
     });
-    
+
     document.querySelector(".total-stores").textContent = `Tổng cộng: ${totalFiltered} cửa hàng`;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', filterStores);
+    });
+
+    const clearButton = document.getElementById("clearFilters");
+    clearButton.addEventListener("click", function () {
+        document.querySelectorAll("tr.bg-gray-50 input").forEach(input => {
+            input.value = "";
+        });
+
+        let rows = document.querySelectorAll("#tableBody tr");
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+
+        filterStores();
     });
 });

@@ -23,7 +23,7 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @GetMapping("/login")
+    @GetMapping({"/", "/login"})
     public String login() {
         return "login";
     }
