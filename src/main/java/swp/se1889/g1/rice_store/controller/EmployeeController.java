@@ -13,17 +13,18 @@ import swp.se1889.g1.rice_store.dto.EmployeeDTO;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.service.EmployeeService;
+import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
 import java.util.List;
 
 @Controller
-@RequestMapping("/employees")
+@RequestMapping("/owner/employees")
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
     @Autowired
-    private StoreController storeController;
+    private UserServiceIpml userService;
 
     @GetMapping("")
     public String employee(@RequestParam(value = "trangthai", required = false) String trangthai, Model model, HttpSession session) {
@@ -38,18 +39,21 @@ public class EmployeeController {
         } else {
             employees = employeeService.getEmployeesActive(store.getId(), "ROLE_EMPLOYEE", true);
         }
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
 
         model.addAttribute("employees", employees);
         model.addAttribute("store", store);
         model.addAttribute("trangthai", trangthai);
         return "employees";
     }
+
     @GetMapping("/{id}")
     public String deleteOrRestoreEmployee(RedirectAttributes redirectAttributes, @PathVariable("id") Long id, Model model, HttpSession session) {
         Store store = (Store) session.getAttribute("store");
 
         if (store == null) {
-            return "redirect:/store";
+            return "redirect:/owner/store";
         }
 
         boolean check = employeeService.getEmployeeById(id).isDeleted();
@@ -62,7 +66,7 @@ public class EmployeeController {
             redirectAttributes.addFlashAttribute("success", "Khôi phục nhân viên thành công!");
         }
 
-        return "redirect:/employees";
+        return "redirect:/owner/employees";
     }
 
 
@@ -71,37 +75,40 @@ public class EmployeeController {
     public String addEmployee(Model model, HttpSession session) {
         Store store = (Store) session.getAttribute("store");
         if (store == null) {
-            return "redirect:/store";
+            return "redirect:/owner/store";
         }
         model.addAttribute("newEmployee", new EmployeeDTO());
         model.addAttribute("store", store);
+
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
         return "addEmployee";
     }
 
     @PostMapping("/addEmployee")
-    public String addEmployee (@ModelAttribute @Valid EmployeeDTO employeeDTO, BindingResult bindingResult, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String addEmployee(@ModelAttribute @Valid EmployeeDTO employeeDTO, BindingResult bindingResult, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
         Store store = (Store) session.getAttribute("store");
         if (store == null) {
-            return "redirect:/store";
+            return "redirect:/owner/store";
         }
 
         if (bindingResult.hasErrors()) {
             for (FieldError fieldError : bindingResult.getFieldErrors()) {
                 redirectAttributes.addFlashAttribute("error", fieldError.getDefaultMessage());
             }
-            return "redirect:/employees/addEmployee";
+            return "redirect:/owner/employees/addEmployee";
         }
 
         try {
             User user = employeeService.addNewEmployee(store.getId(), employeeDTO, redirectAttributes);
             if (user == null) {
-                return "redirect:/employees/addEmployee";
+                return "redirect:/owner/employees/addEmployee";
             }
             model.addAttribute("store", store);
             redirectAttributes.addFlashAttribute("success", "Thêm nhân viên thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
         }
-        return "redirect:/employees/addEmployee";
+        return "redirect:/owner/employees/addEmployee";
     }
 }

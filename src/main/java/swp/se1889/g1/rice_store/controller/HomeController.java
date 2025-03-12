@@ -8,13 +8,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import swp.se1889.g1.rice_store.entity.Store;
+import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.service.StoreService;
+import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
 @Controller
 public class HomeController {
 
     @Autowired
     private StoreService storeService;
+
+    @Autowired
+    private UserServiceIpml userService;
 
     @PostMapping("/home")
     public String storeSelection(@RequestParam("storeName") String name,
@@ -24,6 +29,8 @@ public class HomeController {
         Store store = storeService.getStoreByNameAndCreatedBy(name, createdBy);
         session.setAttribute("store", store);
         model.addAttribute("store", store);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
         return "home";
     }
 
@@ -31,6 +38,18 @@ public class HomeController {
     public String getHome(HttpSession session, Model model) {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
+        return "home";
+    }
+
+    @GetMapping("/employee/home")
+    public String getHomeEmployee(HttpSession session, Model model) {
+        Long createdBy = userService.getCurrentCreatedBy();
+        Store store = storeService.getStoreByCreatedBy(createdBy);
+        model.addAttribute("store", store);
+        session.setAttribute("store", store);
+
         return "home";
     }
 

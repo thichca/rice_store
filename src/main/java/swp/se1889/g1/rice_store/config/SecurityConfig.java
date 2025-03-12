@@ -6,6 +6,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import swp.se1889.g1.rice_store.service.Iservice.UserService;
 
 @Configuration
@@ -25,14 +26,32 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
+        return (request, response, authentication) -> {
+            String role = authentication.getAuthorities().toString();
+
+            if (role.contains("ROLE_ADMIN")) {
+                response.sendRedirect("/admin");
+            } else if (role.contains("ROLE_EMPLOYEE")) {
+                response.sendRedirect("/employee/home");
+            } else if (role.contains("ROLE_OWNER")) {
+                response.sendRedirect("owner/store");
+            } else {
+                response.sendRedirect("/home");
+            }
+        };
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(configurer -> configurer
                         .requestMatchers("/register", "/login", "/assets/**").permitAll()
+                        .requestMatchers("owner/**").hasRole("OWNER")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/store", true)
+                        .successHandler(customAuthenticationSuccessHandler())
                         .permitAll())
                 .logout(logout -> logout
                         .permitAll()

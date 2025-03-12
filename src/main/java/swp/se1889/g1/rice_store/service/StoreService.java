@@ -32,6 +32,10 @@ public class StoreService {
         return storeRepository.findByNameAndCreatedBy(storeName, username);
     }
 
+    public Store getStoreByCreatedBy(Long storeId) {
+        return storeRepository.findById(storeId).orElse(null);
+    }
+
     public Store createStore(StoreDTO storeDTO, RedirectAttributes redirectAttributes) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = (authentication != null) ? authentication.getName() : "Unknown";

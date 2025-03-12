@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -22,6 +23,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByName(String name);
 
     Optional<Product> findById(Long id);
+
+    @Query("SELECT COUNT(p) > 0 FROM Product p WHERE p.createdBy = :createdBy AND p.isDeleted = false AND LOWER(p.name) = LOWER(:name)")
+    boolean existsByCreatedByAndName(@Param("createdBy") User createdBy, @Param("name") String name);
 
     //
     Page<Product> findByCreatedByAndIsDeletedFalse(User createdBy, Pageable pageable);
@@ -66,6 +70,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                        @Param("description") String description,
                                        @Param("price") BigDecimal price,
                                        Pageable pageable);
+
     List<Product> findByIsDeletedFalseAndNameContainingIgnoreCase(String name);
 }
 

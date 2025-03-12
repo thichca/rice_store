@@ -39,8 +39,11 @@
                              id="dropdown-menu">
                             <a th:href="@{/profile}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Hồ
                                 sơ</a>
-                            <a th:href="@{/store}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Thay
-                                đổi cửa hàng</a>
+                            <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
+                                <a th:href="@{/owner/store}"
+                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Thay
+                                    đổi cửa hàng</a>
+                            </div>
                             <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 <form action="#" th:action="@{/logout}" method="POST">
                                     <input type="submit" class="btn btn-info" value="Đăng xuất"/>
@@ -60,31 +63,34 @@
                     </i>
                     Tổng quan
                 </a>
-                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" th:href="@{/products}">
-                    <i class="fas fa-box mr-2">
-                    </i>
-                    Hàng hóa
-                </a>
-                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" href="#">
-                    <i class="fas fa-exchange-alt mr-2">
-                    </i>
-                    Giao dịch
-                </a>
+                <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
+                    <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
+                       th:href="@{/owner/products}">
+                        <i class="fas fa-box mr-2">
+                        </i>
+                        Sản phẩm
+                    </a>
+                </div>
                 <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700 transition "
                    th:href="@{/customers}">
                     <i class="fas fa-user mr-2"></i>
                     Khách hàng
                 </a>
-
-                <a th:name="employee" class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" th:href="@{/employees}">
-                    <i class="fas fa-users mr-2">
-                    </i>
-                    Nhân viên
-                </a>
-                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" th:href="@{/zone}">
-                    <i class="fa-thin fa-warehouse"></i>
-                    Khu vực
-                </a>
+                <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
+                    <a th:name="employee" class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
+                       th:href="@{/owner/employees}">
+                        <i class="fas fa-users mr-2">
+                        </i>
+                        Nhân viên
+                    </a>
+                </div>
+                <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
+                    <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
+                       th:href="@{/owner/zone}">
+                        <i class="fas fa-warehouse mr-2"></i>
+                        Khu vực
+                    </a>
+                </div>
             </div>
             <a class="flex items-center text-white px-3 py-2 rounded-md bg-blue-700" href="#">
                 <i class="fas fa-shopping-basket mr-2">

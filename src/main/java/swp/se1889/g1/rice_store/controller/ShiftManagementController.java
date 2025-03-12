@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 
 @Controller
-@RequestMapping("/shifts")
+@RequestMapping("/owner/shifts")
 public class ShiftManagementController {
 
     private final ShiftService shiftService;
@@ -42,7 +42,7 @@ public class ShiftManagementController {
 
         Store store = (Store) session.getAttribute("store");
         if (store == null) {
-            return "redirect:/store";
+            return "redirect:/owner/store";
         }
 
         LocalDate currentDate = LocalDate.now();
@@ -81,16 +81,17 @@ public class ShiftManagementController {
         // Ensure user details are available in the Thymeleaf template
         model.addAttribute("userDetails", allUsers.stream().collect(Collectors.toMap(User::getId, user -> user)));
 
-        return "weekly-schedule";
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
+
+        return "weeklySchedule";
     }
 
 
-
-
-    @GetMapping("/current-week")
+    @GetMapping("/currentWeek")
     public String viewCurrentWeek() {
         // Redirect to the current week's schedule
-        return "redirect:/shifts/schedule";
+        return "redirect:/owner/shifts/schedule";
     }
 
     @PostMapping("/assign")
@@ -107,7 +108,7 @@ public class ShiftManagementController {
         }
 
         // Redirect back to the same week
-        return "redirect:/shifts/schedule?weekNumber=" + workShiftForm.getWeekNumber() + "&year=" + workShiftForm.getYear();
+        return "redirect:/owner/shifts/schedule?weekNumber=" + workShiftForm.getWeekNumber() + "&year=" + workShiftForm.getYear();
     }
 
     @PostMapping("/remove")
@@ -124,7 +125,7 @@ public class ShiftManagementController {
         }
 
         // Redirect back to the same week
-        return "redirect:/shifts/schedule?weekNumber=" + workShiftForm.getWeekNumber() + "&year=" + workShiftForm.getYear();
+        return "redirect:/owner/shifts/schedule?weekNumber=" + workShiftForm.getWeekNumber() + "&year=" + workShiftForm.getYear();
     }
 
     private Map<String, Map<String, List<User>>> prepareScheduleData(

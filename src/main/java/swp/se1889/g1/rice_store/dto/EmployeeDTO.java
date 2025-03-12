@@ -8,7 +8,7 @@ public class EmployeeDTO {
     @Size(min = 4, message = "Tài khoản phải có ít nhất 4 ký tự")
     private String userName;
 
-    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String password;
 
     @Pattern(regexp = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$", message = "Định dạng email không hợp lệ")

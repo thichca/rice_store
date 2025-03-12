@@ -8,7 +8,7 @@
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-6">
 <div class="absolute bottom-6 right-6">
-    <a th:href="@{/manageStores}"
+    <a th:href="@{/owner/manageStores}"
        class="bg-blue-600 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition duration-300">
         Quản lý cửa hàng
     </a>
@@ -34,7 +34,7 @@
     </th:block>
 
     <div class="border rounded-lg p-6 flex flex-col items-center justify-center bg-white shadow-md hover:shadow-lg transition duration-300 cursor-pointer">
-        <a th:href="@{/createStore}" class="flex flex-col items-center">
+        <a th:href="@{/owner/createStore}" class="flex flex-col items-center">
             <div class="bg-gray-300 text-gray-600 rounded-full w-16 h-16 flex items-center justify-center text-3xl mb-2 transition duration-200 hover:bg-gray-400 hover:text-white">
                 +
             </div>
@@ -46,20 +46,18 @@
 <div class="w-full flex justify-center items-center mt-4 gap-12">
     <button id="prevPage" th:disabled="${currentPage == 0}"
             th:class="${currentPage == 0 ? 'bg-gray-200 text-black px-8 py-2 rounded' : 'bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200'}"
-            th:onclick="|window.location.href='/store?page=' + ${currentPage - 1} + '&size=' + ${recordsPerPage}|">
+            th:onclick="|window.location.href='/owner/store?page=' + ${currentPage - 1} + '&size=' + ${recordsPerPage}|">
         <i class="fas fa-chevron-left"></i>
     </button>
 
     <div class="flex items-center">
-        <span>Trang</span>
-        <input type="text" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1"
-               th:value="${currentPage + 1}">
-        <span th:text="'/ ' + ${totalPages}"></span>
+        <span th:text="${currentPage + 1}"></span>
+        <span th:text="'/' + ${totalPages}"></span>
     </div>
 
     <button id="nextPage" th:disabled="${currentPage + 1 >= totalPages}"
             th:class="${currentPage + 1 >= totalPages ? 'bg-gray-200 text-black px-8 py-2 rounded' : 'bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200'}"
-            th:onclick="|window.location.href='/store?page=' + ${currentPage + 1} + '&size=' + ${recordsPerPage}|">
+            th:onclick="|window.location.href='/owner/store?page=' + ${currentPage + 1} + '&size=' + ${recordsPerPage}|">
         <i class="fas fa-chevron-right"></i>
     </button>
 </div>
