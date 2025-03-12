@@ -1,6 +1,8 @@
 package swp.se1889.g1.rice_store.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,6 +13,7 @@ import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.EmployeeRepository;
 import swp.se1889.g1.rice_store.service.Iservice.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +35,15 @@ public class EmployeeService {
         return employeeRepository.findAllByCreatedByAndRoleAndIsDeleted(storeId, role, isDeleted);
     }
 
+    // New pagination methods
+    public Page<User> getEmployeesPage(Long storeId, String role, Pageable pageable) {
+        return employeeRepository.findByCreatedByAndRole(storeId, role, pageable);
+    }
+
+    public Page<User> getEmployeesActivePage(Long storeId, String role, boolean isDeleted, Pageable pageable) {
+        return employeeRepository.findByCreatedByAndRoleAndIsDeleted(storeId, role, isDeleted, pageable);
+    }
+
     //thêm tài khoản và thông tin employee
     public User addNewEmployee (Long storeId, EmployeeDTO employeeDTO, RedirectAttributes redirectAttributes){
         if (employeeRepository.findByUsername(employeeDTO.getUserName()).isPresent()) {
@@ -47,10 +59,9 @@ public class EmployeeService {
             return null;
         }
 
-
         User user = new User();
         user.setUsername(employeeDTO.getUserName());
-        user.setPassword(employeeDTO.getPassword());
+        user.setPassword(passwordEncoder.encode(employeeDTO.getPassword()));
         user.setEmail(employeeDTO.getEmail());
         user.setRole("ROLE_EMPLOYEE");
         user.setName(employeeDTO.getName());
@@ -59,12 +70,16 @@ public class EmployeeService {
         user.setNote(employeeDTO.getNote());
         user.setCreatedBy(storeId);
 
-
         try {
             employeeRepository.save(user);
         }catch (Exception e){
                 throw new RuntimeException("Error while saving employee: " + e.getMessage());
         }
+        return user;
+    }
+
+    public User updateEmployee (Long storeId, EmployeeDTO employeeDTO, RedirectAttributes redirectAttributes){
+        User user = new User();
         return user;
     }
 
@@ -80,5 +95,22 @@ public class EmployeeService {
         employeeRepository.saveAndFlush(user);
     }
 
+    public boolean updateEmployee(Long employeeId, EmployeeDTO employeeDTO) {
+        User user = employeeRepository.findById(employeeId).orElse(null);
 
+        if (user != null) {
+            // Update user information
+            user.setName(employeeDTO.getName());
+            user.setEmail(employeeDTO.getEmail());
+            user.setAddress(employeeDTO.getAddress());
+            user.setPhone(employeeDTO.getPhone());
+            user.setNote(employeeDTO.getNote());
+            user.setUpdatedAt(LocalDateTime.now());
+
+            employeeRepository.save(user);
+            return true;
+        }
+
+        return false;
+    }
 }

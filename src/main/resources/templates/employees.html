@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Example</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         .divider {
             border-right: 2px solid #ddd; /* Đường kẻ chia đôi */
@@ -71,7 +71,9 @@
             </button>
         </a>
         <div class="flex justify-between items-center mb-4">
-            <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">0</span> bản ghi</p>
+
+            <!-- Update the total records count above the table -->
+            <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span th:text="${totalItems}">0</span> bản ghi</p>
             <div class="w-1/6 mb-4 bg-white rounded-lg p-4">
                 <form th:action="@{/employees}" method="get">
                     <select id="search-status" name="trangthai"
@@ -102,53 +104,41 @@
                 </ul>
                 <div class="mt-3">
                     <div id="info1" class="block">
-                        <form th:action="@{/employees}" method="post">
+                        <form th:action="@{/employees}" th:object="${employeeDTO}" method="post">
+                            <input type="hidden" name="id" id="employeeId">
+                            <!-- Rest of your form fields -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Cửa Hàng</label>
-                                    <input type="text" class="w-full mt-1 p-2 border rounded-md"
-                                           th:placeholder="${store.getName()}" disabled>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Địa Chỉ</label>
-                                    <input type="text" class="w-full mt-1 p-2 border rounded-md"
-                                           th:placeholder="${store.getAddress()}" disabled>
-                                </div>
-                            </div>
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700">Tên Đăng Nhập</label>
-                                <input name="username" type="text" class="w-full mt-1 p-2 border rounded-md"
-                                       placeholder="Nhập tên đăng nhập">
-                            </div>
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700">Password</label>
-                                <input name="password" type="password" class="w-full mt-1 p-2 border rounded-md"
-                                       placeholder="Nhập password">
-                            </div>
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700">Email</label>
-                                <input name="email" type="email" class="w-full mt-1 p-2 border rounded-md"
-                                       placeholder="Nhập email">
+                                <!-- ... -->
                             </div>
                             <div class="mt-4">
                                 <label class="block text-sm font-medium text-gray-700">Tên Nhân Viên</label>
                                 <input name="name" type="text" class="w-full mt-1 p-2 border rounded-md"
-                                       placeholder="Nhập tên nhân viên">
+                                       placeholder="Nhập tên nhân viên"
+                                       th:field="*{name}">
+                            </div>
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700">Email</label>
+                                <input name="email" type="email" class="w-full mt-1 p-2 border rounded-md"
+                                       placeholder="Nhập email"
+                                       th:field="*{email}">
                             </div>
                             <div class="mt-4">
                                 <label class="block text-sm font-medium text-gray-700">Địa Chỉ</label>
                                 <input name="address" type="text" class="w-full mt-1 p-2 border rounded-md"
-                                       placeholder="Nhập địa chỉ">
+                                       placeholder="Nhập địa chỉ"
+                                       th:field="*{address}">
                             </div>
                             <div class="mt-4">
                                 <label class="block text-sm font-medium text-gray-700">Số Điện Thoại</label>
                                 <input name="phone" type="text" class="w-full mt-1 p-2 border rounded-md"
-                                       placeholder="Nhập số điện thoại">
+                                       placeholder="Nhập số điện thoại"
+                                       th:field="*{phone}">
                             </div>
                             <div class="mt-4">
                                 <label class="block text-sm font-medium text-gray-700">Ghi Chú</label>
                                 <input name="note" type="text" class="w-full mt-1 p-2 border rounded-md"
-                                       placeholder="Nhập ghi chú">
+                                       placeholder="Nhập ghi chú"
+                                       th:field="*{note}">
                             </div>
                             <div class="mt-6 flex justify-end gap-4">
                                 <button type="submit"
@@ -197,35 +187,42 @@
                 <tr class="bg-gray-50">
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-id-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-id-max">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterFromId"
+                                   placeholder="Từ"
+                                   style="font-weight: normal;" oninput="filterStores()">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterToId" placeholder="Đến"
+                                   style="font-weight: normal;" oninput="filterStores()">
                         </div>
                     </th>
 
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-name"></td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-address">
-                    </td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-phone"></td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-email"></td>
-
+                    <td class="border p-2"><input type="text" id="filterName" class="w-full border rounded p-1"
+                                                  oninput="filterStores()"></td>
+                    <td class="border p-2"><input type="text" id="filterAddress" class="w-full border rounded p-1"
+                                                  oninput="filterStores()"></td>
+                    <td class="border p-2"><input type="text" id="filterPhone" class="w-full border rounded p-1"
+                                                  oninput="filterStores()"></td>
+                    <td class="border p-2"><input type="text" id="filterEmail" class="w-full border rounded p-1"
+                                                  oninput="filterStores()"></td>
 
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-created-date-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-created-date-max">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterFromCreated"
+                                   placeholder="Từ"
+                                   style="font-weight: normal;" oninput="filterStores()">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterToCreated"
+                                   placeholder="Đến"
+                                   style="font-weight: normal;" oninput="filterStores()">
                         </div>
                     </th>
 
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-updated-date-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-updated-date-max">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterFromUpdated"
+                                   placeholder="Từ"
+                                   style="font-weight: normal;" oninput="filterStores()">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterToUpdated"
+                                   placeholder="Đến"
+                                   style="font-weight: normal;" oninput="filterStores()">
                         </div>
                     </th>
 
@@ -258,8 +255,10 @@
                     <td class="border p-2" th:text="${employee.getAddress()}"></td>
                     <td class="border p-2" th:text="${employee.getPhone()}"></td>
                     <td class="border p-2" th:text="${employee.getEmail()}"></td>
-                    <td class="border p-2" th:text="${employee.getCreatedAt()}"></td>
-                    <td class="border p-2" th:text="${employee.getUpdatedAt()}"></td>
+                    <td class="border p-2"
+                        th:text="${#temporals.format(employee.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                    <td class="border p-2"
+                        th:text="${#temporals.format(employee.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                     <td class="border p-2">
                         <div class="flex gap-2 w-full">
                             <!--                            <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn-->
@@ -322,26 +321,37 @@
                 </tbody>
             </table>
         </div>
+
         <div class="w-full flex justify-center items-center mt-4 gap-12">
-            <button id="prevPage"
-                    class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/employees(page=${currentPage - 1}, size=${pageSize}, trangthai=${trangthai})}"
+               class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+                Trước
+            </a>
+            <button id="prevPage" th:unless="${currentPage > 0}"
+                    class="bg-gray-100 text-gray-400 px-8 py-2 rounded cursor-not-allowed" disabled>
                 Trước
             </button>
-
             <div class="flex items-center">
                 <span>Trang</span>
-                <input type="text" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1">
-                <span id="totalPages">/ 1</span>
+                <input id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center"  th:value="${currentPage + 1}"></input>
+                <span id="totalPages" th:text="'/ ' + ${totalPages}">/ 1</span>
             </div>
-
-            <select id="recordsPerPage" class="border rounded px-4 py-2">
-                <option value="5">5 Bản ghi</option>
-                <option value="10">10 Bản ghi</option>
-                <option value="20">20 Bản ghi</option>
+            <select id="recordsPerPage" class="border rounded px-4 py-2"
+                    th:data-trangthai="${trangthai}"
+                    onchange="window.location.href = '/employees?page=0&size=' + this.value + '&trangthai=' + this.dataset.trangthai">
+                <option th:value="5" th:selected="${pageSize == 5}">5 Bản ghi</option>
+                <option th:value="10" th:selected="${pageSize == 10}">10 Bản ghi</option>
+                <option th:value="20" th:selected="${pageSize == 20}">20 Bản ghi</option>
             </select>
 
-            <button id="nextPage"
-                    class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+            <a th:if="${currentPage < totalPages - 1}"
+               th:href="@{/employees(page=${currentPage + 1}, size=${pageSize}, trangthai=${trangthai})}"
+               class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+                Sau
+            </a>
+            <button id="nextPage" th:unless="${currentPage < totalPages - 1}"
+                    class="bg-gray-100 text-gray-400 px-8 py-2 rounded cursor-not-allowed" disabled>
                 Sau
             </button>
         </div>
@@ -364,15 +374,18 @@
 
             // Lấy dữ liệu của nhân viên từ hàng đó
             var employeeId = row.cells[0].textContent;
-            var username = row.cells[1].textContent;
-            var email = row.cells[4].textContent;
+            var name = row.cells[1].textContent;
+            var address = row.cells[2].textContent;
             var phone = row.cells[3].textContent;
-
+            var email = row.cells[4].textContent;
 
             // Gán giá trị vào form trong overlay
-            document.querySelector("#overlay1 input[name='username']").value = username;
+            document.querySelector("#employeeId").value = employeeId;
+            document.querySelector("#overlay1 input[name='name']").value = name;
             document.querySelector("#overlay1 input[name='email']").value = email;
             document.querySelector("#overlay1 input[name='phone']").value = phone;
+            document.querySelector("#overlay1 input[name='address']").value = address;
+            // Note field might not be visible in the table
 
             // Hiển thị overlay với form sửa
             overlay1.style.display = "flex";
