@@ -95,7 +95,13 @@ public class ShiftManagementController {
     }
 
     @PostMapping("/assign")
-    public String assignEmployee(@ModelAttribute WorkShiftForm workShiftForm, RedirectAttributes redirectAttributes) {
+    public String assignEmployee(@ModelAttribute WorkShiftForm workShiftForm, RedirectAttributes redirectAttributes, Model model, HttpSession session) {
+        Store store = (Store) session.getAttribute("store");
+
+        if (store == null) {
+            return "redirect:/owner/store";
+        }
+        model.addAttribute("store", store);
         try {
             workShiftService.assignEmployeeToShift(
                     workShiftForm.getUserId(),
@@ -112,7 +118,13 @@ public class ShiftManagementController {
     }
 
     @PostMapping("/remove")
-    public String removeAssignment(@ModelAttribute WorkShiftForm workShiftForm, RedirectAttributes redirectAttributes) {
+    public String removeAssignment(@ModelAttribute WorkShiftForm workShiftForm, RedirectAttributes redirectAttributes, Model model, HttpSession session) {
+        Store store = (Store) session.getAttribute("store");
+
+        if (store == null) {
+            return "redirect:/owner/store";
+        }
+        model.addAttribute("store", store);
         try {
             workShiftService.removeEmployeeFromShift(
                     workShiftForm.getUserId(),
@@ -124,7 +136,7 @@ public class ShiftManagementController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
-        // Redirect back to the same week
+
         return "redirect:/owner/shifts/schedule?weekNumber=" + workShiftForm.getWeekNumber() + "&year=" + workShiftForm.getYear();
     }
 
