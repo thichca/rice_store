@@ -59,7 +59,9 @@ public class DebtRecordService {
     public List<DebtRecords> getDebtDetailsByCustomerId(Long customerId ) {
         return debtRecordRepository.findByCustomerId(customerId );
     }
-
+     public Page<DebtRecords> getCustomerPage(Long customerId , Pageable pageable){
+        return debtRecordRepository.findByCustomerId(customerId , pageable);
+ }
     private void updateDebtBalances(Customer customer ) {
         // Lấy tất cả các bản ghi nợ của khách hàng, không nhất thiết đã được sắp xếp
         List<DebtRecords> debtRecords = debtRecordRepository.findByCustomerId(customer.getId() );

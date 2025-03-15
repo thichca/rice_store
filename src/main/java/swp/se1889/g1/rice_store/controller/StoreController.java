@@ -31,7 +31,6 @@ public class StoreController {
                             Model model) {
         String username = userService.getCurrentUsername();
         Page<Store> storePage = storeService.getStoresByUserName(username, page, size);
-
         model.addAttribute("stores", storePage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", storePage.getTotalPages());
