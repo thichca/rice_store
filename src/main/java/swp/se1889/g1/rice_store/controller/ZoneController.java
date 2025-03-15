@@ -2,6 +2,9 @@ package swp.se1889.g1.rice_store.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -38,31 +41,41 @@ public class ZoneController {
     private UserServiceIpml userService;
 
     @GetMapping
-    public String listZones(Model model, HttpSession session) {
+    public String listZones(Model model, HttpSession session,
+                            @RequestParam(defaultValue = "0") int page,
+                            @RequestParam(defaultValue = "10") int size
+                           ) {
         Store store = (Store) session.getAttribute("store");
         if (store == null) return "redirect:/login";
         model.addAttribute("store", store);
-        model.addAttribute("zones", zoneService.getZonesByStoreId(store));
+        Pageable pageable = PageRequest.of(page, size);
+       Page<Zone> zones = zoneService.getZonesByStoreId(store , pageable);
+        model.addAttribute("zones", zones.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", zones.getTotalPages());
+        model.addAttribute("totalItems", zones.getTotalElements());
+        model.addAttribute("recordsPerPage", size);
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
         return "zones";
     }
 
     @GetMapping("/add")
-    public String AddZone(Model model, HttpSession session) {
+    public String AddZone(Model model, HttpSession session ) {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
         model.addAttribute("zone", new Zone());
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
+
         return "addZone";
     }
 
     @PostMapping("/add")
-    public String createZone(@ModelAttribute("zone") ZoneDTO zone, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+    public String createZone(@ModelAttribute("zone") ZoneDTO zone, HttpSession session, Model model, RedirectAttributes redirectAttributes , Pageable pageable) {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
-        List<Zone> existingZones = zoneService.getZonesByStoreId(store);
+        Page<Zone> existingZones = zoneService.getZonesByStoreId(store , pageable);
         boolean isDuplicate = existingZones.stream()
                 .anyMatch(z -> z.getName().equalsIgnoreCase(zone.getName()));
 
@@ -77,6 +90,7 @@ public class ZoneController {
             redirectAttributes.addFlashAttribute("error", "Địa chỉ khu vực đã tồn tại. Vui lòng chọn tên khác.");
             return "redirect:/owner/zone/add"; // Quay lại trang thêm khu vực
         }
+
         Zone zone2 = zoneService.createZone(zone, store);
         if (zone2 != null) {
             redirectAttributes.addFlashAttribute("success", "Thêm khu vực thành công");
@@ -90,6 +104,8 @@ public class ZoneController {
         model.addAttribute("store", store);
         Zone zone = zoneService.getZoneById(id);
         model.addAttribute("zone", zone);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
         return "editZone";
     }
 
@@ -99,7 +115,7 @@ public class ZoneController {
         model.addAttribute("store", store);
 
         // Lấy danh sách tất cả khu vực trong store
-        List<Zone> zones = zoneService.getZonesByStoreId(store);
+        List<Zone> zones = zoneService.getZone(store);
 
         // Lấy khu vực cũ
         Zone existingZone = zoneService.getZoneById(id);
@@ -150,15 +166,17 @@ public class ZoneController {
         model.addAttribute("store", store);
         model.addAttribute("zone", zone);
         model.addAttribute("product", productDTO);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
         return "zoneDetail";
     }
 
     @GetMapping("/addInventory")
-    public String showAddInventoryForm(Model model, HttpSession session) {
+    public String showAddInventoryForm(Model model, HttpSession session ) {
         Store store = (Store) session.getAttribute("store");
         if (store == null) return "redirect:/login";
         // Fetch all zones for the store
-        List<Zone> zones = zoneService.getZonesByStoreId(store);
+        List<Zone> zones = zoneService.getZone(store);
         // Fetch all products (assuming ProductService has a getAllProducts method)
         List<Product> products = productRepository.findAll(); // Adjust based on your ProductService
         model.addAttribute("store", store);

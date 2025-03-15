@@ -1,6 +1,8 @@
 package swp.se1889.g1.rice_store.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -50,9 +52,12 @@ public class ZoneService {
         return zoneRepository.findByNameContainingIgnoreCaseAndStoreAndIsDeletedFalse(name, store);
     }
 
-    public List<Zone> getZonesByStoreId(Store store) {
-        return zoneRepository.findByStoreAndIsDeletedFalse(store);
+    public Page<Zone> getZonesByStoreId(Store store , Pageable pageable) {
+        return zoneRepository.findByStoreAndIsDeletedFalse(store , pageable);
     }
+public List<Zone> getZone(Store store){
+        return zoneRepository.findByStore(store);
+}
 
     public Zone createZone(ZoneDTO zoneDTO, Store store) {
         User currentUser = getCurrentUser();
