@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -44,15 +45,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(configurer -> configurer
-                        .requestMatchers("/register", "/login", "/assets/**", "/forgotPassword/**").permitAll()
-                        .requestMatchers("/shifts/**").hasAnyRole("OWNER", "EMPLOYEE")
-                        .requestMatchers("owner/**").hasRole("OWNER")
+        http
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(configurer -> configurer
+                        .requestMatchers( "/register", "/login", "/assets/**").permitAll()
+                        .requestMatchers("/users/**").permitAll()
+                        .requestMatchers("/restore/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .successHandler(customAuthenticationSuccessHandler())
+                        .defaultSuccessUrl("/store", true)
                         .permitAll())
                 .logout(logout -> logout
                         .permitAll()
@@ -60,6 +64,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .logoutSuccessUrl("/login"))
                 .exceptionHandling(configurer -> configurer.accessDeniedPage("/login"));
+
         return http.build();
     }
 }
