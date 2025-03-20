@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface ShiftRepository extends JpaRepository<Shift, Long> {
     Shift findByShiftCode(String shiftCode);
+    List<Shift> findByCreatedBy(String createdBy);
 }

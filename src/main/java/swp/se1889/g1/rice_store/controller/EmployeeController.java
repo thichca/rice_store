@@ -60,6 +60,9 @@ public class EmployeeController {
         model.addAttribute("store", store);
         model.addAttribute("trangthai", trangthai);
         model.addAttribute("employeeDTO", new EmployeeDTO());
+
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
         return "employees";
     }
 

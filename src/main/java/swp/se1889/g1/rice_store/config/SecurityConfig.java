@@ -46,6 +46,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(configurer -> configurer
                         .requestMatchers("/register", "/login", "/assets/**", "/forgotPassword/**").permitAll()
+                        .requestMatchers("/shifts/**").hasAnyRole("OWNER", "EMPLOYEE")
                         .requestMatchers("owner/**").hasRole("OWNER")
                         .anyRequest().authenticated())
                 .formLogin(form -> form

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,7 +71,7 @@
 
         <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
             <div class="flex items-center space-x-2">
-                <a th:href="@{/owner/shifts/schedule(weekNumber=${weekNumber - 1}, year=${weekNumber == 1 ? year - 1 : year})}"
+                <a th:href="@{/shifts/schedule(weekNumber=${weekNumber - 1}, year=${weekNumber == 1 ? year - 1 : year})}"
                    class="p-2 border rounded-lg hover:bg-gray-200 transition-colors shadow-sm">
                     <span>&lt;</span>
                 </a>
@@ -80,25 +80,24 @@
                       class="px-4 py-2 border rounded-lg font-medium shadow-sm bg-white">
       </span>
 
-                <a th:href="@{/owner/shifts/schedule(weekNumber=${weekNumber + 1}, year=${weekNumber == 52 ? year + 1 : year})}"
+                <a th:href="@{/shifts/schedule(weekNumber=${weekNumber + 1}, year=${weekNumber == 52 ? year + 1 : year})}"
                    class="p-2 border rounded-lg hover:bg-gray-200 transition-colors shadow-sm">
                     <span>&gt;</span>
                 </a>
             </div>
+            <div class="flex space-x-1">
+                <a sec:authorize="hasRole('ROLE_OWNER')" th:href="@{/shifts/add}"
+                   class="px-4 py-2 bg-green-500 text-white border rounded-lg hover:bg-green-600 transition-colors shadow-sm flex items-center">
+                    <i class="fas fa-plus mr-2"></i>Thêm Ca Làm Việc
+                </a>
+                <a th:href="@{/shifts/currentWeek}"
+                   class="px-4 py-2 bg-blue-500 text-white border rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
+                    Tuần này
+                </a>
+            </div>
 
-            <a th:href="@{/owner/shifts/currentWeek}"
-               class="px-4 py-2 bg-blue-500 text-white border rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                Tuần này
-            </a>
+
         </div>
-        <!--        <div class="flex w-full gap-1 scheme-light">-->
-        <!--            <form th:action="@{/shifts/schedule}" method="get" class="flex gap-2 items-center">-->
-        <!--                <input type="date" name="searchDate" class="border rounded w-2/2 py-1 px-2"-->
-        <!--                       th:value="${searchDate}" onchange="this.form.submit()">-->
-        <!--            </form>-->
-        <!--        </div>-->
-
-
         <div class="bg-white rounded-lg shadow-md overflow-hidden border">
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -137,11 +136,24 @@
                     <tbody>
                     <tr th:each="shift, shiftStat : ${shifts}" th:class="${shiftStat.odd ? 'bg-gray-50' : 'bg-white'}">
                         <td class="px-4 py-3 border-b border-r">
-                            <div class="font-medium text-gray-800" th:text="${'Ca ' + shift.getShiftCode()}"></div>
-                            <div class="text-sm text-gray-500"
-                                 th:text="${shift.getStartTime() + ' - ' + shift.getEndTime()}">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-medium text-gray-800" th:text="${shift.getShiftName()}"></div>
+                                    <div class="text-sm text-gray-500" th:text="${shift.getStartTime() + ' - ' + shift.getEndTime()}"></div>
+                                </div>
+                                <div class="flex items-center space-x-1"> <!-- Thêm flex để căn chỉnh nút xóa -->
+                                    <div class="text-xs text-red-500 hover:text-red-700"> <!-- Nút xóa -->
+                                        <form sec:authorize="hasRole('ROLE_OWNER')" th:action="@{/shifts/delete/{id}(id=${shift.getId()})}" method="post" class="mt-2" onsubmit="return confirm('Bạn có chắc chắn muốn xóa ca làm việc này?');">
+                                            <button type="submit" class="flex items-center">
+                                                <i class="fas fa-trash mr-1"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </td>
+
+
                         <td th:each="day : ${#numbers.sequence(0, 6)}"
                             class="px-2 py-3 border-b border-r align-top relative group"
                             th:with="currentDate=${weekStart.plusDays(day)},
@@ -164,14 +176,14 @@
                             </span>
 
                                 <!-- Form để xóa nhân viên khỏi ca -->
-                                <form th:action="@{/owner/shifts/remove}" method="post" class="inline ml-1.5"
+                                <form th:action="@{/shifts/remove}" method="post" class="inline ml-1.5"
                                       onsubmit="return confirm('Bạn có chắc chắn muốn xóa phân công này?')">
                                     <input type="hidden" name="userId" th:value="${employee.getId()}"/>
                                     <input type="hidden" name="shiftId" th:value="${shift.getId()}"/>
                                     <input type="hidden" name="workDate" th:value="${currentDate}"/>
                                     <input type="hidden" name="weekNumber" th:value="${weekNumber}"/>
                                     <input type="hidden" name="year" th:value="${year}"/>
-                                    <button type="submit"
+                                    <button sec:authorize="hasRole('ROLE_OWNER')" type="submit"
                                             class="text-red-500 hover:text-red-700 transition-colors font-medium">
                                         &times;
                                     </button>
@@ -237,16 +249,18 @@
 
             <!-- Modal body -->
             <div class="p-4">
-                <p class="mb-4 text-gray-700">Chọn nhân viên bạn muốn đặt lịch ở ca này?</p>
+                <p th:text="${user.role == 'ROLE_OWNER' ? 'Chọn nhân viên bạn muốn đặt lịch ở ca này?' : 'Bạn muốn đặt lịch ở ca này?'}" class="mb-4 text-gray-700"></p>
 
-                <form id="addEmployeeForm" th:action="@{/owner/shifts/assign}" method="post">
+                <form id="addEmployeeForm" th:action="@{/shifts/assign}" method="post">
                     <input type="hidden" id="modalShiftId" name="shiftId" value=""/>
                     <input type="hidden" id="modalWorkDate" name="workDate" value=""/>
                     <input type="hidden" name="weekNumber" th:value="${weekNumber}"/>
                     <input type="hidden" name="year" th:value="${year}"/>
-                    <input type="hidden" id="selectedUserId" name="userId" value=""/>
+                    <input type="hidden" id="selectedUserId" name="userId"
+                           th:value="${user.role == 'ROLE_EMPLOYEE' ? user.id : ''}" />
 
-                    <div class="mb-4">
+
+                    <div sec:authorize="hasRole('ROLE_OWNER')" class="mb-4">
                         <label for="userSearch" class="block text-sm font-medium text-gray-700 mb-2">Tên nhân
                             viên</label>
                         <input id="userSearch" type="text"
@@ -255,11 +269,10 @@
 
                         <div id="employeeSearchResults"
                              class="mt-2 max-h-48 overflow-y-auto border rounded-md shadow-sm bg-white hidden">
-                            <!-- Employee search results will be populated here -->
                         </div>
                     </div>
 
-                    <div class="flex justify-between mt-6 gap-4">
+                    <div  class="flex justify-between mt-6 gap-4">
                         <button type="button" onclick="closeAddEmployeeModal()"
                                 class="flex-1 px-6 py-2.5 bg-gray-100 text-gray-700 rounded-md flex items-center justify-center hover:bg-gray-200 transition-colors border shadow-sm">
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"

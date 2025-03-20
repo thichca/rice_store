@@ -32,28 +32,13 @@ public class WorkShiftService {
         this.userRepository = userRepository;
     }
 
-    public List<WorkShift> getAllWorkShifts() {
-        return workShiftRepository.findAll();
-    }
 
     public List<WorkShift> getWorkShiftsByDateRange(LocalDate startDate, LocalDate endDate) {
         return workShiftRepository.findByWorkDateBetween(startDate, endDate);
     }
 
-    public List<WorkShift> getWorkShiftsByDate(LocalDate date) {
-        return workShiftRepository.findByWorkDate(date);
-    }
-
-    public List<WorkShift> getWorkShiftsByEmployee(Long employeeId) {
-        return workShiftRepository.findByEmployee(employeeId);
-    }
-
-    public WorkShift getWorkShiftById(Long id) {
-        return workShiftRepository.findById(id).orElse(null);
-    }
-
     @Transactional
-    public void assignEmployeeToShift(Long employeeId, Long shiftId, LocalDate workDate) {
+    public void assignEmployeeToShift(Long employeeId, Long shiftId, LocalDate workDate, Long storeId) {
         // Check if employee and shift exist
         User employee = userRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
@@ -86,9 +71,10 @@ public class WorkShiftService {
 
         workShift.setScheduledStartTime(scheduledStart);
         workShift.setScheduledEndTime(scheduledEnd);
-
         workShift.setCreatedAt(LocalDateTime.now());
         workShift.setUpdatedAt(LocalDateTime.now());
+        workShift.setCreatedBy(storeId.toString());
+        workShift.setUpdatedBy(storeId.toString());
         workShiftRepository.save(workShift);
     }
 
@@ -104,15 +90,4 @@ public class WorkShiftService {
         }
     }
 
-    @Transactional
-    public void updateEmployeeShift(Long workShiftId, Long newEmployeeId) {
-        WorkShift workShift = workShiftRepository.findById(workShiftId)
-                .orElseThrow(() -> new RuntimeException("Work shift not found"));
-
-        User newEmployee = userRepository.findById(newEmployeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-
-        workShift.setEmployee(newEmployeeId);
-        workShiftRepository.save(workShift);
-    }
 }

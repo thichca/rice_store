@@ -49,7 +49,8 @@ public class HomeController {
         Store store = storeService.getStoreByCreatedBy(createdBy);
         model.addAttribute("store", store);
         session.setAttribute("store", store);
-
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
         return "home";
     }
 

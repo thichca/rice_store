@@ -21,6 +21,6 @@ document.getElementById('currentPage').addEventListener('keydown', function (eve
             this.value = totalPages;
         }
 
-        window.location.href = '/manageStores?page=' + (enteredPage - 1) + '&size=' + document.getElementById('recordsPerPage').value;
+        window.location.href = '/owner/manageStores?page=' + (enteredPage - 1) + '&size=' + document.getElementById('recordsPerPage').value;
     }
 });

@@ -5,9 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import swp.se1889.g1.rice_store.dto.ShiftDTO;
 import swp.se1889.g1.rice_store.entity.*;
+import swp.se1889.g1.rice_store.service.EmployeeService;
 import swp.se1889.g1.rice_store.service.ShiftService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 import swp.se1889.g1.rice_store.service.WorkShiftService;
@@ -19,18 +22,20 @@ import java.util.stream.Collectors;
 
 
 @Controller
-@RequestMapping("/owner/shifts")
+@RequestMapping("/shifts")
 public class ShiftManagementController {
 
     private final ShiftService shiftService;
     private final UserServiceIpml userService;
     private final WorkShiftService workShiftService;
+    private final EmployeeService employeeService;
 
     @Autowired
-    public ShiftManagementController(ShiftService shiftService, UserServiceIpml userService, WorkShiftService workShiftService) {
+    public ShiftManagementController(ShiftService shiftService, UserServiceIpml userService, WorkShiftService workShiftService, EmployeeService employeeService) {
         this.shiftService = shiftService;
         this.userService = userService;
         this.workShiftService = workShiftService;
+        this.employeeService = employeeService;
     }
 
     @GetMapping("/schedule")
@@ -42,7 +47,7 @@ public class ShiftManagementController {
 
         Store store = (Store) session.getAttribute("store");
         if (store == null) {
-            return "redirect:/owner/store";
+            return "redirect:/store";
         }
 
         LocalDate currentDate = LocalDate.now();
@@ -61,13 +66,15 @@ public class ShiftManagementController {
 
         LocalDate weekEnd = weekStart.plusDays(6);
 
-        List<Shift> allShifts = shiftService.getAllShifts();
-        List<User> allUsers = userService.getAllActiveUsers();
+        List<Shift> allShifts = shiftService.getStoreByCreatedBy(store.getId());
+        List<User> allUsers = employeeService.getEmployees(store.getId(), "ROLE_EMPLOYEE");
+
         List<WorkShift> weekWorkShifts = workShiftService.getWorkShiftsByDateRange(weekStart, weekEnd);
 
         Map<String, Map<String, List<User>>> scheduleData = prepareScheduleData(weekWorkShifts, allShifts, allUsers, weekStart);
 
-
+        // Add empty ShiftDTO for the create form
+        model.addAttribute("newShift", new ShiftDTO());
         model.addAttribute("searchDate", searchDate);
         model.addAttribute("weekNumber", weekNumber);
         model.addAttribute("year", year);
@@ -87,11 +94,17 @@ public class ShiftManagementController {
         return "weeklySchedule";
     }
 
-
     @GetMapping("/currentWeek")
-    public String viewCurrentWeek() {
-        // Redirect to the current week's schedule
-        return "redirect:/owner/shifts/schedule";
+    public String viewCurrentWeek(Model model, HttpSession session) {
+        Store store = (Store) session.getAttribute("store");
+        if (store == null) {
+            return "redirect:/store";
+        }
+
+        User user = userService.getCurrentUser();
+        model.addAttribute("store", store);
+        model.addAttribute("user", user);
+        return "redirect:/shifts/schedule";
     }
 
     @PostMapping("/assign")
@@ -99,14 +112,18 @@ public class ShiftManagementController {
         Store store = (Store) session.getAttribute("store");
 
         if (store == null) {
-            return "redirect:/owner/store";
+            return "redirect:/store";
         }
+        User user = userService.getCurrentUser();
         model.addAttribute("store", store);
+        model.addAttribute("user", user);
+
         try {
             workShiftService.assignEmployeeToShift(
                     workShiftForm.getUserId(),
                     workShiftForm.getShiftId(),
-                    workShiftForm.getWorkDate()
+                    workShiftForm.getWorkDate(),
+                    store.getId()
             );
             redirectAttributes.addFlashAttribute("success", "Đã phân công nhân viên thành công");
         } catch (Exception e) {
@@ -114,7 +131,7 @@ public class ShiftManagementController {
         }
 
         // Redirect back to the same week
-        return "redirect:/owner/shifts/schedule?weekNumber=" + workShiftForm.getWeekNumber() + "&year=" + workShiftForm.getYear();
+        return "redirect:/shifts/schedule?weekNumber=" + workShiftForm.getWeekNumber() + "&year=" + workShiftForm.getYear();
     }
 
     @PostMapping("/remove")
@@ -122,9 +139,11 @@ public class ShiftManagementController {
         Store store = (Store) session.getAttribute("store");
 
         if (store == null) {
-            return "redirect:/owner/store";
+            return "redirect:/store";
         }
+        User user = userService.getCurrentUser();
         model.addAttribute("store", store);
+        model.addAttribute("user", user);
         try {
             workShiftService.removeEmployeeFromShift(
                     workShiftForm.getUserId(),
@@ -136,8 +155,73 @@ public class ShiftManagementController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
+        return "redirect:/shifts/schedule?weekNumber=" + workShiftForm.getWeekNumber() + "&year=" + workShiftForm.getYear();
+    }
 
-        return "redirect:/owner/shifts/schedule?weekNumber=" + workShiftForm.getWeekNumber() + "&year=" + workShiftForm.getYear();
+    @GetMapping("/add")
+    public String showAddShiftForm(Model model, HttpSession session) {
+        Store store = (Store) session.getAttribute("store");
+        if (store == null) {
+            return "redirect:/store";
+        }
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
+
+        model.addAttribute("newShift", new ShiftDTO());
+        model.addAttribute("store", store);
+        return "addShift";
+    }
+
+    @PostMapping("/add")
+    public String createShift(@ModelAttribute ShiftDTO shiftDTO, Model model, BindingResult bindingResult, RedirectAttributes redirectAttributes, HttpSession session) {
+        Store store = (Store) session.getAttribute("store");
+        if (store == null) {
+            return "redirect:/store";
+        }
+        User user = userService.getCurrentUser();
+        model.addAttribute("store", store);
+        model.addAttribute("user", user);
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("newShift", shiftDTO);
+            model.addAttribute("store", store);
+            return "addShift";
+        }
+
+        try {
+            shiftService.createShift(shiftDTO, store.getId());
+            redirectAttributes.addFlashAttribute("success", "Đã tạo ca làm việc mới thành công");
+            return "redirect:/shifts/add";
+        } catch (Exception e) {
+            // Khi có lỗi, hiển thị form lại với dữ liệu đã nhập và thông báo lỗi
+            model.addAttribute("newShift", shiftDTO);
+            model.addAttribute("store", store);
+            model.addAttribute("error", e.getMessage());
+            return "addShift";
+        }
+    }
+    @PostMapping("/delete/{id}")
+    public String deleteShift(@PathVariable Long id,Model model, RedirectAttributes redirectAttributes, HttpSession session) {
+        Store store = (Store) session.getAttribute("store");
+        if (store == null) {
+            return "redirect:/store";
+        }
+        User user = userService.getCurrentUser();
+        model.addAttribute("store", store);
+        model.addAttribute("user", user);
+
+        try {
+            boolean deleted = shiftService.deleteShift(id, store.getId());
+            if (deleted) {
+                redirectAttributes.addFlashAttribute("success", "Đã xóa ca làm việc thành công");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Không thể xóa ca làm việc này");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/shifts/schedule";
     }
 
     private Map<String, Map<String, List<User>>> prepareScheduleData(
@@ -184,7 +268,3 @@ public class ShiftManagementController {
         return scheduleData;
     }
 }
-
-
-
-

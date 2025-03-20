@@ -91,6 +91,13 @@
                         Khu vực
                     </a>
                 </div>
+                <div th:if="${user != null && user.role == 'ROLE_EMPLOYEE   '}">
+                    <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
+                       th:href="@{/shifts/schedule}">
+                        <i class="fas fa-calendar mr-2"></i>
+                        Lịch làm việc
+                    </a>
+                </div>
             </div>
             <a class="flex items-center text-white px-3 py-2 rounded-md bg-blue-700" href="#">
                 <i class="fas fa-shopping-basket mr-2">
