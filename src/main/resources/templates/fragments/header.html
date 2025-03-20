@@ -80,6 +80,10 @@
                     <i class="fas fa-users mr-2"></i>
                     Người dùng
                 </a>
+                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" th:href="@{/restore-data}">
+                    <i class="fas fa-store mr-2"></i>
+                    Cửa hàng
+                </a>
                 <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
                     <a th:name="employee" class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
                        th:href="@{/owner/employees}">

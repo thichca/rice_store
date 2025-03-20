@@ -133,5 +133,10 @@ public class StoreController {
         return "redirect:/owner/manageStores";
     }
 
+    @GetMapping("/restore-data")
+    public String GetViewManageUser(){
+        return "manage-store-restore-data";
+    }
+
 
 }
