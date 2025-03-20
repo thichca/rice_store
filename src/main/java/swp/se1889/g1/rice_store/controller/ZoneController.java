@@ -49,7 +49,7 @@ public class ZoneController {
         if (store == null) return "redirect:/login";
         model.addAttribute("store", store);
         Pageable pageable = PageRequest.of(page, size);
-       Page<Zone> zones = zoneService.getZonesByStoreId(store , pageable);
+        Page<Zone> zones = zoneService.getZonesByStoreId(store , pageable);
         model.addAttribute("zones", zones.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", zones.getTotalPages());

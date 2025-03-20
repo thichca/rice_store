@@ -3,6 +3,7 @@ package swp.se1889.g1.rice_store.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Where;
 import swp.se1889.g1.rice_store.dto.ProductDTO;
 
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "zones")
 @Data
-@SQLRestriction("is_deleted = false")
+@Where(clause = "is_deleted = false")
 public class Zone {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +28,7 @@ public class Zone {
     private String address;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id", nullable = true)
     private Product product;
 
     @Column(nullable = false)
