@@ -17,5 +17,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     List<CustomerDTO> findCustomersByCurrentUser(@Param("currentUser") User currentUser);
     Optional<Customer> findById(Long id);
     List<Customer> findByPhone(String phone);
+    List<Customer> findByemail(String email);
 
 }

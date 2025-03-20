@@ -23,7 +23,6 @@ public class CustomerService {
     @Autowired
     private UserRepository userRepository;
 
-    // 🟢 Lấy danh sách khách hàng của người dùng hiện tại
     public List<CustomerDTO> getCustomersByCurrentUser() {
         User currentUser = getCurrentUser();
         if (currentUser != null) {
@@ -32,7 +31,6 @@ public class CustomerService {
         return List.of();
     }
 
-    // 🟢 Lấy thông tin khách hàng theo ID (Cập nhật để lấy username của người sửa)
     public CustomerDTO getCustomerById(Long id) {
         Optional<Customer> customerOpt = customerRepository.findById(id);
         if (customerOpt.isPresent()) {
@@ -86,6 +84,10 @@ public class CustomerService {
         List<Customer> existingCustomers = customerRepository.findByPhone(customerDTO.getPhone());
         if (!existingCustomers.isEmpty()) {
             throw new RuntimeException("Số điện thoại đã tồn tại, vui lòng nhập số khác.");
+        }
+        List<Customer> existingCustom1 = customerRepository.findByemail(customerDTO.getEmail());
+        if (!existingCustom1.isEmpty()) {
+            throw new RuntimeException("Email đã tồn tại, vui lòng nhập email khác.");
         }
 
         Customer customer = new Customer();

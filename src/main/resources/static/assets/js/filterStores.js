@@ -28,7 +28,6 @@ function filterStores() {
         let email = row.cells[4].innerText.toLowerCase();
         let createdAt = row.cells[5].innerText;
         let updatedAt = row.cells[6].innerText;
-
         let createdAtDate = new Date(createdAt);
         let updatedAtDate = new Date(updatedAt);
 
@@ -54,7 +53,7 @@ function filterStores() {
         }
     });
 
-    document.querySelector(".total-stores").textContent = `Tổng cộng: ${totalFiltered} cửa hàng`;
+   // document.querySelector(".total-stores").textContent = `Tổng cộng: ${totalFiltered} cửa hàng`;
 }
 
 document.addEventListener("DOMContentLoaded", function () {

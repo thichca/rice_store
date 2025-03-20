@@ -31,9 +31,7 @@ public class ProductController {
     @Autowired
     private UserServiceIpml userService;
 
-    /**
-     * 📌 Hiển thị danh sách sản phẩm của người dùng đăng nhập
-     */
+
     @GetMapping("owner/products")
     public String getProducts(@RequestParam(required = false) String searchType,
                               @RequestParam(required = false) String keyword,
@@ -44,14 +42,14 @@ public class ProductController {
 
         Page<Product> productPage;
 
-        // Nếu có từ khóa tìm kiếm thì thực hiện tìm kiếm
+
         if (keyword != null && !keyword.trim().isEmpty()) {
             productPage = productService.searchProducts(searchType, keyword, page, size);
         } else {
             productPage = productService.getProductsByCurrentUser(page, size);
         }
 
-        // Đảm bảo "newProduct" luôn có trong model để tránh lỗi Thymeleaf
+
         if (!model.containsAttribute("newProduct")) {
             model.addAttribute("newProduct", new ProductDTO());
         }
@@ -74,9 +72,7 @@ public class ProductController {
     }
 
 
-    /**
-     * 📌 Hiển thị trang danh sách sản phẩm và khu vực (zones)
-     */
+
     @GetMapping("/owner/zones")
     public String getProductsWithZones(Model model, HttpSession session,
                                        @RequestParam(defaultValue = "0") int page,
@@ -108,9 +104,7 @@ public class ProductController {
     }
 
 
-    /**
-     * 📌 Xử lý thêm sản phẩm mới
-     */
+
     @PostMapping("/products/add")
     @ResponseBody
     public ResponseEntity<?> addProduct(@Valid @ModelAttribute("newProduct") ProductDTO productDTO,
@@ -129,18 +123,14 @@ public class ProductController {
         }
     }
 
-    /**
-     * 📌 API lấy thông tin sản phẩm để chỉnh sửa
-     */
+
     @GetMapping("/edit-product/{id}")
     @ResponseBody
     public ProductDTO getProductForEdit(@PathVariable Long id) {
         return productService.getProductById(id);
     }
 
-    /**
-     * 📌 Cập nhật sản phẩm
-     */
+
     @PostMapping("/products/update")
     public String updateProduct(@Valid @ModelAttribute("editProduct") ProductDTO productDTO, BindingResult result, Model model,
                                 @RequestParam(defaultValue = "0") int page,
@@ -157,9 +147,7 @@ public class ProductController {
         return "redirect:/owner/products?page=" + page + "&size=" + size;
     }
 
-    /**
-     * 📌 Xóa sản phẩm theo ID
-     */
+
     @GetMapping("/delete/{id}")
     public String deleteProduct(@PathVariable Long id,
                                 @RequestParam(defaultValue = "0") int page,

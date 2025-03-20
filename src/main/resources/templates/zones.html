@@ -6,9 +6,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <!-- Thêm Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <!-- Thêm Flatpickr JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 </head>
 <body class="bg-gray-100 p-4">
 
@@ -34,7 +31,9 @@
                 </button>
             </div>
         </div>
-        <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">0</span> bản ghi</p>
+        <p class="text-gray-600 mb-4">
+            Tổng cộng: <span th:text="${totalItems}"></span> bản ghi
+        </p>
 
         <div class="overflow-x-auto">
             <table class="table-auto border-collapse border w-full">
@@ -65,31 +64,31 @@
                 <tr class="bg-gray-50">
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-zoneid-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-zoneid-max">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="search-zoneid-min" placeholder="Từ"
+                                   style="font-weight: normal;"  oninput="filterZones()" >
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="search-zoneid-max" placeholder="Đến"
+                                   style="font-weight: normal;"  oninput="filterZones()">
                         </div>
                     </th>
 
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zonename">
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zonename" oninput="filterZones()" >
                     </td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zoneaddress">
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zoneaddress" oninput="filterZones()" >
                     </td>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-date-zonemin">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-date-zonemax">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-zonemin" placeholder="Từ"
+                                   style="font-weight: normal;"  oninput="filterZones()">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-zonemax" placeholder="Đến"
+                                   style="font-weight: normal;"  oninput="filterZones()">
                         </div>
                     </th>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
-                                   style="font-weight: normal;" id="search-update-zonemin">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
-                                   style="font-weight: normal;" id="search-update-zonemax">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-update-zonemin" placeholder="Từ"
+                                   style="font-weight: normal;"  oninput="filterZones()" >
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-update-zonemax" placeholder="Đến"
+                                   style="font-weight: normal;"  oninput="filterZones()" >
                         </div>
                     </th>
                     <td class="border p-2">
@@ -150,34 +149,55 @@
             </table>
         </div>
         <div class="w-full flex justify-center items-center mt-4 gap-12">
-            <button id="prevPage"
-                    class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
-                Trước
+            <button id="prevPage" th:disabled="${currentPage == 0}"
+                    th:class="${currentPage == 0 ? 'bg-gray-200 text-black px-8 py-2 rounded' : 'bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200'}"
+                    th:text="Trước"
+                    th:onclick="|window.location.href='/owner/zone?page=' + ${currentPage - 1} + '&size=' + ${recordsPerPage}|">
             </button>
 
             <div class="flex items-center">
                 <span>Trang</span>
-                <input type="text" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1">
-                <span id="totalPages">/ 1</span>
+                <input type="text" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1"
+                       th:value="${currentPage + 1}">
+                <span id="totalPages" th:text="'/ ' + ${totalPages}"></span>
             </div>
 
-            <select id="recordsPerPage" class="border rounded px-4 py-2">
-                <option value="5" selected>5 Bản ghi</option>
-                <option value="10">10 Bản ghi</option>
-                <option value="15">15 Bản ghi</option>
+            <select id="recordsPerPage" class="border rounded px-4 py-2"
+                    th:onchange="'window.location.href=\'/owner/zone?page=0&size=\' + this.value'">
+                <option value="10" th:selected="${recordsPerPage == 10}">10 Bản Ghi</option>
+                <option value="20" th:selected="${recordsPerPage == 20}">20 Bản Ghi</option>
+                <option value="50" th:selected="${recordsPerPage == 50}">50 Bản Ghi</option>
             </select>
 
-
-            <button id="nextPage"
-                    class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
-                Sau
+            <button id="nextPage" th:disabled="${currentPage + 1 >= totalPages}"
+                    th:class="${currentPage + 1 >= totalPages ? 'bg-gray-200 text-black px-8 py-2 rounded' : 'bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200'}"
+                    th:text="Sau"
+                    th:onclick="|window.location.href='/owner/zone?page=' + ${currentPage + 1} + '&size=' + ${recordsPerPage}|">
             </button>
         </div>
     </div>
     <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
-
-
 <div th:replace="~{fragments/script :: script}"></div>
+<script>
+    document.getElementById('currentPage').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            let enteredPage = parseInt(this.value); // Lấy số trang người dùng nhập
+            let totalPagesElement = document.getElementById('totalPages');
+            if (totalPagesElement) {
+                let totalPages = parseInt(totalPagesElement.textContent.split('/')[1].trim()); // Lấy tổng số trang
+                if (isNaN(enteredPage) || enteredPage < 1) {
+                    enteredPage = 1; // Nếu nhập sai, mặc định về trang 1
+                } else if (enteredPage > totalPages) {
+                    enteredPage = totalPages; // Nếu vượt quá, đặt bằng tổng số trang
+                    this.value = totalPages;
+                }
+                let pageParam = enteredPage - 1; // Trang bắt đầu từ 0 trong URL
+                let size = document.getElementById('recordsPerPage').value; // Lấy số bản ghi mỗi trang
+                window.location.href = '/owner/zone?page=' + pageParam + '&size=' + size; // Chuyển hướng
+            }
+        }
+    });
+</script>
 </body>
 </html>
