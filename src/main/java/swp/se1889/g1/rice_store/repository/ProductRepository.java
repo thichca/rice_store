@@ -46,16 +46,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "JOIN Zone z ON p.id = z.product.id " +
             "JOIN Store s ON z.store.id = s.id " +
             "WHERE p.isDeleted = false AND z.isDeleted = false AND s.id = :storeId " +
-            "AND LOWER(p.name) LIKE LOWER(:keyword)")
-    Page<Map<String, Object>> findProductsByName(@Param("storeId") Long storeId, @Param("keyword") String keyword, Pageable pageable);
-
-    @Query("SELECT new map(p.id as productId, p.name as productName, p.description as description, " +
-            "p.price as price, z.id as zoneId, z.name as zoneName, z.quantity as quantity, " +
-            "s.id as storeId, s.name as storeName) " +
-            "FROM Product p " +
-            "JOIN Zone z ON p.id = z.product.id " +
-            "JOIN Store s ON z.store.id = s.id " +
-            "WHERE p.isDeleted = false AND z.isDeleted = false AND s.id = :storeId " +
             "AND LOWER(p.description) LIKE LOWER(:keyword)")
     Page<Map<String, Object>> findProductsByDescription(@Param("storeId") Long storeId, @Param("keyword") String keyword, Pageable pageable);
 
@@ -64,14 +54,46 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "p.createdBy = :createdBy AND p.isDeleted = false AND " +
             "(:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
             "(:description IS NULL OR LOWER(p.description) LIKE LOWER(CONCAT('%', :description, '%'))) AND " +
-            "(:price IS NULL OR p.price = :price)")
-    Page<Product> searchProductsByUser(@Param("createdBy") User createdBy,
-                                       @Param("name") String name,
-                                       @Param("description") String description,
-                                       @Param("price") BigDecimal price,
-                                       Pageable pageable);
+            "(:minPrice IS NULL OR p.price >= :minPrice) AND " +
+            "(:maxPrice IS NULL OR p.price <= :maxPrice)")
+    Page<Product> searchProductsByUser(
+            @Param("createdBy") User createdBy,
+            @Param("name") String name,
+            @Param("description") String description,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            Pageable pageable);
+
 
     List<Product> findByIsDeletedFalseAndNameContainingIgnoreCase(String name);
+    @Query("SELECT new map(p.id as productId, p.name as productName, p.description as description, " +
+            "p.price as price, z.id as zoneId, z.name as zoneName, z.quantity as quantity, " +
+            "s.id as storeId, s.name as storeName) " +
+            "FROM Product p " +
+            "JOIN Zone z ON p.id = z.product.id " +
+            "JOIN Store s ON z.store.id = s.id " +
+            "WHERE p.isDeleted = false AND z.isDeleted = false AND s.id = :storeId " +
+            "AND LOWER(p.name) LIKE LOWER(:keyword)")
+    Page<Map<String, Object>> findProductsByName(@Param("storeId") Long storeId,
+                                                 @Param("keyword") String keyword,
+                                                 Pageable pageable);
+
+    @Query("SELECT new map(p.id as productId, p.name as productName, p.description as description, " +
+            "p.price as price, z.id as zoneId, z.name as zoneName, z.quantity as quantity, " +
+            "s.id as storeId, s.name as storeName) " +
+            "FROM Product p " +
+            "JOIN Zone z ON p.id = z.product.id " +
+            "JOIN Store s ON z.store.id = s.id " +
+            "WHERE p.isDeleted = false AND z.isDeleted = false AND s.id = :storeId " +
+            "AND LOWER(p.description) LIKE LOWER(:keyword) " +
+            "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
+            "AND (:maxPrice IS NULL OR p.price <= :maxPrice)")
+    Page<Map<String, Object>> findProductsByDescriptionAndPrice(@Param("storeId") Long storeId,
+                                                                @Param("keyword") String keyword,
+                                                                @Param("minPrice") BigDecimal minPrice,
+                                                                @Param("maxPrice") BigDecimal maxPrice,
+                                                                Pageable pageable);
+
 }
 
 

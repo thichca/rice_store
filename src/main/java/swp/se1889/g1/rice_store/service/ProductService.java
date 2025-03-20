@@ -141,7 +141,7 @@ public class ProductService {
         }
     }
 
-    public Page<Product> searchProducts(String searchType, String keyword, int page, int size) {
+    public Page<Product> searchProducts(String searchType, String keyword, BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
         User currentUser = getCurrentUser();
         if (currentUser == null) {
             throw new RuntimeException("Không thể xác định người dùng hiện tại.");
@@ -151,22 +151,28 @@ public class ProductService {
 
         String name = null;
         String description = null;
-        BigDecimal price = null;
 
         if ("name".equals(searchType)) {
             name = keyword;
         } else if ("description".equals(searchType)) {
             description = keyword;
-        } else if ("price".equals(searchType)) {
-            try {
-                price = new BigDecimal(keyword);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Giá phải là số hợp lệ.");
-            }
         }
 
-        return productRepository.searchProductsByUser(currentUser, name, description, price, pageable);
+        return productRepository.searchProductsByUser(currentUser, name, description, minPrice, maxPrice, pageable);
     }
+
+    public Page<Map<String, Object>> searchProductsByName(Long storeId, String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findProductsByName(storeId, "%" + keyword + "%", pageable);
+    }
+
+    public Page<Map<String, Object>> searchProductsWithDescriptionAndPrice(Long storeId, String keyword,
+                                                                           BigDecimal minPrice, BigDecimal maxPrice,
+                                                                           int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findProductsByDescriptionAndPrice(storeId, "%" + keyword + "%", minPrice, maxPrice, pageable);
+    }
+
 
 
 }

@@ -3,13 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <title>Trang chủ</title>
-    <script src="https://cdn.tailwindcss.com">
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-
 </head>
 <body>
 <div th:replace="~{fragments/header :: header}"></div>
+
+<div class="container mx-auto mt-6">
+    <h1 class="text-2xl font-bold">Tổng quan</h1>
+    <div class="grid grid-cols-4 gap-4 mt-4">
+        <div class="bg-blue-500 text-white p-4 rounded-lg">
+            <h2 class="text-lg">Sản phẩm</h2>
+            <p class="text-3xl font-bold">120</p>
+        </div>
+        <div class="bg-green-500 text-white p-4 rounded-lg">
+            <h2 class="text-lg">Khách hàng</h2>
+            <p class="text-3xl font-bold">45</p>
+        </div>
+        <div class="bg-yellow-500 text-white p-4 rounded-lg">
+            <h2 class="text-lg">Hóa đơn</h2>
+            <p class="text-3xl font-bold">78</p>
+        </div>
+        <div class="bg-red-500 text-white p-4 rounded-lg">
+            <h2 class="text-lg">Doanh thu</h2>
+            <p class="text-3xl font-bold">15,200,000 đ</p>
+        </div>
+    </div>
+</div>
+
+<div class="container mx-auto mt-6">
+    <h1 class="text-2xl font-bold">5 sản phẩm bán chạy nhất</h1>
+    <ul class="list-disc pl-6">
+        <li>Gạo ST25 - 500kg</li>
+        <li>Gạo Nàng Thơm - 350kg</li>
+        <li>Gạo Lứt - 200kg</li>
+        <li>Gạo Nếp - 180kg</li>
+        <li>Gạo Nhật - 150kg</li>
+    </ul>
+</div>
+
+<div class="container mx-auto mt-6">
+    <h1 class="text-2xl font-bold">5 khách hàng chi tiêu nhiều nhất</h1>
+    <ul class="list-disc pl-6">
+        <li>Nguyễn Văn A - 10,000,000 đ</li>
+        <li>Trần Thị B - 8,500,000 đ</li>
+        <li>Phạm Văn C - 7,200,000 đ</li>
+        <li>Lê Thị D - 6,800,000 đ</li>
+        <li>Hoàng Văn E - 5,900,000 đ</li>
+    </ul>
+</div>
+
+<div class="container mx-auto mt-6">
+    <h1 class="text-2xl font-bold">Doanh thu theo tháng</h1>
+    <canvas id="revenueBarChart" style="max-width: 400px; max-height: 300px;"></canvas>
+</div>
+
+
+
+<script>
+    const ctxBar = document.getElementById('revenueBarChart').getContext('2d');
+    new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: [12000000, 15000000, 11000000, 17000000, 20000000, 19000000],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+</script>
+
 <div th:replace="~{fragments/script :: script}"></div>
 </body>
 </html>
