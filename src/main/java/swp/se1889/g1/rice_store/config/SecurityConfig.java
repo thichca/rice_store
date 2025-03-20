@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -44,9 +45,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(configurer -> configurer
+        http
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(configurer -> configurer
                         .requestMatchers("/register", "/login", "/assets/**", "/forgotPassword/**").permitAll()
                         .requestMatchers("/shifts/**").hasAnyRole("OWNER", "EMPLOYEE")
+                        .requestMatchers("/users/**").permitAll()
                         .requestMatchers("owner/**").hasRole("OWNER")
                         .anyRequest().authenticated())
                 .formLogin(form -> form

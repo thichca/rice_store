@@ -99,4 +99,9 @@ public class CustomerController {
 
         return "redirect:/customers";
     }
+
+    @GetMapping("/manageUser")
+    public String GetViewManageUser(){
+        return "manage-user";
+    }
 }
