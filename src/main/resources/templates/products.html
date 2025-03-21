@@ -16,6 +16,30 @@
         .bg-gray-900.bg-opacity-50 {
             z-index: 999; /* Lớp nền mờ của modal */
         }
+        #errorToast {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            opacity: 0;
+            transform: translateX(100px);
+            max-width: 300px;
+        }
+
+        #errorToast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        #successToast {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            opacity: 0;
+            transform: translateX(100px);
+            max-width: 300px;
+        }
+
+        #successToast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+
 
     </style>
 </head>
@@ -38,6 +62,12 @@
     <div th:if="${errorMessage}" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
         <span th:text="${errorMessage}"></span>
     </div>
+    <div id="errorToast" class="hidden fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
+    </div>
+    <div id="successToast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
+    </div>
+
+
     <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md">
 
         <div class="flex justify-between items-center mb-4">
@@ -120,32 +150,33 @@
         </div>
 
         <div th:each="product : ${products}">
-            <!-- Modal Chỉnh Sửa SẢN PHẨM -->
             <div th:id="'editProductModal-' + ${product.id}"
                  class="hidden fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
                 <div class="bg-white p-6 rounded-lg shadow-2xl w-[400px] relative z-50">
                     <h2 class="text-xl font-semibold mb-4 text-center">Chỉnh sửa SẢN PHẨM</h2>
-                    <form th:action="@{/products/update}" method="post">
+                    <form th:action="@{/products/update}" method="post" onsubmit="submitEditProductForm(event, this)">
                         <input type="hidden" name="id" th:value="${product.id}">
 
                         <div class="mb-3">
                             <label class="block text-gray-700 font-medium">Tên sản phẩm</label>
                             <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" name="name"
                                    th:value="${product.name}" required>
+                            <span class="text-red-500 error-message"></span> <!-- Thêm phần hiển thị lỗi -->
                         </div>
 
                         <div class="mb-3">
                             <label class="block text-gray-700 font-medium">Mô tả</label>
-                            <textarea type="text" class="border p-2 w-full rounded focus:outline-blue-500" rows="4"
-                                      name="description" th:text="${product.description}" required></textarea>
+                            <textarea class="border p-2 w-full rounded focus:outline-blue-500" rows="4"
+                                      name="description" required th:text="${product.description}"></textarea>
+                            <span class="text-red-500 error-message"></span> <!-- Thêm phần hiển thị lỗi -->
                         </div>
 
                         <div class="mb-3">
                             <label class="block text-gray-700 font-medium">Giá</label>
                             <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" name="price"
                                    th:value="${product.price}">
+                            <span class="text-red-500 error-message"></span> <!-- Thêm phần hiển thị lỗi -->
                         </div>
-
 
                         <div class="flex justify-end mt-4 gap-3">
                             <button type="button"
@@ -153,29 +184,44 @@
                                     th:onclick="|toggleModal('editProductModal-' + ${product.id})|">Hủy
                             </button>
                             <button type="submit"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Cập
-                                nhật
+                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Cập nhật
                             </button>
                         </div>
                     </form>
-
                 </div>
             </div>
         </div>
 
 
+
         <p class="text-gray-600 mb-4">
             Tổng cộng: <span th:text="${totalItems}"></span> bản ghi
         </p>
-        <form th:action="@{/owner/products}" method="get" class="mb-4 flex items-center">
-            <select name="searchType" class="border rounded px-2 py-1 mr-2">
-                <option value="name">Tên sản phẩm</option>
-                <option value="description">Mô tả</option>
-                <option value="price">Giá</option>
+        <form id="searchForm" th:action="@{/owner/products}" method="get" class="mb-4 flex items-center">
+            <!-- Dropdown chọn kiểu tìm kiếm -->
+            <select id="searchType" name="searchType" class="border rounded px-2 py-1 mr-2" onchange="reloadSearchForm()">
+                <option value="name" th:selected="${searchType == 'name'}">Tên sản phẩm</option>
+                <option value="description" th:selected="${searchType == 'description'}">Mô tả</option>
+                <option value="price" th:selected="${searchType == 'price'}">Giá</option>
             </select>
-            <input type="text" name="keyword" class="border rounded px-2 py-1 mr-2" placeholder="Nhập từ khóa...">
+
+            <!-- Ô nhập từ khóa -->
+            <input type="text" id="keywordInput" name="keyword" class="border rounded px-2 py-1 mr-2"
+                   placeholder="Nhập từ khóa..." th:value="${keyword}">
+
+            <!-- Ô nhập giá từ và giá đến -->
+            <div id="priceInputs" th:style="${searchType == 'price' ? 'display: flex;' : 'display: none;'}">
+                <input type="number" id="minPriceInput" name="minPrice" step="0.01" class="border rounded px-2 py-1 mr-2"
+                       placeholder="Giá từ..." th:value="${minPrice}">
+                <input type="number" id="maxPriceInput" name="maxPrice" step="0.01" class="border rounded px-2 py-1 mr-2"
+                       placeholder="Giá đến..." th:value="${maxPrice}">
+            </div>
+
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Tìm kiếm</button>
         </form>
+
+
+
 
 
         <div class="relative overflow-x-auto max-h-[500px]">
@@ -189,7 +235,7 @@
                 <th class="border p-2 relative">Mô tả
                     <div class="resizer"></div>
                 </th>
-                <th class="border p-2 relative">Giá
+                <th class="border p-2 relative">Giá/Kg
                     <div class="resizer"></div>
                 </th>
                 <th class="border p-2 relative">Ngày tạo
@@ -201,15 +247,12 @@
                 <th class="border p-2 relative w-[340px]">Hành động
                     <div class="resizer"></div>
                 </th>
-
-
                 </thead>
-
                 <tbody id="tableBody">
-                <tr th:each="product,x : ${products}">
+                <tr th:each="product : ${products}">
                     <td class="border p-2" th:text="${product.name}"></td>
                     <td class="border p-2" th:text="${product.description}"></td>
-                    <td class="border p-2" th:text="${product.price}"></td>
+                    <td class="border p-2" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
                     <td class="border p-2"
                         th:text="${#temporals.format(product.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                     <td class="border p-2"
@@ -247,44 +290,39 @@
                 </tbody>
             </table>
         </div>
+        <!-- Pagination -->
         <div class="w-full flex justify-center items-center mt-4 gap-2" th:if="${totalPages > 0}">
-            <!-- Nút "Trước" -->
+            <!-- Previous Page -->
             <a th:if="${currentPage > 0}"
-               th:href="@{/owner/products(page=${currentPage - 1}, size=5, searchType=${searchType}, keyword=${keyword})}"
+               th:href="@{/owner/products(page=${currentPage - 1}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
                 Trước
             </a>
 
-            <!-- Hiển thị danh sách số trang -->
-            <th:block th:if="${totalPages > 1}">
-                <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
-                    <a th:href="@{/owner/products(page=${pageNumber}, size=5, searchType=${searchType}, keyword=${keyword})}"
-                       th:text="${pageNumber + 1}"
-                       th:classappend="${pageNumber == currentPage} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-400 hover:text-white'"
-                       class="px-4 py-2 rounded transition duration-200">
-                    </a>
-                </th:block>
+            <!-- Page Numbers -->
+            <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
+                <a th:href="@{/owner/products(page=${pageNumber}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                   th:text="${pageNumber + 1}"
+                   th:classappend="${pageNumber == currentPage} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-400 hover:text-white'"
+                   class="px-4 py-2 rounded transition duration-200">
+                </a>
             </th:block>
 
-            <!-- Nếu chỉ có 1 trang, chỉ hiển thị số 1 -->
-            <th:block th:if="${totalPages == 1}">
-                <span class="bg-blue-500 text-white px-4 py-2 rounded">1</span>
-            </th:block>
-
-            <!-- Nút "Sau" -->
+            <!-- Next Page -->
             <a th:if="${currentPage + 1 < totalPages}"
-               th:href="@{/owner/products(page=${currentPage + 1}, size=5, searchType=${searchType}, keyword=${keyword})}"
+               th:href="@{/owner/products(page=${currentPage + 1}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
                 Sau
             </a>
         </div>
 
 
+
         <div th:replace="~{fragments/script :: script}"></div>
     </div>
     <script>
         async function submitProductForm(event) {
-            event.preventDefault();  // Ngăn form reload trang
+            event.preventDefault();  // Ngăn form reload trang mặc định
 
             let form = event.target;
             let formData = new FormData(form);
@@ -297,23 +335,82 @@
             let result = await response.json();
 
             if (!response.ok) {
-                let errorMessage = "<ul>";
+                let errors = [];
+
                 if (result.errorMessage) {
-                    errorMessage += `<li>${result.errorMessage}</li>`;
+                    errors.push(result.errorMessage);
                 } else {
                     for (const [field, message] of Object.entries(result)) {
-                        errorMessage += `<li>${message}</li>`;
+                        errors.push(message);
                     }
                 }
-                errorMessage += "</ul>";
 
-                document.getElementById("errorModalContent").innerHTML = errorMessage;
-                toggleModal("errorModal");
+                let errorMessage = errors.join("\n");  // Gộp lỗi thành danh sách
+                showErrorToast(errorMessage);
             } else {
-                alert(result.message);
+                // Lưu thông báo vào localStorage
+                localStorage.setItem("successMessage", result.message);
+
+                // Reload trang ngay lập tức
                 location.reload();
             }
         }
+        document.addEventListener("DOMContentLoaded", function () {
+            let successMessage = localStorage.getItem("successMessage");
+
+            if (successMessage) {
+                showSuccessToast(successMessage);
+
+                // Xóa thông báo sau khi hiển thị để không bị lặp lại
+                localStorage.removeItem("successMessage");
+
+                // Ẩn thông báo sau 2 giây
+                setTimeout(() => {
+                    document.getElementById("successToast").classList.remove("show");
+                    setTimeout(() => document.getElementById("successToast").classList.add("hidden"), 500);
+                }, 2000);
+            }
+        });
+
+
+
+
+        function showErrorToast(message) {
+            let toast = document.getElementById("errorToast");
+
+            let errorMessages = message.split(/\n|\. /); // Chia lỗi thành danh sách
+            let errorMessageHTML = "<ul class='pl-4'>";
+            errorMessages.forEach(msg => {
+                if (msg.trim() !== "") {
+                    errorMessageHTML += `<li>${msg}</li>`;
+                }
+            });
+            errorMessageHTML += "</ul>";
+
+            toast.innerHTML = errorMessageHTML;
+            toast.classList.add("show");
+            toast.classList.remove("hidden");
+
+            // Ẩn sau 2 giây
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.classList.add("hidden"), 500);
+            }, 2000);
+        }
+
+        function showSuccessToast(message) {
+            let toast = document.getElementById("successToast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            toast.classList.remove("hidden");
+
+            // Ẩn sau 2 giây
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.classList.add("hidden"), 500);
+            }, 2000);
+        }
+
 
         function toggleModal(modalId) {
             let modal = document.getElementById(modalId);
@@ -361,6 +458,79 @@
         function toggleModal(modalId) {
             let modal = document.getElementById(modalId);
             modal.classList.toggle("hidden");
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            togglePriceInput();
+        });
+
+        function reloadSearchForm() {
+            let searchType = document.getElementById("searchType").value;
+            let keywordInput = document.getElementById("keywordInput");
+            let minPriceInput = document.getElementById("minPriceInput");
+            let maxPriceInput = document.getElementById("maxPriceInput");
+            let priceInputs = document.getElementById("priceInputs");
+
+            // Xóa dữ liệu không liên quan khi đổi kiểu tìm kiếm
+            keywordInput.value = "";
+            minPriceInput.value = "";
+            maxPriceInput.value = "";
+
+            // Hiển thị hoặc ẩn các ô nhập liệu dựa vào loại tìm kiếm
+            if (searchType === "price") {
+                priceInputs.style.display = "flex";
+            } else {
+                priceInputs.style.display = "none";
+            }
+
+            // Gửi form tự động để load lại trang với kiểu tìm kiếm mới
+            document.getElementById("searchForm").submit();
+        }
+
+        function togglePriceInput() {
+            let searchType = document.getElementById("searchType").value;
+            let keywordInput = document.getElementById("keywordInput");
+            let minPriceInput = document.getElementById("minPriceInput");
+            let maxPriceInput = document.getElementById("maxPriceInput");
+            let priceInputs = document.getElementById("priceInputs");
+
+            if (searchType === "price") {
+                keywordInput.classList.add("hidden");
+                priceInputs.style.display = "flex";
+            } else {
+                keywordInput.classList.remove("hidden");
+                priceInputs.style.display = "none";
+            }
+        }
+        async function submitEditProductForm(event, form) {
+            event.preventDefault();  // Ngăn form reload trang
+
+            let formData = new FormData(form);
+
+            let response = await fetch(form.action, {
+                method: form.method,
+                body: formData
+            });
+
+            let result = await response.json();
+
+            if (!response.ok) {
+                let errors = [];
+
+                if (result.errorMessage) {
+                    errors.push(result.errorMessage);
+                } else {
+                    for (const message of Object.values(result)) {
+                        errors.push(message);
+                    }
+                }
+
+                let errorMessage = errors.join("\n");
+                showErrorToast(errorMessage);
+            } else {
+
+                localStorage.setItem("successMessage", result.message);
+                location.reload();
+            }
         }
     </script>
 </div>

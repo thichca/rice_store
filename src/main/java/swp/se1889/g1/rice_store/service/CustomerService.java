@@ -22,6 +22,14 @@ public class CustomerService {
 
     @Autowired
     private UserRepository userRepository;
+    // Lấy tổng số khách hàng theo user hiện tại
+    public long countCustomersByCurrentUser() {
+        User currentUser = getCurrentUser();
+        if (currentUser != null) {
+            return customerRepository.countByCreatedBy(currentUser);
+        }
+        return 0;
+    }
 
     public List<CustomerDTO> getCustomersByCurrentUser() {
         User currentUser = getCurrentUser();
