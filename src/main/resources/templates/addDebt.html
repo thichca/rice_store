@@ -16,19 +16,19 @@
         <input type="hidden" name="customerId" th:value="${customer.id}">
         <div class="mb-4">
             <label for="debtorName" class="block text-sm font-medium text-gray-700">Tên người nợ:</label>
-            <input type="text" id="debtorName" name="debtorName" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.name}" readonly>
+            <input type="text" id="debtorName" name="debtorName" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.name}" th:disabled="${customer.name}">
         </div>
         <div class="mb-4">
             <label for="debtorNames" class="block text-sm font-medium text-gray-700">Số điện thoại:</label>
-            <input type="text" id="debtorNames" name="debtorphone" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.phone}" readonly>
+            <input type="text" id="debtorNames" name="debtorphone" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.phone}" th:disabled="${customer.phone}">
         </div>
         <div class="mb-4">
             <label for="address" class="block text-sm font-medium text-gray-700">Địa chỉ:</label>
-            <input type="text" id="address" name="debtoraddress" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.address}" readonly>
+            <input type="text" id="address" name="debtoraddress" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.address}" th:disabled="${customer.address}">
         </div>
         <div class="mb-4">
             <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
-            <input type="text" id="email" name="debtorEmail" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.email}" readonly>
+            <input type="text" id="email" name="debtorEmail" required class="mt-1 block w-full border border-gray-300 rounded-md p-2" th:value="${customer.email}" th:disabled="${customer.email}">
         </div>
         <div class="mb-4">
             <label for="amount" class="block text-sm font-medium text-gray-700">Số tiền:</label>
@@ -49,7 +49,7 @@
         </div>
 
         <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600">Thêm Nợ</button><br><br>
-        <button type="button" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600" th:onclick="|window.location.href='@{/customers}'|">Hủy</button>
+        <button type="button" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600" th:onclick="|window.location.href='@{/debt/detail(customerId=${customer.id})}'|">Hủy</button>
     </form>
     <div th:replace="~{fragments/noti :: noti}"></div>
 </div>

@@ -30,6 +30,14 @@ public class ProductService {
 
     @Autowired
     private UserRepository userRepository;
+    // Lấy tổng số sản phẩm theo user hiện tại
+    public long countProductsByCurrentUser() {
+        User currentUser = getCurrentUser();
+        if (currentUser != null) {
+            return productRepository.countByCreatedBy(currentUser);
+        }
+        return 0;
+    }
 
 
     public Page<Product> getProductsByCurrentUser(int page, int size) {
@@ -42,7 +50,7 @@ public class ProductService {
     }
 
     public List<Product> searchProductsByName(String name) {
-        return productRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(name);
+        return productRepository.findByNameContaining(name);
     }
 
 
@@ -88,27 +96,41 @@ public class ProductService {
 
     public void updateProduct(ProductDTO productDTO) {
         Optional<Product> productOpt = productRepository.findById(productDTO.getId());
+
         if (productOpt.isPresent()) {
             Product product = productOpt.get();
 
+            boolean isDuplicateName = productRepository.existsByCreatedByAndNameAndIdNot(
+                    product.getCreatedBy(), productDTO.getName(), productDTO.getId()
+            );
+
+            if (isDuplicateName) {
+                throw new RuntimeException("Tên sản phẩm đã tồn tại, vui lòng chọn tên khác.");
+            }
+
+            // Kiểm tra giá phải lớn hơn 0
             if (productDTO.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new RuntimeException("Giá sản phẩm phải lớn hơn 0.");
             }
 
+            // Cập nhật thông tin sản phẩm
             product.setName(productDTO.getName());
             product.setDescription(productDTO.getDescription());
             product.setPrice(productDTO.getPrice());
             product.setUpdatedAt(LocalDateTime.now());
-            // Cập nhật thông tin "Người sửa"
+
+            // Cập nhật người sửa
             User currentUser = getCurrentUser();
             if (currentUser != null) {
                 product.setUpdatedBy(currentUser.getUsername());
             }
+
             productRepository.save(product);
         } else {
             throw new RuntimeException("Không tìm thấy sản phẩm để cập nhật!");
         }
     }
+
 
     public void deleteProduct(Long id) {
         Product product = getProductToDelete(id);
@@ -141,7 +163,7 @@ public class ProductService {
         }
     }
 
-    public Page<Product> searchProducts(String searchType, String keyword, int page, int size) {
+    public Page<Product> searchProducts(String searchType, String keyword, BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
         User currentUser = getCurrentUser();
         if (currentUser == null) {
             throw new RuntimeException("Không thể xác định người dùng hiện tại.");
@@ -151,22 +173,28 @@ public class ProductService {
 
         String name = null;
         String description = null;
-        BigDecimal price = null;
 
         if ("name".equals(searchType)) {
             name = keyword;
         } else if ("description".equals(searchType)) {
             description = keyword;
-        } else if ("price".equals(searchType)) {
-            try {
-                price = new BigDecimal(keyword);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Giá phải là số hợp lệ.");
-            }
         }
 
-        return productRepository.searchProductsByUser(currentUser, name, description, price, pageable);
+        return productRepository.searchProductsByUser(currentUser, name, description, minPrice, maxPrice, pageable);
     }
+
+    public Page<Map<String, Object>> searchProductsByName(Long storeId, String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findProductsByName(storeId, "%" + keyword + "%", pageable);
+    }
+
+    public Page<Map<String, Object>> searchProductsWithDescriptionAndPrice(Long storeId, String keyword,
+                                                                           BigDecimal minPrice, BigDecimal maxPrice,
+                                                                           int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findProductsByDescriptionAndPrice(storeId, "%" + keyword + "%", minPrice, maxPrice, pageable);
+    }
+
 
 
 }

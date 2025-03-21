@@ -31,6 +31,11 @@ public class ZoneDTO {
     private Long storeId;
     private Long productId;
 
+    public ZoneDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public Long getProductId() {
         return productId;
     }
