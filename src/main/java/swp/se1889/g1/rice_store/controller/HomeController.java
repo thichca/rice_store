@@ -29,7 +29,7 @@ public class HomeController {
     @Autowired
     private CustomerService customerService;
     @Autowired
-    private InvoiceService invoiceService;
+    private InvoicesService invoiceService;
 
     @PostMapping("/home")
     public String storeSelection(@RequestParam("storeName") String name,

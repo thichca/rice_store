@@ -12,6 +12,8 @@ import swp.se1889.g1.rice_store.entity.*;
 import swp.se1889.g1.rice_store.repository.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -152,4 +154,61 @@ public InvoiceDetailDTO getInvoice(Long id) {
         }
         return null;
     }
+    public List<BigDecimal> getRevenueByMonth(Long storeId) {
+        List<BigDecimal> monthlyRevenue = new ArrayList<>(Collections.nCopies(6, BigDecimal.ZERO));
+        List<Object[]> results;
+
+        if (storeId != null) {
+            results = invoiceRepository.getRevenueByMonthAndStore(storeId);
+        } else {
+            results = invoiceRepository.getRevenueByMonth();
+        }
+
+        for (Object[] row : results) {
+            int month = (int) row[0]; // Lấy tháng từ database
+            BigDecimal revenue = (BigDecimal) row[1]; // Lấy doanh thu
+            monthlyRevenue.set(month - 1, revenue); // Gán vào danh sách
+        }
+
+        return monthlyRevenue;
+    }
+
+
+    // Lấy tổng số hóa đơn theo User hiện tại
+    public long countInvoicesByCurrentUser() {
+        User currentUser = getCurrentUser();
+        if (currentUser != null) {
+            return invoiceRepository.countByCreatedBy(currentUser);
+        }
+        return 0;
+    }
+
+    // Lấy tổng số hóa đơn theo User + Store
+    public long countInvoicesByUserAndStore(Long storeId) {
+        User currentUser = getCurrentUser();
+        if (currentUser != null && storeId != null) {
+            return invoiceRepository.countByUserAndStore(currentUser, storeId);
+        }
+        return 0;
+    }
+
+    // Lấy tổng doanh thu theo User hiện tại
+    public BigDecimal getTotalRevenueByCurrentUser() {
+        User currentUser = getCurrentUser();
+        if (currentUser != null) {
+            return invoiceRepository.getTotalRevenueByUser(currentUser);
+        }
+        return BigDecimal.ZERO;
+    }
+
+    // Lấy tổng doanh thu theo User + Store
+    public BigDecimal getTotalRevenueByUserAndStore(Long storeId) {
+        User currentUser = getCurrentUser();
+        if (currentUser != null && storeId != null) {
+            return invoiceRepository.getTotalRevenueByUserAndStore(currentUser, storeId);
+        }
+        return BigDecimal.ZERO;
+    }
+
+
 }

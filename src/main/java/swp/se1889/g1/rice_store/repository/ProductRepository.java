@@ -98,7 +98,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT COUNT(p) FROM Product p WHERE p.createdBy = :createdBy AND p.isDeleted = false")
     long countByCreatedBy(@Param("createdBy") User createdBy);
 
-
+    List<Product> findByNameContaining(String name);
 }
 
 
