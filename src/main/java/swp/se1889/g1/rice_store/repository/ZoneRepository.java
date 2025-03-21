@@ -22,4 +22,5 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> {
     List<Zone> findByStoreId(Long storeId);
 
     List<Zone> findByNameContainingIgnoreCase(String name);
+    List<Zone> findByStoreIdAndIsDeletedFalse(Long storeId);
 }

@@ -52,13 +52,13 @@ public class InvoiceController {
         model.addAttribute("user", user);
         model.addAttribute("store", store);
         Pageable pageable = PageRequest.of(page, size);
-        Page<InvoicesDetails> invoices = invoiceDetailRepository.findAllByIsDeletedFalse(pageable);
+        Page<InvoicesDetails> invoices = invoiceDetailRepository.findAllByIsDeletedFalseAndZoneNotDeleted(pageable);
         model.addAttribute("invoices", invoices.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", invoices.getTotalPages());
         model.addAttribute("totalItems", invoices.getTotalElements());
         model.addAttribute("recordsPerPage", size);
-        return "invoice-detail";
+        return "invoice";
     }
 
 
@@ -74,11 +74,8 @@ public class InvoiceController {
     }
     @GetMapping("/zones")
     @ResponseBody
-    public List<ZoneDTO> getZonesByStoreId(@RequestParam("storeId") Long storeId) {
-        List<Zone> zones = zoneRepository.findByStoreId(storeId);
-        return zones.stream()
-                .map(zone -> new ZoneDTO(zone.getId(), zone.getName()))
-                .collect(Collectors.toList());
+    public List<Zone> getZonesByStoreId(@RequestParam("storeId") Long storeId) {
+       return zoneRepository.findByStoreIdAndIsDeletedFalse(storeId);
     }
 
     @GetMapping("/search-products")
@@ -99,6 +96,7 @@ public class InvoiceController {
         String username = authentication.getName(); // Lấy tên người dùng đã đăng nhập
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
+
         // Xử lý logic lưu vào database thông qua service
         Invoices invoices = invoiceService.createImportInvoice(invoiceDTO , store);
         if(invoices !=null) {
@@ -106,5 +104,4 @@ public class InvoiceController {
         }
         return "redirect:/owner/invoices";
     }
-
     }
