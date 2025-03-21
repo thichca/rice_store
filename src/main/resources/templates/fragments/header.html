@@ -91,15 +91,15 @@
                         Khu vực
                     </a>
                 </div>
-                <div th:if="${user != null && user.role == 'ROLE_EMPLOYEE   '}">
+                <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
                     <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
-                       th:href="@{/shifts/schedule}">
-                        <i class="fas fa-calendar mr-2"></i>
-                        Lịch làm việc
+                       th:href="@{/owner/invoices}">
+                        <i class="fas fa-warehouse mr-2"></i>
+                       Hóa Đơn
                     </a>
                 </div>
             </div>
-            <a class="flex items-center text-white px-3 py-2 rounded-md bg-blue-700" href="#">
+            <a class="flex items-center text-white px-3 py-2 rounded-md bg-blue-700"  >
                 <i class="fas fa-shopping-basket mr-2">
                 </i>
                 Bán hàng

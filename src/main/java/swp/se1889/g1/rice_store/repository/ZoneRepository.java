@@ -18,4 +18,8 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> {
    // Tìm khu vực theo tên và chỉ lấy những khu vực chưa bị xóa
    List<Zone> findByNameContainingIgnoreCaseAndStoreAndIsDeletedFalse(String name, Store store);
    List<Zone> findByStore(Store store);
+    Zone findByStoreIdAndProductId(Long storeId, Long productId);
+    List<Zone> findByStoreId(Long storeId);
+
+    List<Zone> findByNameContainingIgnoreCase(String name);
 }

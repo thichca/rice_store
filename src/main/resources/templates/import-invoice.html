@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện Hóa Đơn</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-50">
+<div class="max-w-screen-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <form id="invoiceForm" th:action="@{/owner/invoices/import}" method="post">
+        <input type="hidden" name="storeId" th:value="${store.id}">
+
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-semibold text-gray-800">Hóa Đơn Nhập Kho</h1>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-10 gap-6">
+            <div class="lg:col-span-7 bg-gray-100 p-6 rounded-lg shadow-md hover:shadow-xl transition duration-300">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Danh Sách Sản Phẩm</h2>
+                <div class="mb-4">
+                    <input type="text" id="productSearch" class="w-full p-2 border rounded" placeholder="Tìm kiếm sản phẩm..." th:attr="data-url=@{/owner/invoices/search-products}">
+                    <div id="productResults" class="hidden bg-white border mt-1 max-h-40 overflow-auto"></div>
+                </div>
+                <table class="w-full table-auto text-gray-700">
+                    <thead class="bg-gray-200 text-sm">
+                    <tr>
+                        <th class="py-2 px-4">Tên sản phẩm</th>
+                        <th class="py-2 px-4">Số lượng</th>
+                        <th class="py-2 px-4">Giá nhập</th>
+                        <th class="py-2 px-4">Khu vực</th>
+                        <th class="py-2 px-4">Thành tiền</th>
+                        <th class="py-2 px-4">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody id="productList">
+                    <!-- Các hàng sản phẩm sẽ được thêm vào đây -->
+                    </tbody>
+                </table>
+                <div class="mt-6 grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700">Chọn phương thức:
+                            <select name="paymentMethod" id="paymentMethod" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                <option value="onlyProduct">Tiền Hàng</option>
+                                <option value="productAndDebt">Tiền Hàng + Nợ</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Tổng tiền:
+                            <input type="text" name="totalPrice" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" readonly>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Thanh toán:
+                            <input type="text" name="paidAmount" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Còn nợ:
+                            <input type="text" name="remainingAmount" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" readonly>
+                        </label>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <label class="block text-gray-700">Ghi chú:
+                        <textarea name="note" class="mt-1 w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" rows="4"></textarea>
+                    </label>
+                </div>
+            </div>
+            <div class="lg:col-span-3 bg-gray-100 p-6 rounded-lg shadow-md hover:shadow-xl transition duration-300">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Thông Tin Khách Hàng</h2>
+                <div class="mb-4">
+                    <label>Số điện thoại:
+                        <input type="text" id="customerPhone" name="customerPhone" class="w-full p-2 border rounded" th:attr="data-url=@{/owner/invoices/search-customer}" placeholder="Nhập số điện thoại khách hàng">
+                    </label>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Tên khách hàng:
+                        <input type="text" name="customerName" id="customerName" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nhập tên khách hàng" readonly>
+                    </label>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Địa chỉ khách hàng:
+                        <input type="text" name="customerAddress" id="customerAddress" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nhập địa chỉ khách hàng" readonly>
+                    </label>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Số dư khách hàng:
+                        <input type="text" name="customerBalance" id="customerBalance" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nhập số dư khách hàng" readonly>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div>
+            <input type="submit" value="Lưu hóa đơn" class="mt-6 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200">
+        </div>
+        <div>
+            <button type="button" class="mt-6 bg-red-500 text-white px-4 py-2 rounded-lg" th:onclick="|window.location.href='@{/owner/invoices}'|">Quay Lại</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let productIndex = 0;
+    let zones = [];
+
+    $(document).ready(function() {
+        const storeId = $('[name="storeId"]').val();
+        $.ajax({
+            url: `/owner/invoices/zones?storeId=${storeId}`,
+            method: 'GET',
+            success: function(data) {
+                zones = data;
+            },
+            error: function() {
+                console.error('Lỗi khi lấy danh sách khu vực');
+            }
+        });
+
+        $('#productSearch').on('input', function(e) {
+            const query = e.target.value;
+            if (query.length < 2) {
+                $('#productResults').addClass('hidden');
+                return;
+            }
+
+            $.ajax({
+                url: $('#productSearch').data('url'),
+                method: 'GET',
+                data: { query: query },
+                success: function(products) {
+                    let resultsHtml = '';
+                    products.forEach(function(product) {
+                        resultsHtml += `
+                            <div class="p-2 hover:bg-gray-100 cursor-pointer"
+                                 data-id="${product.id}"
+                                 data-name="${product.name}"
+                                 data-price="${product.unitPrice}"
+                                 onclick="addProduct(this)">
+                                ${product.name}
+                            </div>
+                        `;
+                    });
+                    $('#productResults').html(resultsHtml);
+                    $('#productResults').removeClass('hidden');
+                },
+                error: function() {
+                    console.error('Lỗi khi tìm kiếm sản phẩm.');
+                }
+            });
+        });
+
+        $('#productList').on('input', '.zoneSearch', function(e) {
+            const query = e.target.value;
+            const row = $(this).closest('tr');
+            const $zoneResults = row.find('.zoneResults');
+
+            if (query.length < 2) {
+                $zoneResults.addClass('hidden');
+                return;
+            }
+
+            const filteredZones = zones.filter(zone =>
+                zone.name.toLowerCase().includes(query.toLowerCase())
+            );
+
+            let resultsHtml = '';
+            filteredZones.forEach(zone => {
+                resultsHtml += `
+                    <div class="p-2 hover:bg-gray-100 cursor-pointer"
+                         data-id="${zone.id}"
+                         data-name="${zone.name}"
+                         onclick="selectZone(this)">
+                        ${zone.name}
+                    </div>
+                `;
+            });
+
+            $zoneResults.html(resultsHtml);
+            $zoneResults.removeClass('hidden');
+        });
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.zoneSearch, .zoneResults').length) {
+                $('.zoneResults').addClass('hidden');
+            }
+        });
+    });
+
+    function addProduct(element) {
+        const product = {
+            id: $(element).data('id'),
+            name: $(element).data('name'),
+            unitPrice: $(element).data('price')
+        };
+
+        const row = `
+            <tr data-id="${product.id}">
+                <td class="py-2 px-4">${product.name}
+                    <input type="hidden" name="details[${productIndex}].productId" value="${product.id}">
+                </td>
+                <td class="py-2 px-4">
+                    <input type="number" name="details[${productIndex}].quantity" class="quantity w-20 p-1 border rounded" value="1" min="1" required>
+                </td>
+                <td class="py-2 px-4">
+                    <input type="number" name="details[${productIndex}].unitPrice" class="unitPrice w-24 p-1 border rounded" step="0.01" value="${product.unitPrice}" min="0" required>
+                </td>
+                <td class="py-2 px-4">
+                    <input type="text" class="zoneSearch w-full p-1 border rounded" placeholder="Tìm kiếm khu vực...">
+                    <div class="zoneResults hidden bg-white border mt-1 max-h-40 overflow-auto"></div>
+                    <input type="hidden" name="details[${productIndex}].zoneId" class="zoneId">
+                </td>
+                <td class="py-2 px-4 totalPrice">${product.unitPrice}</td>
+                <td class="py-2 px-4">
+                    <button type="button" class="bg-red-500 text-white px-4 py-2 rounded-lg" onclick="this.parentElement.parentElement.remove(); calculateTotal()">Xóa</button>
+                </td>
+            </tr>
+        `;
+
+        $('#productList').append(row);
+        $('#productResults').addClass('hidden');
+        calculateTotal();
+        productIndex++;
+    }
+
+    function selectZone(element) {
+        const zoneId = $(element).data('id');
+        const zoneName = $(element).data('name');
+        const row = $(element).closest('tr');
+
+        row.find('.zoneSearch').val(zoneName);
+        row.find('.zoneId').val(zoneId);
+        row.find('.zoneResults').addClass('hidden');
+    }
+
+    $('#customerPhone').on('change', function(e) {
+        const phone = e.target.value;
+        if (!phone) return;
+
+        $.ajax({
+            url: $('#customerPhone').data('url'),
+            method: 'GET',
+            data: { phone: phone },
+            success: function(customer) {
+                if (customer) {
+                    $('#customerName').val(customer.name || '');
+                    $('#customerAddress').val(customer.address || '');
+                    $('#customerBalance').val(customer.debtBalance || '0');
+                    calculateRemaining();
+                } else {
+                    $('#customerName').val('');
+                    $('#customerAddress').val('');
+                    $('#customerBalance').val('0');
+                }
+            },
+            error: function() {
+                console.error('Lỗi khi tìm kiếm khách hàng.');
+            }
+        });
+    });
+
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('quantity') || e.target.classList.contains('unitPrice')) {
+            const row = e.target.closest('tr');
+            const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+            const unitPrice = parseFloat(row.querySelector('.unitPrice').value) || 0;
+            row.querySelector('.totalPrice').textContent = (quantity * unitPrice).toFixed(2);
+            calculateTotal();
+        }
+    });
+
+    $('#paymentMethod').on('change', function() {
+        const paymentMethod = this.value;
+        const total = parseFloat($('[name="totalPrice"]').val()) || 0;
+        const balance = parseFloat($('#customerBalance').val()) || 0;
+        if (paymentMethod === "onlyProduct") {
+            $('[name="paidAmount"]').val(total.toFixed(2));
+        } else if (paymentMethod === "productAndDebt") {
+            $('[name="paidAmount"]').val((total + balance).toFixed(2));
+        }
+        calculateRemaining();
+    });
+
+    $('[name="paidAmount"]').on('input', function() {
+        calculateRemaining();
+    });
+
+    function calculateTotal() {
+        let total = 0;
+        $('#productList tr').each(function() {
+            const quantity = parseFloat($(this).find('.quantity').val()) || 0;
+            const unitPrice = parseFloat($(this).find('.unitPrice').val()) || 0;
+            const totalPrice = quantity * unitPrice;
+            $(this).find('.totalPrice').text(totalPrice.toFixed(2));
+            total += totalPrice;
+        });
+        $('[name="totalPrice"]').val(total.toFixed(2));
+        calculateRemaining();
+    }
+
+    function calculateRemaining() {
+        const total = parseFloat($('[name="totalPrice"]').val()) || 0;
+        const balance = parseFloat($('#customerBalance').val()) || 0;
+        const paidAmount = parseFloat($('[name="paidAmount"]').val()) || 0;
+        const remaining = total + balance - paidAmount;
+        $('[name="remainingAmount"]').val(remaining.toFixed(2));
+    }
+</script>
+</body>
+</html>
