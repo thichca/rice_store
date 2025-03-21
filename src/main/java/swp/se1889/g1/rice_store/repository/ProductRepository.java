@@ -21,6 +21,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCreatedBy(User createdBy);
 
     List<Product> findAllByName(String name);
+    boolean existsByCreatedByAndNameAndIdNot(User createdBy, String name, Long id);
+
 
     Optional<Product> findById(Long id);
 
@@ -93,6 +95,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                                                 @Param("minPrice") BigDecimal minPrice,
                                                                 @Param("maxPrice") BigDecimal maxPrice,
                                                                 Pageable pageable);
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.createdBy = :createdBy AND p.isDeleted = false")
+    long countByCreatedBy(@Param("createdBy") User createdBy);
+
 
 }
 

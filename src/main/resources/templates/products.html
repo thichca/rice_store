@@ -150,32 +150,33 @@
         </div>
 
         <div th:each="product : ${products}">
-            <!-- Modal Chỉnh Sửa SẢN PHẨM -->
             <div th:id="'editProductModal-' + ${product.id}"
                  class="hidden fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
                 <div class="bg-white p-6 rounded-lg shadow-2xl w-[400px] relative z-50">
                     <h2 class="text-xl font-semibold mb-4 text-center">Chỉnh sửa SẢN PHẨM</h2>
-                    <form th:action="@{/products/update}" method="post">
+                    <form th:action="@{/products/update}" method="post" onsubmit="submitEditProductForm(event, this)">
                         <input type="hidden" name="id" th:value="${product.id}">
 
                         <div class="mb-3">
                             <label class="block text-gray-700 font-medium">Tên sản phẩm</label>
                             <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" name="name"
                                    th:value="${product.name}" required>
+                            <span class="text-red-500 error-message"></span> <!-- Thêm phần hiển thị lỗi -->
                         </div>
 
                         <div class="mb-3">
                             <label class="block text-gray-700 font-medium">Mô tả</label>
-                            <textarea type="text" class="border p-2 w-full rounded focus:outline-blue-500" rows="4"
-                                      name="description" th:text="${product.description}" required></textarea>
+                            <textarea class="border p-2 w-full rounded focus:outline-blue-500" rows="4"
+                                      name="description" required th:text="${product.description}"></textarea>
+                            <span class="text-red-500 error-message"></span> <!-- Thêm phần hiển thị lỗi -->
                         </div>
 
                         <div class="mb-3">
                             <label class="block text-gray-700 font-medium">Giá</label>
                             <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" name="price"
                                    th:value="${product.price}">
+                            <span class="text-red-500 error-message"></span> <!-- Thêm phần hiển thị lỗi -->
                         </div>
-
 
                         <div class="flex justify-end mt-4 gap-3">
                             <button type="button"
@@ -183,15 +184,14 @@
                                     th:onclick="|toggleModal('editProductModal-' + ${product.id})|">Hủy
                             </button>
                             <button type="submit"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Cập
-                                nhật
+                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Cập nhật
                             </button>
                         </div>
                     </form>
-
                 </div>
             </div>
         </div>
+
 
 
         <p class="text-gray-600 mb-4">
@@ -379,7 +379,7 @@
             let toast = document.getElementById("errorToast");
 
             let errorMessages = message.split(/\n|\. /); // Chia lỗi thành danh sách
-            let errorMessageHTML = "<ul class='list-disc pl-4'>";
+            let errorMessageHTML = "<ul class='pl-4'>";
             errorMessages.forEach(msg => {
                 if (msg.trim() !== "") {
                     errorMessageHTML += `<li>${msg}</li>`;
@@ -501,7 +501,37 @@
                 priceInputs.style.display = "none";
             }
         }
+        async function submitEditProductForm(event, form) {
+            event.preventDefault();  // Ngăn form reload trang
 
+            let formData = new FormData(form);
+
+            let response = await fetch(form.action, {
+                method: form.method,
+                body: formData
+            });
+
+            let result = await response.json();
+
+            if (!response.ok) {
+                let errors = [];
+
+                if (result.errorMessage) {
+                    errors.push(result.errorMessage);
+                } else {
+                    for (const message of Object.values(result)) {
+                        errors.push(message);
+                    }
+                }
+
+                let errorMessage = errors.join("\n");
+                showErrorToast(errorMessage);
+            } else {
+
+                localStorage.setItem("successMessage", result.message);
+                location.reload();
+            }
+        }
     </script>
 </div>
 </body>

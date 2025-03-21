@@ -30,6 +30,14 @@ public class ProductService {
 
     @Autowired
     private UserRepository userRepository;
+    // Lấy tổng số sản phẩm theo user hiện tại
+    public long countProductsByCurrentUser() {
+        User currentUser = getCurrentUser();
+        if (currentUser != null) {
+            return productRepository.countByCreatedBy(currentUser);
+        }
+        return 0;
+    }
 
 
     public Page<Product> getProductsByCurrentUser(int page, int size) {
@@ -88,27 +96,41 @@ public class ProductService {
 
     public void updateProduct(ProductDTO productDTO) {
         Optional<Product> productOpt = productRepository.findById(productDTO.getId());
+
         if (productOpt.isPresent()) {
             Product product = productOpt.get();
 
+            boolean isDuplicateName = productRepository.existsByCreatedByAndNameAndIdNot(
+                    product.getCreatedBy(), productDTO.getName(), productDTO.getId()
+            );
+
+            if (isDuplicateName) {
+                throw new RuntimeException("Tên sản phẩm đã tồn tại, vui lòng chọn tên khác.");
+            }
+
+            // Kiểm tra giá phải lớn hơn 0
             if (productDTO.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new RuntimeException("Giá sản phẩm phải lớn hơn 0.");
             }
 
+            // Cập nhật thông tin sản phẩm
             product.setName(productDTO.getName());
             product.setDescription(productDTO.getDescription());
             product.setPrice(productDTO.getPrice());
             product.setUpdatedAt(LocalDateTime.now());
-            // Cập nhật thông tin "Người sửa"
+
+            // Cập nhật người sửa
             User currentUser = getCurrentUser();
             if (currentUser != null) {
                 product.setUpdatedBy(currentUser.getUsername());
             }
+
             productRepository.save(product);
         } else {
             throw new RuntimeException("Không tìm thấy sản phẩm để cập nhật!");
         }
     }
+
 
     public void deleteProduct(Long id) {
         Product product = getProductToDelete(id);

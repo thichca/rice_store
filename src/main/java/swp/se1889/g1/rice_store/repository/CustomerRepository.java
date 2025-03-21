@@ -18,5 +18,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Optional<Customer> findById(Long id);
     List<Customer> findByPhone(String phone);
     List<Customer> findByemail(String email);
+    @Query("SELECT COUNT(c) FROM Customer c WHERE c.createdBy = :createdBy AND c.isDeleted = false")
+    long countByCreatedBy(@Param("createdBy") User createdBy);
+
 
 }

@@ -163,22 +163,21 @@ public class ProductController {
 
 
     @PostMapping("/products/update")
-    public String updateProduct(@Valid @ModelAttribute("editProduct") ProductDTO productDTO, BindingResult result, Model model,
-                                @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "5") int size) {
+    @ResponseBody
+    public ResponseEntity<?> updateProduct(@Valid @ModelAttribute("editProduct") ProductDTO productDTO, BindingResult result) {
         if (result.hasErrors()) {
-            Page<Product> productPage = productService.getProductsByCurrentUser(page, size);
-            model.addAttribute("products", productPage.getContent());
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", productPage.getTotalPages());
-            model.addAttribute("totalItems", productPage.getTotalElements());
-            return "products";
+            Map<String, String> errors = new HashMap<>();
+            result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);  // Trả về lỗi dưới dạng JSON
         }
-        productService.updateProduct(productDTO);
-        return "redirect:/owner/products?page=" + page + "&size=" + size;
+
+        try {
+            productService.updateProduct(productDTO);
+            return ResponseEntity.ok().body(Collections.singletonMap("message", "Cập nhật sản phẩm thành công!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("errorMessage", e.getMessage()));
+        }
     }
-
-
     @GetMapping("/delete/{id}")
     public String deleteProduct(@PathVariable Long id,
                                 @RequestParam(defaultValue = "0") int page,
@@ -186,7 +185,6 @@ public class ProductController {
         productService.deleteProduct(id);
         return "redirect:/owner/products?page=" + page + "&size=" + size;
     }
-
 
 }
 

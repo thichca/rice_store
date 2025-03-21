@@ -13,63 +13,87 @@
 <div class="container mx-auto mt-6">
     <h1 class="text-2xl font-bold">Tổng quan</h1>
     <div class="grid grid-cols-4 gap-4 mt-4">
+        <!-- Tổng số sản phẩm -->
         <div class="bg-blue-500 text-white p-4 rounded-lg">
             <h2 class="text-lg">Sản phẩm</h2>
-            <p class="text-3xl font-bold">120</p>
+            <p class="text-3xl font-bold" th:text="${totalProducts}">0</p>
         </div>
+
+        <!-- Tổng số khách hàng -->
         <div class="bg-green-500 text-white p-4 rounded-lg">
             <h2 class="text-lg">Khách hàng</h2>
-            <p class="text-3xl font-bold">45</p>
+            <p class="text-3xl font-bold" th:text="${totalCustomers}">0</p>
         </div>
+
+        <!-- Tổng số hóa đơn -->
         <div class="bg-yellow-500 text-white p-4 rounded-lg">
             <h2 class="text-lg">Hóa đơn</h2>
-            <p class="text-3xl font-bold">78</p>
+            <p class="text-3xl font-bold" th:text="${totalInvoices}">0</p>
         </div>
+
+        <!-- Tổng doanh thu -->
         <div class="bg-red-500 text-white p-4 rounded-lg">
             <h2 class="text-lg">Doanh thu</h2>
-            <p class="text-3xl font-bold">15,200,000 đ</p>
+            <p class="text-3xl font-bold"
+               th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 2, 'POINT') + ' đ'}">
+                0 đ
+            </p>
         </div>
     </div>
 </div>
 
-<div class="container mx-auto mt-6">
-    <h1 class="text-2xl font-bold">5 sản phẩm bán chạy nhất</h1>
-    <ul class="list-disc pl-6">
-        <li>Gạo ST25 - 500kg</li>
-        <li>Gạo Nàng Thơm - 350kg</li>
-        <li>Gạo Lứt - 200kg</li>
-        <li>Gạo Nếp - 180kg</li>
-        <li>Gạo Nhật - 150kg</li>
-    </ul>
-</div>
+
 
 <div class="container mx-auto mt-6">
-    <h1 class="text-2xl font-bold">5 khách hàng chi tiêu nhiều nhất</h1>
-    <ul class="list-disc pl-6">
-        <li>Nguyễn Văn A - 10,000,000 đ</li>
-        <li>Trần Thị B - 8,500,000 đ</li>
-        <li>Phạm Văn C - 7,200,000 đ</li>
-        <li>Lê Thị D - 6,800,000 đ</li>
-        <li>Hoàng Văn E - 5,900,000 đ</li>
-    </ul>
+    <div class="grid grid-cols-2 gap-4">
+        <!-- 5 sản phẩm bán chạy nhất -->
+        <div>
+            <h1 class="text-2xl font-bold">5 sản phẩm bán chạy nhất</h1>
+            <ul class="list-disc pl-6">
+                <li>Gạo ST25 - 500kg</li>
+                <li>Gạo Nàng Thơm - 350kg</li>
+                <li>Gạo Lứt - 200kg</li>
+                <li>Gạo Nếp - 180kg</li>
+                <li>Gạo Nhật - 150kg</li>
+            </ul>
+        </div>
+
+        <!-- 5 khách hàng chi tiêu nhiều nhất -->
+        <div>
+            <h1 class="text-2xl font-bold">5 khách hàng chi tiêu nhiều nhất</h1>
+            <ul class="list-disc pl-6">
+                <li>Nguyễn Văn A - 10,000,000 đ</li>
+                <li>Trần Thị B - 8,500,000 đ</li>
+                <li>Phạm Văn C - 7,200,000 đ</li>
+                <li>Lê Thị D - 6,800,000 đ</li>
+                <li>Hoàng Văn E - 5,900,000 đ</li>
+            </ul>
+        </div>
+    </div>
 </div>
+
+
+
+
 
 <div class="container mx-auto mt-6">
     <h1 class="text-2xl font-bold">Doanh thu theo tháng</h1>
-    <canvas id="revenueBarChart" style="max-width: 400px; max-height: 300px;"></canvas>
+    <canvas id="revenueBarChart" style="max-width: 600px; max-height: 300px;"></canvas>
 </div>
 
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const revenueData = /*[[${monthlyRevenue}]]*/ [];
+    const monthLabels = /*[[${monthLabels}]]*/ [];
 
-
-<script>
     const ctxBar = document.getElementById('revenueBarChart').getContext('2d');
     new Chart(ctxBar, {
         type: 'bar',
         data: {
-            labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
+            labels: monthLabels,
             datasets: [{
                 label: 'Doanh thu (VNĐ)',
-                data: [12000000, 15000000, 11000000, 17000000, 20000000, 19000000],
+                data: revenueData,
                 backgroundColor: 'rgba(54, 162, 235, 0.6)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
@@ -84,8 +108,9 @@
             }
         }
     });
-
+    /*]]>*/
 </script>
+
 
 <div th:replace="~{fragments/script :: script}"></div>
 </body>
