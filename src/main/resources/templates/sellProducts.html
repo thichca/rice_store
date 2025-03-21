@@ -12,20 +12,32 @@
   <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
 
     <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-semibold">Danh sách người nợ</h1>
-      <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-
-        <i class="fas fa-plus mr-2"></i> THÊM NGƯỜI NỢ
-      </button>
+      <h1 class="text-2xl font-semibold">Danh sách tồn kho</h1>
     </div>
-    <form th:action="@{/zones}" method="get" class="mb-4 flex items-center">
-      <select name="searchType" class="border rounded px-2 py-1 mr-2">
-        <option value="name">Tên sản phẩm</option>
-        <option value="description">Mô tả</option>
+    <form id="searchForm" th:action="@{/owner/zones}" method="get" class="mb-4 flex items-center">
+      <!-- Dropdown chọn kiểu tìm kiếm -->
+      <select id="searchType" name="searchType" class="border rounded px-2 py-1 mr-2" onchange="reloadSearchForm()">
+        <option value="name" th:selected="${searchType == 'name'}">Tên sản phẩm</option>
+        <option value="description" th:selected="${searchType == 'description'}">Mô tả</option>
       </select>
-      <input type="text" name="keyword" class="border rounded px-2 py-1 mr-2" placeholder="Nhập từ khóa...">
+
+      <!-- Ô nhập từ khóa -->
+      <input type="text" id="keywordInput" name="keyword" class="border rounded px-2 py-1 mr-2"
+             placeholder="Nhập từ khóa..." th:value="${keyword}">
+
+      <!-- Ô nhập giá từ và giá đến, hiển thị nếu tìm kiếm theo mô tả -->
+      <div id="priceInputs" th:style="${searchType == 'description' ? 'display: flex;' : 'display: none;'}">
+        <input type="number" id="minPriceInput" name="minPrice" step="0.01" class="border rounded px-2 py-1 mr-2"
+               placeholder="Giá từ..." th:value="${minPrice}">
+        <input type="number" id="maxPriceInput" name="maxPrice" step="0.01" class="border rounded px-2 py-1 mr-2"
+               placeholder="Giá đến..." th:value="${maxPrice}">
+      </div>
+
       <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Tìm kiếm</button>
     </form>
+
+
+
 
     <p class="text-gray-600 mb-4">Tổng cộng: <span th:text="${totalItems}"></span> bản ghi</p>
 
@@ -33,21 +45,21 @@
     <div class="overflow-x-auto">
       <table class="table-auto border-collapse border w-full">
         <thead>
-          <th class="border p-2 relative">Tên Sản Phẩm
-            <div class="resizer"></div>
-          </th>
-          <th class="border p-2 relative">Mô tả
-            <div class="resizer"></div>
-          </th>
-          <th class="border p-2 relative">Giá
-            <div class="resizer"></div>
-          </th>
-          <th class="border p-2 relative">Khu vực
-            <div class="resizer"></div>
-          </th>
-          <th class="border p-2 relative">Số lượng
-            <div class="resizer"></div>
-          </th>
+        <th class="border p-2 relative">Tên Sản Phẩm
+          <div class="resizer"></div>
+        </th>
+        <th class="border p-2 relative">Mô tả
+          <div class="resizer"></div>
+        </th>
+        <th class="border p-2 relative">Giá/Kg
+          <div class="resizer"></div>
+        </th>
+        <th class="border p-2 relative">Khu vực
+          <div class="resizer"></div>
+        </th>
+        <th class="border p-2 relative">Số lượng
+          <div class="resizer"></div>
+        </th>
         </tr>
         </thead>
 
@@ -55,7 +67,7 @@
         <tr th:each="item : ${productWithZones}">
           <td class="border p-2" th:text="${item['productName']}"></td>
           <td class="border p-2" th:text="${item['description']}"></td>
-          <td class="border p-2" th:text="${item['price']}"></td>
+          <td class="border p-2" th:text="${#numbers.formatDecimal(item['price'], 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
           <td class="border p-2" th:text="${item['zoneName']}"></td>
           <td class="border p-2" th:text="${item['quantity']}"></td>
         </tr>
@@ -65,7 +77,7 @@
     <div class="w-full flex justify-center items-center mt-4 gap-2" th:if="${totalPages > 0}">
       <!-- Nút "Trước" -->
       <a th:if="${currentPage > 0}"
-         th:href="@{/products(page=${currentPage - 1}, size=5)}"
+         th:href="@{/owner/zones(page=${currentPage - 1}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
          class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
         Trước
       </a>
@@ -73,7 +85,7 @@
       <!-- Hiển thị danh sách số trang -->
       <th:block th:if="${totalPages > 1}">
         <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
-          <a th:href="@{/zones(page=${pageNumber}, size=5)}"
+          <a th:href="@{/owner/zones(page=${pageNumber}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
              th:text="${pageNumber + 1}"
              th:classappend="${pageNumber == currentPage} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-400 hover:text-white'"
              class="px-4 py-2 rounded transition duration-200">
@@ -81,14 +93,9 @@
         </th:block>
       </th:block>
 
-      <!-- Nếu chỉ có 1 trang, chỉ hiển thị số 1 -->
-      <th:block th:if="${totalPages == 1}">
-        <span class="bg-blue-500 text-white px-4 py-2 rounded">1</span>
-      </th:block>
-
       <!-- Nút "Sau" -->
       <a th:if="${currentPage + 1 < totalPages}"
-         th:href="@{/zones(page=${currentPage + 1}, size=5)}"
+         th:href="@{/owner/zones(page=${currentPage + 1}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
          class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
         Sau
       </a>
@@ -96,9 +103,50 @@
 
 
 
+
   </div>
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    togglePriceInputs();
+  });
 
+  function togglePriceInputs() {
+    let searchType = document.getElementById("searchType").value;
+    let priceInputs = document.getElementById("priceInputs");
+
+    if (searchType === "description") {
+      priceInputs.style.display = "flex";
+    } else {
+      priceInputs.style.display = "none";
+    }
+  }
+
+  function reloadSearchForm() {
+    let searchType = document.getElementById("searchType").value;
+    let keywordInput = document.getElementById("keywordInput");
+    let minPriceInput = document.getElementById("minPriceInput");
+    let maxPriceInput = document.getElementById("maxPriceInput");
+    let priceInputs = document.getElementById("priceInputs");
+
+    // Xóa dữ liệu cũ khi đổi dropdown
+    keywordInput.value = "";
+    minPriceInput.value = "";
+    maxPriceInput.value = "";
+
+    // Hiển thị hoặc ẩn ô nhập giá dựa vào lựa chọn
+    if (searchType === "description") {
+      priceInputs.style.display = "flex";
+    } else {
+      priceInputs.style.display = "none";
+    }
+
+    // Gửi form tự động để load lại trang
+    document.getElementById("searchForm").submit();
+  }
+
+
+</script>
 
 <div th:replace="~{fragments/script :: script}"></div>
 </body>

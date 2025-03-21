@@ -71,6 +71,13 @@
                         Sản phẩm
                     </a>
                 </div>
+                <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
+                    <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
+                       th:href="@{/owner/zones}">
+                        <i class="fas fa-warehouse mr-2"></i>
+                        Tồn kho
+                    </a>
+                </div>
                 <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700 transition "
                    th:href="@{/customers}">
                     <i class="fas fa-user mr-2"></i>
@@ -91,15 +98,15 @@
                         Khu vực
                     </a>
                 </div>
-                <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
+                <div th:if="${user != null && user.role == 'ROLE_EMPLOYEE'}">
                     <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
-                       th:href="@{/owner/invoices}">
-                        <i class="fas fa-warehouse mr-2"></i>
-                       Hóa Đơn
+                       th:href="@{/shifts/schedule}">
+                        <i class="fas fa-calendar mr-2"></i>
+                        Lịch làm việc
                     </a>
                 </div>
             </div>
-            <a class="flex items-center text-white px-3 py-2 rounded-md bg-blue-700"  >
+            <a class="flex items-center text-white px-3 py-2 rounded-md bg-blue-700" href="#">
                 <i class="fas fa-shopping-basket mr-2">
                 </i>
                 Bán hàng

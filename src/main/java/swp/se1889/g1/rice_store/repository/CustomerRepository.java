@@ -6,7 +6,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
 import swp.se1889.g1.rice_store.entity.Customer;
-import swp.se1889.g1.rice_store.entity.Product;
 import swp.se1889.g1.rice_store.entity.User;
 
 import java.util.List;
@@ -19,6 +18,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Optional<Customer> findById(Long id);
     List<Customer> findByPhone(String phone);
     List<Customer> findByemail(String email);
-    List<Customer> findByIsDeletedFalseAndNameContainingIgnoreCase(String name);
-    Customer findCustomerByPhone(String phone);
+    @Query("SELECT COUNT(c) FROM Customer c WHERE c.createdBy = :createdBy AND c.isDeleted = false")
+    long countByCreatedBy(@Param("createdBy") User createdBy);
+
+
 }
