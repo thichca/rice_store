@@ -41,10 +41,10 @@
                     <th class="border p-2 relative">Id
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative">Tên Sản Phẩm
+                    <th class="border p-2 relative">Note
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative">Số lượng
+                    <th class="border p-2 relative">Trạng thái thanh toán
                         <div class="resizer"></div>
                     </th>
                     <th class="border p-2 relative">Tổng tiền
@@ -75,7 +75,13 @@
 
                     <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="name" oninput="filterInvoices()" >
                     </td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="quantity" oninput="filterInvoices()" >
+                    <td class="border p-2">
+                        <select class="border rounded p-1 w-full" id="quantity" oninput="filterInvoices()"  >
+                            <option value="">Tất cả</option>
+                            <option value="Paid">Thanh Toán</option>
+                            <option value="Unpaid">Chưa Thanh Toán</option>
+                        </select>
+                    </td>
                     </td>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
@@ -122,35 +128,35 @@
                 <tbody id="tableBody">
                 <tr th:each="invoice : ${invoices}">
                     <td class="border p-2" th:text="${invoice.id}"></td>
-                    <td class="border p-2"  th:text="${invoice.product.name}"></td>
-                    <td class="border p-2" th:text="${invoice.quantity}"></td>
+                    <td class="border p-2"  th:text="${invoice.note}"></td>
+                    <td class="border p-2" th:text="${invoice.status}"></td>
                     <td class="border p-2" th:text="${invoice.totalPrice}"></td>
                     <td class="border p-2" th:text="${#temporals.format(invoice.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                     <td class="border p-2" th:text="${#temporals.format(invoice.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                     <td class="border p-2">
                         <div class="flex gap-2 w-full">
-                            <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
+                            <button class="w-1/2 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-blue-700 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
                                     data-icon='<i class="fas fa-info"></i>'
-                                    >
+                                    th:onclick="|window.location.href='@{/owner/invoices/detail/{id}(id=${invoice.id})}'|">
 
                                 <i class="fas fa-info mr-1"></i> Chi tiết
                             </button>
-                            <button class="w-1/4 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                            <button class="w-1/2 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-yellow-500 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
                                     data-icon='<i class="fas fa-pencil-alt"></i>'
-                                   >
+                                    th:onclick="|window.location.href='@{/owner/invoices/edit/{id}(id=${invoice.id})}'|" >
                                 <i class="fas fa-pencil-alt mr-1"></i> Sửa
                             </button>
-                            <button class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-red-500 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-trash-alt mr-1"></i> Xoá'
-                                    data-icon='<i class="fas fa-trash-alt"></i>'
-                                   >
-                                <i class="fas fa-trash-alt mr-1"></i> Xóa
-                            </button>
+<!--                            <button class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn-->
+<!--                                    hover:bg-red-500 hover:text-white transition duration-200"-->
+<!--                                    data-full='<i class="fas fa-trash-alt mr-1"></i> Xoá'-->
+<!--                                    data-icon='<i class="fas fa-trash-alt"></i>'-->
+<!--                                   >-->
+<!--                                <i class="fas fa-trash-alt mr-1"></i> Xóa-->
+<!--                            </button>-->
                         </div>
                     </td>
                 </tr>

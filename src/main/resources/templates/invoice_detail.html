@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi Tiết Hóa Đơn</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-6">
+<div th:replace="~{fragments/header :: header}"></div><br><br>
+<div th:if="${zoneError != null}" class="error-message">
+    <p th:text="${zoneError}"></p>
+</div>
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md" th:unless="${zoneError != null}">
+    <h1 class="text-2xl font-bold text-center mb-6">Chi Tiết Hóa Đơn</h1>
+
+    <input type="hidden" th:value="${invoice.id}">
+
+    <!-- Khách hàng -->
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Tên Khách Hàng:</label>
+        <p th:text="${invoice.customer.name}" class="mt-1 block w-full border border-gray-300 rounded-md p-2"></p>
+    </div>
+
+    <!-- Bảng danh sách sản phẩm -->
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Danh sách sản phẩm:</label>
+        <table class="w-full border border-gray-300 rounded-md mt-2">
+            <thead>
+            <tr class="bg-gray-200">
+                <th class="p-2 border">Tên Sản Phẩm</th>
+                <th class="p-2 border">Số Lượng</th>
+                <th class="p-2 border">Đơn Giá</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="detail : ${invoiceDetails}">
+                <td class="p-2 border" th:text="${detail.product.name}"></td>
+                <td class="p-2 border text-center" th:text="${detail.quantity}"></td>
+                <td class="p-2 border text-right" th:text="${#numbers.formatInteger(detail.unitPrice, 0, 'COMMA')} + ' VNĐ'"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Nút quay lại -->
+    <div class="flex justify-center">
+        <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                th:onclick="|window.location.href='@{/owner/invoices}'|">Quay Lại</button>
+    </div>
+</div>
+</body>
+</html>

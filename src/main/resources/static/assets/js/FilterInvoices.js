@@ -3,7 +3,7 @@ function filterInvoices() {
     let filterFromId = document.getElementById("id1").value.toLowerCase();
     let filterToId = document.getElementById("id2").value.toLowerCase();
     let filterName = document.getElementById("name").value.toLowerCase();
-    let filterQuantity = document.getElementById("quantity").value.toLowerCase();
+    let filterPay = document.getElementById("quantity").value.toLowerCase();
     let filterTotalFrom = document.getElementById("totalPrice").value.toLowerCase();
     let filterTotalTo = document.getElementById("totalPrice1").value.toLowerCase();
     let filterFromCreated = document.getElementById("create1").value;
@@ -35,6 +35,7 @@ function filterInvoices() {
         if (filterFromId && parseInt(id) < parseInt(filterFromId)) match3 = false;
         if (filterToId && parseInt(id) > parseInt(filterToId)) match3 = false;
         if (filterName && !name.includes(filterName)) match3 = false;
+        if (filterPay && quantity.toLowerCase() !== filterPay.toLowerCase()) match3 = false;
         if (filterTotalFrom && parseFloat(totalPrice) < parseInt(filterTotalFrom)) match3 = false;
         if (filterTotalTo && parseFloat(totalPrice) > parseInt(filterTotalTo)) match3 = false;
         if (fromCreatedDate && createdAtDate2 < fromCreatedDate) match3 = false;

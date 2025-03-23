@@ -162,6 +162,7 @@ public InvoiceDetailDTO getInvoice(Long id) {
 
 
 
+
     private BigDecimal calculateTotalPrice(List<InvoiceDetailDTO> details) {
         return details.stream()
                 .map(d -> d.getUnitPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
@@ -231,6 +232,24 @@ public InvoiceDetailDTO getInvoice(Long id) {
             return invoiceRepository.getTotalRevenueByUserAndStore(currentUser, storeId);
         }
         return BigDecimal.ZERO;
+    }
+    public Invoices update(Long id, String newStatus) {
+        Invoices invoices = invoiceRepository.findById(id).orElse(null);
+        if (invoices == null) {
+            throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + id);
+        }
+
+        // Chuyển đổi trạng thái thành giá trị hợp lệ
+        if ("Paid".equalsIgnoreCase(newStatus)) {
+            newStatus = "Paid";  // Hoặc giá trị hợp lệ trong database
+        } else if ("Unpaid".equalsIgnoreCase(newStatus)) {
+            newStatus = "Unpaid";
+        } else {
+            throw new IllegalArgumentException("Trạng thái không hợp lệ: " + newStatus);
+        }
+
+        invoices.setStatus(newStatus);
+        return invoiceRepository.save(invoices);
     }
 
 
