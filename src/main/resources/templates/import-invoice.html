@@ -274,10 +274,14 @@
         const paymentMethod = this.value;
         const total = parseFloat($('[name="totalPrice"]').val()) || 0;
         const balance = parseFloat($('#customerBalance').val()) || 0;
+
         if (paymentMethod === "onlyProduct") {
             $('[name="paidAmount"]').val(total.toFixed(2));
         } else if (paymentMethod === "productAndDebt") {
-            $('[name="paidAmount"]').val((total + balance).toFixed(2));
+            // Nếu không nhập paidAmount, mặc định thanh toán hết tổng tiền + nợ
+            if (!$('[name="paidAmount"]').val()) {
+                $('[name="paidAmount"]').val((total + balance).toFixed(2));
+            }
         }
         calculateRemaining();
     });
@@ -303,7 +307,19 @@
         const total = parseFloat($('[name="totalPrice"]').val()) || 0;
         const balance = parseFloat($('#customerBalance').val()) || 0;
         const paidAmount = parseFloat($('[name="paidAmount"]').val()) || 0;
-        const remaining = total + balance - paidAmount;
+        const paymentMethod = $('#paymentMethod').val();
+
+        let remaining;
+        if (paymentMethod === "productAndDebt") {
+            const totalDue = total + balance;
+            if (paidAmount < totalDue) {
+                remaining = totalDue - paidAmount;
+            } else {
+                remaining = 0; // Nếu thanh toán đủ hoặc dư, nợ mới = 0
+            }
+        } else {
+            remaining = total - paidAmount; // Chỉ tính cho tiền hàng
+        }
         $('[name="remainingAmount"]').val(remaining.toFixed(2));
     }
 </script>

@@ -15,7 +15,7 @@ public class InvoicesDTO {
     private String customerBalance;
     private String paymentMethod;
     private double totalPrice;
-    private double paidAmount;
+    private BigDecimal paidAmount;
     private double remainingAmount;
     private String note;
     private List<InvoiceDetailDTO> details;
@@ -94,11 +94,11 @@ public class InvoicesDTO {
         this.totalPrice = totalPrice;
     }
 
-    public double getPaidAmount() {
+    public BigDecimal getPaidAmount() {
         return paidAmount;
     }
 
-    public void setPaidAmount(double paidAmount) {
+    public void setPaidAmount(BigDecimal paidAmount) {
         this.paidAmount = paidAmount;
     }
 

@@ -63,22 +63,45 @@ public InvoiceDetailDTO getInvoice(Long id) {
         if (customer == null) {
             throw new RuntimeException("Không tìm thấy khách hàng với số điện thoại: " + dto.getCustomerPhone());
         }
-
         // 2. Kiểm tra và lấy thông tin cửa hàng
         if (dto.getStoreId() == null) {
             throw new IllegalArgumentException("ID cửa hàng không được để trống");
         }
-
         // Lấy thông tin cửa hàng từ storeId
         Store storeFromDb = storeRepository.findById(dto.getStoreId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy cửa hàng với ID: " + dto.getStoreId()));
-
         // 3. Tính toán tổng giá trị hóa đơn
         BigDecimal totalPrice = calculateTotalPrice(dto.getDetails());
         BigDecimal discount = dto.getDiscount() != null ? dto.getDiscount() : BigDecimal.ZERO;
         BigDecimal finalAmount = totalPrice.subtract(discount);
-
-
+        // 4. Lấy thông tin về phương thức thanh toán và số tiền đã trả
+        String paymentMethod = dto.getPaymentMethod();
+        BigDecimal paidAmount = dto.getPaidAmount() != null ? dto.getPaidAmount() : BigDecimal.ZERO;
+        // 5. Lấy nợ hiện tại của khách hàng
+        BigDecimal debtBalance = customer.getDebtBalance() != null ? customer.getDebtBalance() : BigDecimal.ZERO;
+        // 6. Tính toán nợ mới dựa trên phương thức thanh toán
+        BigDecimal newDebtBalance;
+        if ("productAndDebt".equals(paymentMethod)) {
+            // Thanh toán tiền hàng + nợ: Trả cả hóa đơn và nợ cũ
+            BigDecimal totalDue = finalAmount.add(debtBalance);
+            if (paidAmount.compareTo(totalDue) < 0) {
+                newDebtBalance = totalDue.subtract(paidAmount); // Còn nợ nếu trả chưa đủ
+            } else {
+                newDebtBalance = BigDecimal.ZERO; // Hết nợ nếu trả đủ hoặc dư
+            }
+        } else if ("onlyProduct".equals(paymentMethod)) {
+            // Chỉ tiền hàng: Chỉ trả cho hóa đơn, nợ cũ giữ nguyên
+            if (paidAmount.compareTo(finalAmount) < 0) {
+                newDebtBalance = debtBalance.add(finalAmount.subtract(paidAmount)); // Tăng nợ nếu trả thiếu
+            } else {
+                newDebtBalance = debtBalance; // Nợ không đổi nếu trả đủ hoặc dư
+            }
+        } else {
+            throw new RuntimeException("Phương thức thanh toán không hợp lệ");
+        }
+        // 7. Cập nhật nợ mới cho khách hàng
+        customer.setDebtBalance(newDebtBalance);
+        customerRepository.save(customer);
         // 4. Tạo hóa đơn
         Invoices invoice = new Invoices();
         invoice.setStore(storeFromDb);  // Lưu trữ cửa hàng đã xác thực
@@ -109,8 +132,8 @@ public InvoiceDetailDTO getInvoice(Long id) {
             Product newProduct = productRepository.findById(dto.getProductId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + dto.getProductId()));
 
-            Zone zone = zoneRepository.findById(dto.getZoneId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khu vực với ID: " + dto.getZoneId()));
+            Zone zone = zoneRepository.findByIdAndIsDeletedFalse(dto.getZoneId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khu vực với ID: " + dto.getZoneId() + " hoặc đã bị xóa!"));
 
             // Nếu khu vực đã có sản phẩm khác, thì thay thế sản phẩm mới và cập nhật số lượng mới
             if (zone.getProduct() == null || !zone.getProduct().getId().equals(newProduct.getId())) {
