@@ -135,10 +135,6 @@ public class Invoices {
         this.createdBy = createdBy;
     }
 
-
-
-
-
     public String getUpdatedBy() {
         return updatedBy;
     }
