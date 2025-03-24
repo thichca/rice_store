@@ -59,6 +59,10 @@ public class UserServiceIpml implements UserService {
         return Collections.singletonList(new SimpleGrantedAuthority(role.getRole()));
     }
 
+    public User getUserById(long id) {
+        return userRepository.findById(id);
+    }
+
     public User getCurrentUser() {
         String username = getCurrentUsername();
         return userRepository.findByUsername(username);

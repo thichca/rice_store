@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -44,11 +45,18 @@ public class CustomerDTO {
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
     }
-    public CustomerDTO(){
 
+    public CustomerDTO(Long id, String name, String phone, String address, String email) {
+        this.id = id;
+        this.name = name;
+        this.phone = phone;
+        this.address = address;
+        this.email = email;
     }
 
+    public CustomerDTO() {
 
+    }
 
     // Getters và Setters
     public Long getId() {
@@ -114,15 +122,19 @@ public class CustomerDTO {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
     public String getCreatedBy() {
         return createdBy;
     }
+
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+
     public String getUpdatedBy() {
         return updatedBy;
     }
+
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
     }

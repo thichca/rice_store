@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
+import swp.se1889.g1.rice_store.dto.ProductZoneDTO;
 import swp.se1889.g1.rice_store.entity.Customer;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.CustomerRepository;
@@ -122,5 +123,17 @@ public class CustomerService {
             return userRepository.findByUsername(username);
         }
         return null;
+    }
+
+    public List<CustomerDTO> searchCustomers(String query) {
+        return customerRepository.searchCustomerDetails(query);
+    }
+
+    public Customer findCustomerById(Long id) {
+        return customerRepository.findById(id).get();
+    }
+
+    public Customer saveCustomer(Customer customer) {
+        return customerRepository.save(customer);
     }
 }

@@ -118,7 +118,6 @@ public class StoreController {
                 redirectAttributes.addFlashAttribute("error", fieldError.getDefaultMessage());
             }
             return "redirect:/owner/updateStore/" + storeId;
-
         }
 
         try {
@@ -134,7 +133,7 @@ public class StoreController {
     }
 
     @GetMapping("/restore-data")
-    public String GetViewManageUser(){
+    public String GetViewManageUser() {
         return "manage-store-restore-data";
     }
 

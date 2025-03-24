@@ -16,6 +16,8 @@ import java.util.Optional;
 
 @Repository
 public interface InvoiceDetailRepository extends JpaRepository<InvoicesDetails, Long> {
+    Page<InvoicesDetails> findAllByIsDeletedFalse(Pageable pageable);
+
     Optional<InvoicesDetails> findById(Long id);
     List<InvoicesDetails> findByInvoice(Invoices invoice);
     @Query("SELECT i FROM InvoicesDetails i WHERE i.invoice.id = :invoiceId AND i.zone.isDeleted = false")

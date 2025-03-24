@@ -2,45 +2,51 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý cửa hàng</title>
+    <title>Hóa đơn bán hàng</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 </head>
 <body class="bg-gray-100 p-4">
 
-<div class="mb-12 w-full">
+<div class="fixed top-0 left-0 w-full">
+    <div th:replace="~{fragments/header :: header}"></div>
+</div>
 
+<div class="mt-28 mb-12 w-full">
     <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
 
         <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-semibold">Danh sách cửa hàng</h1>
-            <button onclick="window.location.href='/owner/createStore'"
+            <h1 class="text-2xl font-semibold">Danh sách hóa đơn bán hàng</h1>
+            <button onclick="window.location.href='/createOrder'"
                     class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-                <i class="fas fa-plus mr-2"></i> Thêm cửa hàng
+                <i class="fas fa-plus mr-2"></i> Tạo đơn hàng
             </button>
         </div>
-        <div class="text-gray-600 mb-4 total-stores" th:text="'Tổng cộng: ' + ${totalItems} + ' cửa hàng'">Tổng cộng: 0
-            cửa hàng
+        <div class="text-gray-600 mb-4 total-stores" th:text="'Tổng cộng: ' + ${totalItems} + ' hóa đơn'">Tổng cộng: 0
+            hóa đơn
         </div>
 
         <div class="overflow-x-auto">
             <table class="table-auto border-collapse border w-full">
                 <thead>
                 <tr class="bg-gray-100">
-                    <th class="border p-2 relative w-[150px]">Id
+                    <th class="border p-2 relative w-[120px]">Id
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative w-[200px]">Tên
+                    <th class="border p-2 relative w-[150px]">Khách hàng
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative">Địa chỉ
+                    <th class="border p-2 relative w-[150px]">Số điện thoại
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative">SĐT
+                    <th class="border p-2 relative w-[150px]">Số tiền (VNĐ)
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative">Email
+                    <th class="border p-2 relative w-[150px]">Trạng thái
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative w-[150px]">Người tạo
                         <div class="resizer"></div>
                     </th>
                     <th class="border p-2 relative w-[180px]">Ngày tạo
@@ -49,12 +55,9 @@
                     <th class="border p-2 relative w-[180px]">Cập nhật
                         <div class="resizer"></div>
                     </th>
-
                     <th class="border p-2 hidden"></th>
                     <th class="border p-2 hidden"></th>
                     <th class="border p-2 hidden"></th>
-                    <th class="border p-2 hidden"></th>
-
                     <th class="border p-2 relative w-[300px]">Hành động
                         <div class="resizer"></div>
                     </th>
@@ -66,29 +69,38 @@
                         <div class="flex w-full gap-1">
                             <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterFromId"
                                    placeholder="Từ"
-                                   style="font-weight: normal;" oninput="filterStores()">
+                                   style="font-weight: normal;" oninput="filterInvoice()">
                             <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterToId" placeholder="Đến"
-                                   style="font-weight: normal;" oninput="filterStores()">
+                                   style="font-weight: normal;" oninput="filterInvoice()">
                         </div>
                     </th>
 
                     <td class="border p-2"><input type="text" id="filterName" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
-                    <td class="border p-2"><input type="text" id="filterAddress" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
+                                                  oninput="filterInvoice()"></td>
                     <td class="border p-2"><input type="text" id="filterPhone" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
-                    <td class="border p-2"><input type="text" id="filterEmail" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
-
+                                                  oninput="filterInvoice()"></td>
+                    <th class="border p-2">
+                        <div class="flex w-full gap-1">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterFromAmount"
+                                   placeholder="Từ"
+                                   style="font-weight: normal;" oninput="filterInvoice()">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterToAmount"
+                                   placeholder="Đến"
+                                   style="font-weight: normal;" oninput="filterInvoice()">
+                        </div>
+                    </th>
+                    <td class="border p-2"><input type="text" id="filterStatus" class="w-full border rounded p-1"
+                                                  oninput="filterInvoice()"></td>
+                    <td class="border p-2"><input type="text" id="filterCreatedBy" class="w-full border rounded p-1"
+                                                  oninput="filterInvoice()"></td>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
                             <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterFromCreated"
                                    placeholder="Từ"
-                                   style="font-weight: normal;" oninput="filterStores()">
+                                   style="font-weight: normal;" oninput="filterInvoice()">
                             <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterToCreated"
                                    placeholder="Đến"
-                                   style="font-weight: normal;" oninput="filterStores()">
+                                   style="font-weight: normal;" oninput="filterInvoice()">
                         </div>
                     </th>
 
@@ -96,13 +108,16 @@
                         <div class="flex w-full gap-1">
                             <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterFromUpdated"
                                    placeholder="Từ"
-                                   style="font-weight: normal;" oninput="filterStores()">
+                                   style="font-weight: normal;" oninput="filterInvoice()">
                             <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterToUpdated"
                                    placeholder="Đến"
-                                   style="font-weight: normal;" oninput="filterStores()">
+                                   style="font-weight: normal;" oninput="filterInvoice()">
                         </div>
                     </th>
 
+                    <td class="border p-2 hidden"></td>
+                    <td class="border p-2 hidden"></td>
+                    <td class="border p-2 hidden"></td>
 
                     <td class="border p-2">
                         <div class="flex gap-2 w-full">
@@ -125,36 +140,49 @@
                 </thead>
 
                 <tbody id="tableBody">
-                <th:block th:each="store : ${stores}">
+                <th:block th:each="invoiceSale : ${invoiceSales}">
                     <tr>
-                        <td class="border p-2" th:text="${store.id}"></td>
-                        <td class="border p-2" th:text="${store.name}"></td>
-                        <td class="border p-2" th:text="${store.address}"></td>
-                        <td class="border p-2" th:text="${store.phone}"></td>
-                        <td class="border p-2" th:text="${store.email}"></td>
+                        <td class="border p-2" th:text="${invoiceSale.id}"></td>
+                        <td class="border p-2" th:text="${invoiceSale.customer.name}"></td>
                         <td class="border p-2"
-                            th:text="${#temporals.format(store.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                            th:text="${invoiceSale.customer.phone}"></td>
                         <td class="border p-2"
-                            th:text="${#temporals.format(store.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
-
-                        <td class="border p-2 hidden"></td>
-                        <td class="border p-2 hidden"></td>
-                        <td class="border p-2 hidden"></td>
-                        <td class="border p-2 hidden"></td>
-
+                            th:text="${#numbers.formatDecimal(invoiceSale.finalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+                        <td class="border p-2">
+                            <form th:action="@{/updateInvoiceStatus(id=${invoiceSale.id})}" method="post">
+                                <select name="paymentStatus" class="border rounded p-1"
+                                        th:value="${invoiceSale.paymentStatus}" onchange="this.form.submit()">
+                                    <option value="Unpaid" th:selected="${invoiceSale.paymentStatus == 'Unpaid'}">Chưa
+                                        thanh toán
+                                    </option>
+                                    <option value="Paid" th:selected="${invoiceSale.paymentStatus == 'Paid'}">Đã thanh
+                                        toán
+                                    </option>
+                                    <option value="In_debt" th:selected="${invoiceSale.paymentStatus == 'In_debt'}">Ghi
+                                        nợ
+                                    </option>
+                                </select>
+                                <input type="hidden" name="_method" value="post"/>
+                            </form>
+                        </td>
+                        <td class="border p-2" th:text="${invoiceSale.user.name}"></td>
+                        <td class="border p-2"
+                            th:text="${#temporals.format(invoiceSale.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                        <td class="border p-2"
+                            th:text="${#temporals.format(invoiceSale.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                         <td class="border p-2">
                             <div class="flex gap-2 w-full">
                                 <button class="w-1/2 bg-blue-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-blue-500 hover:text-white transition duration-200"
-                                        data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
-                                        data-icon='<i class="fas fa-pencil-alt"></i>'
-                                        th:onclick="'window.location.href=\'/owner/updateStore/' + ${store.id} + '\''">
-                                    <i class="fas fa-pencil-alt mr-1"></i> Sửa
+                                        data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
+                                        data-icon='<i class="fas fa-info"></i>'
+                                        th:onclick="'window.location.href=\'/invoiceDetail/' + ${invoiceSale.id} + '\''">
+                                    <i class="fas fa-info mr-1"></i> Chi tiết
                                 </button>
 
                                 <button class="w-1/2 bg-red-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
                                      hover:bg-red-700 hover:text-white transition duration-200"
-                                        th:onclick="'showConfirmModal(' + ${store.id} + ')'"
+                                        th:onclick="'showConfirmModal(' + ${invoiceSale.id} + ')'"
                                         data-full='<i class="fas fa-trash mr-1"></i> Xóa'
                                         data-icon='<i class="fas fa-trash"></i>'>
                                     <i class="fas fa-trash mr-1"></i> Xóa
@@ -171,7 +199,7 @@
             <button id="prevPage" th:disabled="${currentPage == 0}"
                     th:class="${currentPage == 0 ? 'bg-gray-200 text-black px-8 py-2 rounded' : 'bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200'}"
                     th:text="Trước"
-                    th:onclick="|window.location.href='/owner/manageStores?page=' + ${currentPage - 1} + '&size=' + ${recordsPerPage}|">
+                    th:onclick="|window.location.href='/invoiceSale?page=' + ${currentPage - 1} + '&size=' + ${recordsPerPage}|">
             </button>
 
             <div class="flex items-center">
@@ -182,16 +210,16 @@
             </div>
 
             <select id="recordsPerPage" class="border rounded px-4 py-2"
-                    th:onchange="'window.location.href=\'/owner/manageStores?page=0&size=\' + this.value'">
-                <option value="10" th:selected="${recordsPerPage == 10}">10 Cửa hàng</option>
-                <option value="20" th:selected="${recordsPerPage == 20}">20 Cửa hàng</option>
-                <option value="50" th:selected="${recordsPerPage == 50}">50 Cửa hàng</option>
+                    th:onchange="'window.location.href=\'/invoiceSale?page=0&size=\' + this.value'">
+                <option value="10" th:selected="${recordsPerPage == 10}">10 Hóa đơn</option>
+                <option value="20" th:selected="${recordsPerPage == 20}">20 Hóa đơn</option>
+                <option value="50" th:selected="${recordsPerPage == 50}">50 Hóa đơn</option>
             </select>
 
             <button id="nextPage" th:disabled="${currentPage + 1 >= totalPages}"
                     th:class="${currentPage + 1 >= totalPages ? 'bg-gray-200 text-black px-8 py-2 rounded' : 'bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200'}"
                     th:text="Sau"
-                    th:onclick="|window.location.href='/owner/manageStores?page=' + ${currentPage + 1} + '&size=' + ${recordsPerPage}|">
+                    th:onclick="|window.location.href='/invoiceSale?page=' + ${currentPage + 1} + '&size=' + ${recordsPerPage}|">
             </button>
         </div>
     </div>
@@ -201,7 +229,7 @@
 <div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 hidden">
     <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
         <h3 class="text-xl font-semibold mb-4">Xác nhận xóa</h3>
-        <p>Bạn có chắc chắn muốn xóa cửa hàng này không?</p>
+        <p>Bạn có chắc chắn muốn xóa hoá đơn này không?</p>
         <div class="flex justify-between mt-4">
             <button id="confirmDelete" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Xóa</button>
             <button id="cancelDelete" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-500">Hủy bỏ</button>

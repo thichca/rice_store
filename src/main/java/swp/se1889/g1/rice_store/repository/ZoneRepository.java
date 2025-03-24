@@ -4,11 +4,13 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import swp.se1889.g1.rice_store.entity.Product;
+import swp.se1889.g1.rice_store.dto.ProductZoneDTO;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.Zone;
 
@@ -26,10 +28,21 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> {
     Page<Zone> findByStoreId(Long storeId, Pageable pageable);
 
     Optional<Zone> findByIdAndIsDeletedFalse(Long id);
-    Page<Zone> findByStoreAndIsDeletedFalse(Store store , Pageable pageable);
-   // Tìm khu vực theo tên và chỉ lấy những khu vực chưa bị xóa
-   List<Zone> findByNameContainingIgnoreCaseAndStoreAndIsDeletedFalse(String name, Store store);
-   List<Zone> findByStore(Store store);
+
+    List<Zone> findByStoreAndIsDeletedFalse(Store store);
+
+    @Query("SELECT new swp.se1889.g1.rice_store.dto.ProductZoneDTO(p.id, p.name, z.id,z.name, p.price, z.quantity) " +
+            "FROM Zone z " +
+            "JOIN z.product p " +
+            "WHERE z.isDeleted = false AND p.name LIKE %:query%")
+    List<ProductZoneDTO> searchProductZoneDetails(@Param("query") String query);
+
+    Page<Zone> findByStoreAndIsDeletedFalse(Store store, Pageable pageable);
+
+    // Tìm khu vực theo tên và chỉ lấy những khu vực chưa bị xóa
+    List<Zone> findByNameContainingIgnoreCaseAndStoreAndIsDeletedFalse(String name, Store store);
+
+    List<Zone> findByStore(Store store);
     Zone findByStoreIdAndProductId(Long storeId, Long productId);
     List<Zone> findByStoreId(Long storeId);
 

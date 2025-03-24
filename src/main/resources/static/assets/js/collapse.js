@@ -20,7 +20,7 @@ document.getElementById("toggleButtons").addEventListener("click", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
     const toggleButton = document.getElementById("toggleButtons");
-    const actionCells = document.querySelectorAll("td:nth-child(8), th:nth-child(8)");
+    const actionCells = document.querySelectorAll("td:nth-child(12), th:nth-child(12)");
     let isCollapsed = false;
 
     toggleButton.addEventListener("click", function () {

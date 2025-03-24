@@ -25,34 +25,35 @@ public class Invoices {
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false) // Thay thế @Column bằng @JoinColumn
     private Customer customer;
-    @Column(name = "total_price" , nullable = false)
+    @Column(name = "total_price", nullable = false)
     private BigDecimal totalPrice;
-    @Column(name = "discount" , nullable = false)
+    @Column(name = "discount", nullable = false)
     private BigDecimal discount;
-    @Column(name = "final_amount" , nullable = false)
+    @Column(name = "final_amount", nullable = false)
     private BigDecimal finalAmount;
-    @Column(name = "note" , nullable = false)
+    @Column(name = "note", nullable = false)
     private String note;
-    @Column(name = "created_at" , nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-    @Column(name = "updated_at" , nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
     @ManyToOne
-    @JoinColumn (name = "created_by" , nullable = false)
+    @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
-    @Column(name = "updated_by" , nullable = false)
+    @Column(name = "updated_by", nullable = false)
     private String updatedBy;
-    @Column(name = "is_deleted" , nullable = false)
+    @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
-    @Column(name = "payment_status" , nullable = false)
+    @Column(name = "payment_status", nullable = false)
     private String status;
-    @Column(name = "quantity" , nullable = false)
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private InvoiceType type;
-    public enum InvoiceType{
-        PURCHASE , SALE
+
+    public enum InvoiceType {
+        PURCHASE, Sale
     }
 
     public Long getId() {

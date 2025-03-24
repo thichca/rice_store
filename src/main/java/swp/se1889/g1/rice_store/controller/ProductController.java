@@ -9,19 +9,18 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import swp.se1889.g1.rice_store.dto.ProductDTO;
+import swp.se1889.g1.rice_store.dto.ProductZoneDTO;
 import swp.se1889.g1.rice_store.entity.Product;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
+import swp.se1889.g1.rice_store.entity.Zone;
 import swp.se1889.g1.rice_store.service.ProductService;
 
 import jakarta.validation.Valid;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class ProductController {

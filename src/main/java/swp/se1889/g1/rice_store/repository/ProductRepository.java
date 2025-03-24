@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import swp.se1889.g1.rice_store.dto.ProductZoneDTO;
 import swp.se1889.g1.rice_store.entity.Product;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import swp.se1889.g1.rice_store.entity.Zone;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -97,6 +99,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                                                 Pageable pageable);
     @Query("SELECT COUNT(p) FROM Product p WHERE p.createdBy = :createdBy AND p.isDeleted = false")
     long countByCreatedBy(@Param("createdBy") User createdBy);
+
+
 
     List<Product> findByNameContaining(String name);
 }

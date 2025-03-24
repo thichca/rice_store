@@ -28,6 +28,7 @@ public class HomeController {
 
     @Autowired
     private CustomerService customerService;
+
     @Autowired
     private InvoicesService invoiceService;
 
@@ -103,5 +104,14 @@ public class HomeController {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
         return "baseFE";
+    }
+
+    @GetMapping("/createOrder")
+    public String getSell(HttpSession session, Model model) {
+        Store store = (Store) session.getAttribute("store");
+        model.addAttribute("store", store);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
+        return "createOrder";
     }
 }

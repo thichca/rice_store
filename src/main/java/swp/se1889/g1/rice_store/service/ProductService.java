@@ -1,6 +1,8 @@
 
 package swp.se1889.g1.rice_store.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,11 +11,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import swp.se1889.g1.rice_store.dto.ProductDTO;
+import swp.se1889.g1.rice_store.dto.ProductZoneDTO;
 import swp.se1889.g1.rice_store.entity.Product;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.ProductRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
+import swp.se1889.g1.rice_store.repository.ZoneRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,6 +34,7 @@ public class ProductService {
 
     @Autowired
     private UserRepository userRepository;
+
     // Lấy tổng số sản phẩm theo user hiện tại
     public long countProductsByCurrentUser() {
         User currentUser = getCurrentUser();
@@ -39,6 +44,8 @@ public class ProductService {
         return 0;
     }
 
+    @Autowired
+    private ZoneRepository zoneRepository;
 
     public Page<Product> getProductsByCurrentUser(int page, int size) {
         User currentUser = getCurrentUser();
@@ -195,6 +202,12 @@ public class ProductService {
         return productRepository.findProductsByDescriptionAndPrice(storeId, "%" + keyword + "%", minPrice, maxPrice, pageable);
     }
 
+    public List<ProductZoneDTO> searchProducts(String query) {
+        return zoneRepository.searchProductZoneDetails(query);
+    }
 
+    public Product findProductById(Long id) {
+        return productRepository.findById(id).get();
+    }
 
 }
