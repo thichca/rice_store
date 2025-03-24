@@ -6,8 +6,10 @@
     <title>Giao diện Hóa Đơn</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
 </head>
 <body class="bg-gray-50">
+<div th:replace="~{fragments/header :: header}"></div><br><br>
 <div class="max-w-screen-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
     <form id="invoiceForm" th:action="@{/owner/invoices/import}" method="post">
         <input type="hidden" name="storeId" th:value="${store.id}">
@@ -323,5 +325,7 @@
         $('[name="remainingAmount"]').val(remaining.toFixed(2));
     }
 </script>
+<div th:replace="~{fragments/noti :: noti}"></div>
+<div th:replace="~{fragments/script :: script}"></div>
 </body>
 </html>

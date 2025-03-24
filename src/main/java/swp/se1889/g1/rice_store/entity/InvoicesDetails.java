@@ -24,7 +24,7 @@ public class InvoicesDetails {
      @JoinColumn(name = "product_id" , nullable = false)
      private Product product;
      @ManyToOne
-     @JoinColumn(name = "zone_id" , nullable = false)
+     @JoinColumn(name = "zone_id" , nullable = true)
      private Zone zone;
      @ManyToOne
      @JoinColumn(name = "customer_id" , nullable = false)
@@ -49,6 +49,16 @@ public class InvoicesDetails {
     private User createdBy;
     @Column(name = "updated_by", nullable = false)
     private String updatedBy;
+    @Transient
+    private String zoneName;
+
+    public String getZoneName() {
+        return zoneName;
+    }
+
+    public void setZoneName(String zoneName) {
+        this.zoneName = zoneName;
+    }
 
     public Long getId() {
         return id;

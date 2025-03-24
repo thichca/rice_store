@@ -238,7 +238,6 @@ public InvoiceDetailDTO getInvoice(Long id) {
         if (invoices == null) {
             throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + id);
         }
-
         // Chuyển đổi trạng thái thành giá trị hợp lệ
         if ("Paid".equalsIgnoreCase(newStatus)) {
             newStatus = "Paid";  // Hoặc giá trị hợp lệ trong database
@@ -247,10 +246,7 @@ public InvoiceDetailDTO getInvoice(Long id) {
         } else {
             throw new IllegalArgumentException("Trạng thái không hợp lệ: " + newStatus);
         }
-
         invoices.setStatus(newStatus);
         return invoiceRepository.save(invoices);
     }
-
-
 }

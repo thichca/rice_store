@@ -69,6 +69,8 @@ public class InvoiceController {
         model.addAttribute("invoice", new InvoicesDTO());
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
         model.addAttribute("customer", new Customer());
         model.addAttribute("product", new Product());
         model.addAttribute("zone", new Zone());
@@ -109,33 +111,29 @@ public class InvoiceController {
     }
 
     @GetMapping("/detail/{id}")
-    public String getInvoiceDetail(@PathVariable Long id, Model model) {
-        try {
-            // Lấy hóa đơn theo ID
-            Optional<Invoices> optionalInvoice = invoicesRepository.findById(id);
-            if (optionalInvoice.isEmpty()) {
-                return "redirect:/owner/invoices"; // Quay lại danh sách nếu không tìm thấy hóa đơn
+    public String getInvoiceDetail(@PathVariable Long id, Model model ) {
+        Invoices invoices = invoicesRepository.findById(id).orElse(null);
+       List<InvoicesDetails> invoicesDetails = invoiceDetailRepository.findByInvoice(invoices);
+        for (InvoicesDetails detail : invoicesDetails) {
+            Zone zone = detail.getZone();
+            if (zone != null) {
+                if (zone.getIsDeleted()) {
+                    detail.setZoneName("Khu vực đã bị xóa");
+                } else {
+                    detail.setZoneName(zone.getName());
+                }
+
+            } else {
+                detail.setZoneName("Khu vực đã bị xóa");
             }
-
-            Invoices invoice = optionalInvoice.get();
-
-            // Lấy danh sách chi tiết hóa đơn (Chỉ lấy Zone hợp lệ)
-            List<InvoicesDetails> invoiceDetails = invoiceDetailRepository.findActiveInvoiceDetails(invoice);
-
-            // Nếu danh sách chi tiết rỗng, có thể báo lỗi
-            if (invoiceDetails.isEmpty()) {
-                model.addAttribute("zoneError", "Hóa đơn không có sản phẩm hợp lệ do khu vực bị xóa.");
-            }
-
-            // Thêm dữ liệu vào model
-            model.addAttribute("invoice", invoice);
-            model.addAttribute("invoiceDetails", invoiceDetails);
-            return "invoice_detail"; // Chuyển đến trang chi tiết
-
-        } catch (Exception e) {
-            model.addAttribute("zoneError", "Có lỗi xảy ra khi lấy thông tin hóa đơn.");
-            return "invoice_detail";
         }
+       model.addAttribute("invoiceDetails", invoicesDetails);
+       model.addAttribute("invoice", invoices);
+       User user = userService.getCurrentUser();
+       model.addAttribute("user", user);
+       Store store = (Store) model.getAttribute("store");
+       model.addAttribute("store", store);
+        return "invoice_detail";
     }
     @GetMapping("/edit/{id}")
     public  String updateInvoices(

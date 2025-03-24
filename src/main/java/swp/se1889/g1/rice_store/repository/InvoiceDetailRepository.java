@@ -18,7 +18,8 @@ import java.util.Optional;
 public interface InvoiceDetailRepository extends JpaRepository<InvoicesDetails, Long> {
     Optional<InvoicesDetails> findById(Long id);
     List<InvoicesDetails> findByInvoice(Invoices invoice);
-
+    @Query("SELECT i FROM InvoicesDetails i WHERE i.invoice.id = :invoiceId AND i.zone.isDeleted = false")
+    List<InvoicesDetails> findByInvoiceIdAndZoneNotDeleted(@Param("invoiceId") Long invoiceId);
     // Chỉ lấy chi tiết hóa đơn có Zone chưa bị xóa
     @Query("SELECT d FROM InvoicesDetails d WHERE d.invoice = :invoice AND d.zone.isDeleted = false")
     List<InvoicesDetails> findActiveInvoiceDetails(@Param("invoice") Invoices invoice);

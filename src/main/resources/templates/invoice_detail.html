@@ -8,10 +8,11 @@
 </head>
 <body class="bg-gray-100 p-6">
 <div th:replace="~{fragments/header :: header}"></div><br><br>
-<div th:if="${zoneError != null}" class="error-message">
-    <p th:text="${zoneError}"></p>
-</div>
-<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md" th:unless="${zoneError != null}">
+<!--<div th:if="${zoneError != null}" class="error-message">-->
+<!--    <p th:text="${zoneError}"></p>-->
+<!--</div>-->
+<!--th:unless="${zoneError != null}"-->
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md" >
     <h1 class="text-2xl font-bold text-center mb-6">Chi Tiết Hóa Đơn</h1>
 
     <input type="hidden" th:value="${invoice.id}">
@@ -31,6 +32,7 @@
                 <th class="p-2 border">Tên Sản Phẩm</th>
                 <th class="p-2 border">Số Lượng</th>
                 <th class="p-2 border">Đơn Giá</th>
+                <th class="p-2 border">Khu vực</th>
             </tr>
             </thead>
             <tbody>
@@ -38,6 +40,7 @@
                 <td class="p-2 border" th:text="${detail.product.name}"></td>
                 <td class="p-2 border text-center" th:text="${detail.quantity}"></td>
                 <td class="p-2 border text-right" th:text="${#numbers.formatInteger(detail.unitPrice, 0, 'COMMA')} + ' VNĐ'"></td>
+                <td class="p-2 border" th:text="${detail.zoneName}"></td>
             </tr>
             </tbody>
         </table>
