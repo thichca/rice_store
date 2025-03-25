@@ -6,51 +6,107 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 p-6">
-<div th:replace="~{fragments/header :: header}"></div><br><br>
-<!--<div th:if="${zoneError != null}" class="error-message">-->
-<!--    <p th:text="${zoneError}"></p>-->
-<!--</div>-->
-<!--th:unless="${zoneError != null}"-->
-<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md" >
-    <h1 class="text-2xl font-bold text-center mb-6">Chi Tiết Hóa Đơn</h1>
-
+<body>
+<div class="fixed top-0 left-0 w-full">
+    <div th:replace="~{fragments/header :: header}"></div>
+</div>
+<div class="mt-28 container mx-auto p-4">
     <input type="hidden" th:value="${invoice.id}">
+    <section class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">
+            Chi tiết đơn hàng
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h3 class="text-lg font-medium">
+                    Thông tin khách hàng
+                </h3>
+                <p class="mt-2">
+                    <strong>Tên: </strong><span th:text="${invoice.customer.getName()}"></span>
+                </p>
 
-    <!-- Khách hàng -->
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Tên Khách Hàng:</label>
-        <p th:text="${invoice.customer.name}" class="mt-1 block w-full border border-gray-300 rounded-md p-2"></p>
-    </div>
+                <p class="mt-2">
+                    <strong>Email: </strong><span th:text="${invoice.customer.getEmail()}"></span>
+
+                </p>
+                <p class="mt-2">
+                    <strong>Số điện thoại: </strong><span th:text="${invoice.customer.getPhone()}"></span>
+
+                </p>
+                <p class="mt-2">
+                    <strong>Địa chỉ: </strong><span th:text="${invoice.customer.getAddress()}"></span>
+
+                </p>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium">
+                    Thông tin đơn hàng
+                </h3>
+                <p class="mt-2">
+                    <strong>Mã đơn hàng: </strong><span th:text="${invoice.getId()}"></span>
+                </p>
+                <p class="mt-2">
+                    <strong>Ngày tạo: </strong><span
+                        th:text="${#temporals.format(invoice.getCreatedAt(), 'dd/MM/yyyy HH:mm:ss')}"></span>
+                </p>
+                <p class="mt-2">
+                    <strong>Trạng thái: </strong>
+                    <span th:if="${invoice.getStatus() == 'Paid'}">Đã thanh toán</span>
+                    <span th:if="${invoice.getStatus() == 'Unpaid'}">Chưa thanh toán</span>
+                    <span th:if="${invoice.getStatus() == 'In_debt'}">Ghi nợ</span>
+
+                </p>
+                <p class="mt-2">
+                    <strong>Số tiền (VNĐ): </strong><span
+                        th:text="${#numbers.formatDecimal(invoice.getFinalAmount(), 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                </p>
+            </div>
+        </div>
+    </section>
 
     <!-- Bảng danh sách sản phẩm -->
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Danh sách sản phẩm:</label>
-        <table class="w-full border border-gray-300 rounded-md mt-2">
+    <section class="bg-white p-6 rounded-lg shadow-lg mt-6">
+        <h2 class="text-xl font-semibold mb-4">
+            Sản phẩm trong đơn hàng
+        </h2>
+        <table class="min-w-full bg-white">
             <thead>
-            <tr class="bg-gray-200">
-                <th class="p-2 border">Tên Sản Phẩm</th>
-                <th class="p-2 border">Số Lượng</th>
-                <th class="p-2 border">Đơn Giá</th>
-                <th class="p-2 border">Khu vực</th>
+            <tr>
+                <th class="py-2 px-4 border p-2">
+                    Tên sản phẩm
+                </th>
+                <th class="py-2 px-4 border p-2">
+                    Khu vực
+                </th>
+                <th class="py-2 px-4 border p-2">
+                    Số lượng
+                </th>
+                <th class="py-2 px-4 border p-2">
+                    Giá
+                </th>
+                <th class="py-2 px-4 border p-2">
+                    Tổng cộng (VNĐ)
+                </th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="detail : ${invoiceDetails}">
-                <td class="p-2 border" th:text="${detail.product.name}"></td>
-                <td class="p-2 border text-center" th:text="${detail.quantity}"></td>
-                <td class="p-2 border text-right" th:text="${#numbers.formatInteger(detail.unitPrice, 0, 'COMMA')} + ' VNĐ'"></td>
-                <td class="p-2 border" th:text="${detail.zoneName}"></td>
-            </tr>
+            <th:block th:each="invoiceDetail, iterStat : ${invoiceDetails}">
+                <tr>
+                    <td class="py-2 px-4 border p-2" th:text="${productNameList[iterStat.index]}"></td>
+                    <td class="py-2 px-4 border p-2" th:text="${zoneNameList[iterStat.index]}"></td>
+                    <td class="py-2 px-4 border p-2" th:text="${invoiceDetail.getQuantity()}"></td>
+                    <td class="py-2 px-4 border p-2" th:text="${#numbers.formatDecimal(invoiceDetail.getUnitPrice(), 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+                    <td class="py-2 px-4 border p-2" th:text="${#numbers.formatDecimal(invoiceDetail.getTotalPrice(), 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+                </tr>
+            </th:block>
             </tbody>
         </table>
-    </div>
-
+    </section>
     <!-- Nút quay lại -->
-    <div class="flex justify-center">
-        <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                th:onclick="|window.location.href='@{/owner/invoices}'|">Quay Lại</button>
-    </div>
+    <button class="mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onclick="window.location.href='/owner/invoices'">
+        Quay Lại
+    </button>
 </div>
 </body>
 </html>

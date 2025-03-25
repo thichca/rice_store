@@ -28,6 +28,7 @@ public class EmployeeService {
     private EmployeeRepository employeeRepository;
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     //lấy danh sách nhân viên
     public List<User> getEmployees(Long storeId, String role) {
         return employeeRepository.findByCreatedByAndRole(storeId, role);
@@ -47,7 +48,7 @@ public class EmployeeService {
     }
 
     //thêm tài khoản và thông tin employee
-    public User addNewEmployee (Long storeId, EmployeeDTO employeeDTO, RedirectAttributes redirectAttributes){
+    public User addNewEmployee(Long storeId, EmployeeDTO employeeDTO, RedirectAttributes redirectAttributes) {
         if (employeeRepository.findByUsername(employeeDTO.getUserName()).isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Tên đăng nhập đã tồn tại");
             return null;
@@ -74,20 +75,20 @@ public class EmployeeService {
 
         try {
             employeeRepository.save(user);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Error while saving employee: " + e.getMessage());
         }
         return user;
     }
 
-    public User updateEmployee (Long storeId, EmployeeDTO employeeDTO, RedirectAttributes redirectAttributes){
+    public User updateEmployee(Long storeId, EmployeeDTO employeeDTO, RedirectAttributes redirectAttributes) {
         User user = new User();
         return user;
     }
 
     //lấy nhân viên theo id
     public User getEmployeeById(Long id) {
-        return employeeRepository.findById(id).orElseThrow(()->new RuntimeException("User not found"));
+        return employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     //xóa và khôi phục
@@ -114,5 +115,9 @@ public class EmployeeService {
         }
 
         return false;
+    }
+
+    public Page<User> advancedSearchEmployees(Long storeId, String role, boolean isDeleted, String name, String email, String phone, String address, Pageable pageable) {
+        return employeeRepository.advancedSearchEmployees(storeId, role, isDeleted, name, email, phone, address, pageable);
     }
 }

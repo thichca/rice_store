@@ -45,12 +45,12 @@ public class ForgotPasswordController {
         User user = userRepository.findByEmail(email);
 
         if (user == null) {
-            redirectAttributes.addAttribute("error", "Email not found");
+            redirectAttributes.addFlashAttribute("error", "Email không tồn tại");
             return "redirect:/forgotPassword";
         }
 
         int otp = otpGenerator();
-        MailBodyDTO mailBodyDTO = new MailBodyDTO(email, "OTP for Forgot Password request", "This is the OTP for your Forgot Password request: " + otp);
+        MailBodyDTO mailBodyDTO = new MailBodyDTO(email, "OTP cho yêu cầu Quên mật khẩu", "OTP tồn tại trong vòng 1 phút! Đây là OTP cho yêu cầu Quên mật khẩu của bạn: " + otp );
 
         ForgotPassword fp = new ForgotPassword(otp, new Date(System.currentTimeMillis() + 60 * 1000), user.getId());
         emailService.sendSimpleMessage(mailBodyDTO);
@@ -72,21 +72,21 @@ public class ForgotPasswordController {
         User user = userRepository.findByEmail(email);
 
         if (user == null) {
-            redirectAttributes.addAttribute("error", "User not found");
+            redirectAttributes.addAttribute("error", "Kông tìm thấy người dùng");
             return "redirect:/forgotPassword/verify?email=" + email;
         }
 
         Optional<ForgotPassword> fpOptional = forgotPasswordRepository.findByOtpAndUser(otp, user.getId());
 
         if (fpOptional.isEmpty()) {
-            redirectAttributes.addAttribute("error", "Invalid OTP");
+            redirectAttributes.addFlashAttribute("error", "OTP không hợp lệ");
             return "redirect:/forgotPassword/verify?email=" + email;
         }
 
         ForgotPassword fp = fpOptional.get();
         if (fp.getExpirationTime().before(Date.from(Instant.now()))) {
             forgotPasswordRepository.deleteById(fp.getFpid());
-            redirectAttributes.addAttribute("error", "OTP has expired");
+            redirectAttributes.addFlashAttribute("error", "OTP đã hết hạn");
             return "redirect:/forgotPassword/verify?email=" + email;
         }
 
@@ -105,20 +105,20 @@ public class ForgotPasswordController {
     @PostMapping("/updatePassword")
     public String updatePassword(@RequestParam String email, @RequestParam String password, @RequestParam String repeatPassword, RedirectAttributes redirectAttributes) {
         if (!Objects.equals(password, repeatPassword)) {
-            redirectAttributes.addAttribute("error", "Passwords don't match");
+            redirectAttributes.addFlashAttribute("error", "Mật khẩu không khớp");
             return "redirect:/forgotPassword/changePassword?email=" + email;
         }
 
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            redirectAttributes.addAttribute("error", "User not found");
+            redirectAttributes.addFlashAttribute("error", "Người dùng không tồn tại");
             return "redirect:/forgotPassword/changePassword?email=" + email;
         }
 
         userRepository.updatePassword(email, passwordEncoder.encode(password));
         forgotPasswordRepository.deleteByUserId(user.getId());
 
-        redirectAttributes.addAttribute("success", "Password has been changed successfully");
+        redirectAttributes.addFlashAttribute("success", "Mật khẩu đã được thay đổi thành công");
         return "redirect:/login";
     }
 

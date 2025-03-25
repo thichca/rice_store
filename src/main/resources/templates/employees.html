@@ -11,20 +11,6 @@
             height: 100%;
         }
 
-        /* The overlay background */
-        #overlay {
-            display: none; /* Hidden by default */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            justify-content: center;
-            align-items: center;
-        }
-
         #overlay1 {
             display: none; /* Hidden by default */
             position: fixed;
@@ -58,14 +44,14 @@
 
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-2xl font-semibold">Danh sách nhân viên</h1>
-            <a href="/owner/employees/addEmployee" >
+            <a href="/owner/employees/addEmployee">
                 <button name="addEmployee" id="showFormButton"
                         class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
                     <i class="fas fa-plus mr-2"></i> Thêm Nhân viên
                 </button>
             </a>
         </div>
-        <a href="/shifts/schedule" >
+        <a href="/shifts/schedule">
             <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
                 <i class="fas fa-calendar mr-2"></i> Lịch làm Nhân viên
             </button>
@@ -73,7 +59,8 @@
         <div class="flex justify-between items-center mb-4">
 
             <!-- Update the total records count above the table -->
-            <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span th:text="${totalItems}">0</span> bản ghi</p>
+            <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span th:text="${totalItems}">0</span> bản ghi
+            </p>
             <div class="w-1/6 mb-4 bg-white rounded-lg p-4">
                 <form th:action="@{/owner/employees}" method="get">
                     <select id="search-status" name="trangthai"
@@ -163,193 +150,182 @@
                 </div>
             </div>
         </div>
+        <div class="bg-gray-50 p-4">
+            <form th:action="@{/owner/employees}" method="get">
+                <div class="flex space-x-2">
+                    <input
+                            type="text"
+                            name="name"
+                            th:value="${name}"
+                            placeholder="Tên"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <input
+                            type="text"
+                            name="address"
+                            th:value="${address}"
+                            placeholder="Địa chỉ"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <input
+                            type="text"
+                            name="phone"
+                            th:value="${phone}"
+                            placeholder="Số điện thoại"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <input
+                            type="text"
+                            name="email"
+                            th:value="${email}"
+                            placeholder="Email"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <button
+                            type="submit"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-200"
+                    >
+                        Tìm kiếm
+                    </button>
+                </div>
+            </form>
+        </div>        <div class="overflow-x-auto">
+        <table class="table-auto border-collapse border w-full">
+            <thead>
+            <tr class="bg-gray-100">
+                <th class="border p-2 relative" style="width: 105px;">Id
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative">Tên
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative">Địa chỉ
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative">SĐT
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative">Email
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative" style="width: 105px;">Ngày tạo
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative" style="width: 105px;">Cập nhật
+                    <div class="resizer"></div>
+                </th>
+                <th class="border p-2 relative" style="width: 105px;">Hành động
+                    <div class="resizer"></div>
+                </th>
 
-        <div class="overflow-x-auto">
-            <table class="table-auto border-collapse border w-full">
-                <thead>
-                <tr class="bg-gray-100">
-                    <th class="border p-2 relative">Id
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Tên
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Địa chỉ
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">SĐT
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Email
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Ngày tạo
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative">Cập nhật
-                        <div class="resizer"></div>
-                    </th>
-                    <th class="border p-2 relative w-[340px]">Hành động
-                        <div class="resizer"></div>
-                    </th>
+            </tr>
 
-                </tr>
-                <tr class="bg-gray-50">
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterFromId"
-                                   placeholder="Từ"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterToId" placeholder="Đến"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                        </div>
-                    </th>
+            </thead>
 
-                    <td class="border p-2"><input type="text" id="filterName" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
-                    <td class="border p-2"><input type="text" id="filterAddress" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
-                    <td class="border p-2"><input type="text" id="filterPhone" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
-                    <td class="border p-2"><input type="text" id="filterEmail" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
+            <tbody id="tableBody">
+            <tr th:each="employee : ${employees}">
+                <td class="border p-2" th:text="${employee.getId()}"></td>
+                <td class="border p-2" th:text="${employee.getName()}"></td>
+                <td class="border p-2" th:text="${employee.getAddress()}"></td>
+                <td class="border p-2" th:text="${employee.getPhone()}"></td>
+                <td class="border p-2" th:text="${employee.getEmail()}"></td>
+                <td class="border p-2"
+                    th:text="${#temporals.format(employee.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                <td class="border p-2"
+                    th:text="${#temporals.format(employee.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                <td class="border p-2">
+                    <div class="flex gap-2 w-full">
+                        <form th:if="${!employee.isDeleted()}" class="w-1/2 "
+                              th:action="@{/owner/employees/{id}(id=${employee.getId()})}" method="get"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
+                            <button type="submit"
 
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterFromCreated"
-                                   placeholder="Từ"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterToCreated"
-                                   placeholder="Đến"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                        </div>
-                    </th>
-
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterFromUpdated"
-                                   placeholder="Từ"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterToUpdated"
-                                   placeholder="Đến"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                        </div>
-                    </th>
-
-                    <td class="border p-2">
-                        <div class="flex gap-2 w-full">
-                            <button id="clearFilters" class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-red-500 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-times mr-1"></i> Bỏ lọc'
-                                    data-icon='<i class="fas fa-times"></i>'>
-                                <i class="fas fa-times mr-1"></i> Bỏ lọc
-                            </button>
-
-
-                            <button id="toggleButtons" class="w-1/2 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                hover:bg-blue-500 hover:text-white transition duration-200">
-                                <i class="fas fa-angle-right mr-1"></i> Thu gọn
-                            </button>
-                        </div>
-                    </td>
-                    <td hidden="hidden"></td>
-                </tr>
-
-                </tr>
-                </thead>
-
-                <tbody id="tableBody">
-                <tr th:each="employee : ${employees}">
-                    <td class="border p-2" th:text="${employee.getId()}"></td>
-                    <td class="border p-2" th:text="${employee.getName()}"></td>
-                    <td class="border p-2" th:text="${employee.getAddress()}"></td>
-                    <td class="border p-2" th:text="${employee.getPhone()}"></td>
-                    <td class="border p-2" th:text="${employee.getEmail()}"></td>
-                    <td class="border p-2"
-                        th:text="${#temporals.format(employee.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                    <td class="border p-2"
-                        th:text="${#temporals.format(employee.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                    <td class="border p-2">
-                        <div class="flex gap-2 w-full">
-                            <form th:if="${!employee.isDeleted()}" class="w-1/2 "
-                                  th:action="@{/owner/employees/{id}(id=${employee.getId()})}" method="get"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
-                                <button type="submit"
-
-                                        class="w-full bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center
+                                    class="w-full bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center
                                 toggle-btn button-xoa space-x-2
                                 hover:bg-red-600 transition duration-200"
-                                        data-full='<i class="fas fa-trash-alt"></i> Xóa'
-                                        data-icon='<i class="fas fa-trash-alt"></i>'>
-                                    <i class="fas fa-trash-alt"></i>
-                                    <span>Xóa</span>
-                                </button>
-                            </form>
-
-                            <form th:action="@{/owner/employees/{id}(id=${employee.getId()})}" method="get"
-                                  th:unless="${!employee.isDeleted()}" class="w-1/2"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục?');">
-                                <button
-                                        type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center toggle-btn button-khoi-phuc space-x-2
-                                            hover:bg-green-600 hover:text-white transition duration-200"
-                                        data-full='<i class="fas fa-undo mr-1"></i> Khôi Phục'
-                                        data-icon='<i class="fas fa-undo mr-1-alt"></i>'>
-                                    <i class="fas fa-undo mr-1"></i> <span>Khôi Phục</span>
-                                </button>
-                            </form>
-                            <button
-                                    class="showFormButton1 w-1/2 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-yellow-500 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
-                                    data-icon='<i class="fas fa-pencil-alt"></i>'>
-                                <i class="fas fa-pencil-alt mr-1"></i> Sửa
+                                    data-full='<i class="fas fa-trash-alt"></i> Xóa'
+                                    data-icon='<i class="fas fa-trash-alt"></i>'>
+                                <i class="fas fa-trash-alt"></i>
+                                <span>Xóa</span>
                             </button>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+                        </form>
 
-        <div class="w-full flex justify-center items-center mt-4 gap-12">
-            <a th:if="${currentPage > 0}"
-               th:href="@{/owner/employees(page=${currentPage - 1}, size=${pageSize}, trangthai=${trangthai})}"
-               class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
-                Trước
-            </a>
-            <button id="prevPage" th:unless="${currentPage > 0}"
-                    class="bg-gray-100 text-gray-400 px-8 py-2 rounded cursor-not-allowed" disabled>
-                Trước
-            </button>
-            <div class="flex items-center">
-                <span>Trang</span>
-                <input id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center"  th:value="${currentPage + 1}"></input>
-                <span id="totalPages" th:text="'/ ' + ${totalPages}">/ 1</span>
-            </div>
-            <select id="recordsPerPage" class="border rounded px-4 py-2"
-                    th:data-trangthai="${trangthai}"
-                    onchange="window.location.href = '/owner/employees?page=0&size=' + this.value + '&trangthai=' + this.dataset.trangthai">
-                <option th:value="5" th:selected="${pageSize == 5}">5 Bản ghi</option>
-                <option th:value="10" th:selected="${pageSize == 10}">10 Bản ghi</option>
-                <option th:value="20" th:selected="${pageSize == 20}">20 Bản ghi</option>
-            </select>
-
-            <a th:if="${currentPage < totalPages - 1}"
-               th:href="@{/owner/employees(page=${currentPage + 1}, size=${pageSize}, trangthai=${trangthai})}"
-               class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
-                Sau
-            </a>
-            <button id="nextPage" th:unless="${currentPage < totalPages - 1}"
-                    class="bg-gray-100 text-gray-400 px-8 py-2 rounded cursor-not-allowed" disabled>
-                Sau
-            </button>
-        </div>
-
-
+                        <form th:action="@{/owner/employees/{id}(id=${employee.getId()})}" method="get"
+                              th:unless="${!employee.isDeleted()}" class="w-1/2"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục?');">
+                            <button
+                                    type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center toggle-btn button-khoi-phuc space-x-2
+                                            hover:bg-green-600 hover:text-white transition duration-200"
+                                    data-full='<i class="fas fa-undo mr-1"></i> Khôi Phục'
+                                    data-icon='<i class="fas fa-undo mr-1-alt"></i>'>
+                                <i class="fas fa-undo mr-1"></i> <span>Khôi Phục</span>
+                            </button>
+                        </form>
+                        <button
+                                class="showFormButton1 w-1/2 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-yellow-500 hover:text-white transition duration-200"
+                                data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
+                                data-icon='<i class="fas fa-pencil-alt"></i>'>
+                            <i class="fas fa-pencil-alt mr-1"></i> Sửa
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
-</div>
+    </div>
 
-<div th:replace="~{fragments/script :: script}"></div>
+
+    <div class="w-full flex justify-center items-center mt-4 gap-12">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/owner/employees(page=${currentPage - 1}, size=${pageSize}, trangthai=${trangthai})}"
+           class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+            Trước
+        </a>
+        <button id="prevPage" th:unless="${currentPage > 0}"
+                class="bg-gray-100 text-gray-400 px-8 py-2 rounded cursor-not-allowed" disabled>
+            Trước
+        </button>
+        <div class="flex items-center">
+            <span>Trang</span>
+            <input id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center"
+                   th:value="${currentPage + 1}"></input>
+            <span id="totalPages" th:text="'/ ' + ${totalPages}">/ 1</span>
+        </div>
+        <select id="recordsPerPage" class="border rounded px-4 py-2"
+                th:data-trangthai="${trangthai}"
+                onchange="window.location.href = '/owner/employees?page=0&size=' + this.value + '&trangthai=' + this.dataset.trangthai">
+            <option th:value="5" th:selected="${pageSize == 5}">5 Bản ghi</option>
+            <option th:value="10" th:selected="${pageSize == 10}">10 Bản ghi</option>
+            <option th:value="20" th:selected="${pageSize == 20}">20 Bản ghi</option>
+        </select>
+
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="@{/owner/employees(page=${currentPage + 1}, size=${pageSize}, trangthai=${trangthai})}"
+           class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
+            Sau
+        </a>
+        <button id="nextPage" th:unless="${currentPage < totalPages - 1}"
+                class="bg-gray-100 text-gray-400 px-8 py-2 rounded cursor-not-allowed" disabled>
+            Sau
+        </button>
+    </div>
+
+
+</div>
+</div>
+<script th:src="@{/assets/js/resizeTable.js}"></script>
+<script th:src="@{/assets/js/collapse.js}"></script>
+<script th:src="@{/assets/js/currentPage.js}"></script>
+<script th:src="@{/assets/js/confirmDelete.js}"></script>
+<script th:src="@{/assets/js/selectDate.js}"></script>
+<script th:src="@{/assets/js/filterStores.js}"></script>
+<script th:src="@{/assets/js/paginationRecord.js}"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<!--<div th:replace="~{fragments/script :: script}"></div>-->
 
 <script>
     var overlay1 = document.getElementById("overlay1");
