@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import swp.se1889.g1.rice_store.dto.ProductZoneDTO;
 import swp.se1889.g1.rice_store.entity.Product;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.Zone;
@@ -36,4 +37,10 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> , JpaSpecifica
 
     List<Zone> findByNameContainingIgnoreCase(String name);
     List<Zone> findByStoreIdAndIsDeletedFalse(Long storeId);
+
+    @Query("SELECT new swp.se1889.g1.rice_store.dto.ProductZoneDTO(p.id, p.name, z.id,z.name, p.price, z.quantity) " +
+            "FROM Zone z " +
+            "JOIN z.product p " +
+            "WHERE z.isDeleted = false AND p.name LIKE %:query%")
+    List<ProductZoneDTO> searchProductZoneDetails(@Param("query") String query);
 }

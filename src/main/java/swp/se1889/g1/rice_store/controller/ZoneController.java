@@ -290,16 +290,4 @@ public class ZoneController {
     }
 
     // Tìm kiếm sản phẩm theo tên
-    @GetMapping("/api/products/search")
-    @ResponseBody
-    public List<Map<String, Object>> searchProducts(@RequestParam("query") String query) {
-        return productService.searchProductsByName(query).stream()
-                .map(product -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("id", product.getId());
-                    map.put("text", product.getName());
-                    return map;
-                })
-                .collect(Collectors.toList());
-    }
 }

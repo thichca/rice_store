@@ -141,7 +141,7 @@ public class InvoiceController {
         return "import-invoice";
     }
 
-    @GetMapping("/zones")
+    @GetMapping("/zones1")
     @ResponseBody
     public List<Zone> getZonesByStoreId(@RequestParam("storeId") Long storeId) {
         return zoneRepository.findByStoreIdAndIsDeletedFalse(storeId);
@@ -150,7 +150,7 @@ public class InvoiceController {
     @GetMapping("/search-products")
     @ResponseBody
     public List<Product> searchProducts(@RequestParam String query) {
-        return productRepository.findByNameContaining(query);
+        return productRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(query);
     }
 
     @GetMapping("/search-customer")
@@ -177,7 +177,7 @@ public class InvoiceController {
     @GetMapping("/detail/{id}")
     public String getInvoiceDetail(@PathVariable Long id, Model model ) {
         Invoices invoices = invoicesRepository.findById(id).orElse(null);
-       List<InvoicesDetails> invoicesDetails = invoiceDetailRepository.findByInvoice(invoices);
+        List<InvoicesDetails> invoicesDetails = invoiceDetailRepository.findByInvoice(invoices);
         for (InvoicesDetails detail : invoicesDetails) {
             Zone zone = detail.getZone();
             if (zone != null) {
@@ -191,12 +191,12 @@ public class InvoiceController {
                 detail.setZoneName("Khu vực đã bị xóa");
             }
         }
-       model.addAttribute("invoiceDetails", invoicesDetails);
-       model.addAttribute("invoice", invoices);
-       User user = userService.getCurrentUser();
-       model.addAttribute("user", user);
-       Store store = (Store) model.getAttribute("store");
-       model.addAttribute("store", store);
+        model.addAttribute("invoiceDetails", invoicesDetails);
+        model.addAttribute("invoice", invoices);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
+        Store store = (Store) model.getAttribute("store");
+        model.addAttribute("store", store);
         return "invoice_detail";
     }
     @GetMapping("/edit/{id}")

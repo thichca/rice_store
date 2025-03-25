@@ -116,7 +116,7 @@ public InvoiceDetailDTO getInvoice(Long id) {
         invoice.setFinalAmount(finalAmount);
         invoice.setNote(dto.getNote());
         invoice.setQuantity(invoice.getQuantity());
-        invoice.setType(Invoices.InvoiceType.PURCHASE);
+        invoice.setType(Invoices.InvoiceType.Purchase);
         invoice.setStatus("Unpaid");
         invoice.setIsDeleted(false);
         invoice.setCreatedBy(currentUser);

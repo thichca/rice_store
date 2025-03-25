@@ -53,7 +53,7 @@ public class Invoices {
     private InvoiceType type;
 
     public enum InvoiceType {
-        PURCHASE, Sale
+        Purchase, Sale
     }
 
     public Long getId() {

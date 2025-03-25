@@ -53,7 +53,7 @@ function displaySuggestions(data) {
             <td class="px-4 py-2 border text-center">${item.zoneName}</td>
             <td class="px-4 py-2 border text-center">${item.price} đ</td>
             <td class="px-4 py-2 border text-center">${item.quantity}</td>
-            
+
         `;
 
         row.dataset.maxQuantity = item.quantity;
@@ -87,7 +87,7 @@ function addProductToSelected(product) {
         <td class="py-2 px-4 border-b text-center">${product.zoneName}</td>
         <td class="py-2 px-4 border-b text-center">${product.price} đ</td>
         <td class="py-2 px-4 border-b text-center">
-            <input class="w-12 text-center rounded border-gray-300 focus:border-blue-500 outline-none transition duration-300" type="number" value="1" min="1" max="${product.quantity}" 
+            <input class="w-12 text-center rounded border-gray-300 focus:border-blue-500 outline-none transition duration-300" type="number" value="1" min="1" max="${product.quantity}"
                 oninput="updateOrderDetails()"/>
         </td>
         <td class="py-2 px-4 border-b text-center">
@@ -161,7 +161,7 @@ function updateOrderDetails() {
             <td class="py-2 px-4 border-b text-center">${orderDetailsTableBody.rows.length + 1}</td>
             <td class="py-2 px-4 border-b">${productName}</td>
             <td class="py-2 px-4 border-b text-center">
-                <input class="w-12 text-center rounded border-gray-300 focus:border-blue-500 outline-none transition duration-300" type="number" value="${quantity}" min="1" max="${maxQuantity}" 
+                <input class="w-12 text-center rounded border-gray-300 focus:border-blue-500 outline-none transition duration-300" type="number" value="${quantity}" min="1" max="${maxQuantity}"
                     oninput="updateOrderDetails()"/>
             </td>
             <td class="py-2 px-4 border-b text-center">${productPrice} đ</td>

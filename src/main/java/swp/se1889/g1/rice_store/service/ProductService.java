@@ -56,11 +56,6 @@ public class ProductService {
         return Page.empty();
     }
 
-    public List<Product> searchProductsByName(String name) {
-        return productRepository.findByNameContaining(name);
-    }
-
-
     public Product getProductToDelete(Long id) {
         return productRepository.findById(id).orElse(null);
     }
