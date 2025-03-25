@@ -146,12 +146,12 @@ public class InvoiceController {
     public List<Zone> getZonesByStoreId(@RequestParam("storeId") Long storeId) {
         return zoneRepository.findByStoreIdAndIsDeletedFalse(storeId);
     }
-
     @GetMapping("/search-products")
     @ResponseBody
     public List<Product> searchProducts(@RequestParam String query) {
-        return productRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(query);
+        return productRepository.searchProducts(query);
     }
+
 
     @GetMapping("/search-customer")
     @ResponseBody
