@@ -50,11 +50,8 @@
         <div>
             <h1 class="text-2xl font-bold">5 sản phẩm bán chạy nhất</h1>
             <ul class="list-disc pl-6">
-                <li>Gạo ST25 - 500kg</li>
-                <li>Gạo Nàng Thơm - 350kg</li>
-                <li>Gạo Lứt - 200kg</li>
-                <li>Gạo Nếp - 180kg</li>
-                <li>Gạo Nhật - 150kg</li>
+                <li th:each="p : ${topProducts}"
+                    th:text="${p[0]} + ' - ' + p[1] + ' kg'">Tên sản phẩm - Số lượng</li>
             </ul>
         </div>
 
@@ -62,11 +59,10 @@
         <div>
             <h1 class="text-2xl font-bold">5 khách hàng chi tiêu nhiều nhất</h1>
             <ul class="list-disc pl-6">
-                <li>Nguyễn Văn A - 10,000,000 đ</li>
-                <li>Trần Thị B - 8,500,000 đ</li>
-                <li>Phạm Văn C - 7,200,000 đ</li>
-                <li>Lê Thị D - 6,800,000 đ</li>
-                <li>Hoàng Văn E - 5,900,000 đ</li>
+                <li th:each="c : ${topCustomers}"
+                    th:text="${c[0]} + ' - ' + #numbers.formatDecimal(c[1], 0, 'POINT', 0, 'COMMA') + ' đ'" >
+                    Tên khách - Số tiền
+                </li>
             </ul>
         </div>
     </div>

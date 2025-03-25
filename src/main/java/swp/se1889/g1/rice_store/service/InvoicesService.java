@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,14 +48,14 @@ public class InvoicesService {
     public Page<Invoices> getPage(Store store , Pageable pageable){
         return invoiceRepository.findInvoicesByStore(store , pageable);
     }
-public InvoiceDetailDTO getInvoice(Long id) {
-    Optional<InvoicesDetails> invoice = invoiceDetailsRepository.findById(id);
-    if (invoice.isPresent()) {
-        InvoicesDetails detail = invoice.get();
-        detail.getId();
+    public InvoiceDetailDTO getInvoice(Long id) {
+        Optional<InvoicesDetails> invoice = invoiceDetailsRepository.findById(id);
+        if (invoice.isPresent()) {
+            InvoicesDetails detail = invoice.get();
+            detail.getId();
+        }
+        throw new RuntimeException("Không tìm thấy hóa đơn có ID: " + id);
     }
-    throw new RuntimeException("Không tìm thấy hóa đơn có ID: " + id);
-}
 
 
     @Transactional
@@ -188,19 +189,27 @@ public InvoiceDetailDTO getInvoice(Long id) {
         List<Object[]> results;
 
         if (storeId != null) {
-            results = invoiceRepository.getRevenueByMonthAndStore(storeId);
+            results = invoiceRepository.getSaleRevenueByMonthAndStore(storeId);
         } else {
-            results = invoiceRepository.getRevenueByMonth();
+            results = invoiceRepository.getSaleRevenueByMonth();
         }
 
         for (Object[] row : results) {
-            int month = (int) row[0]; // Lấy tháng từ database
-            BigDecimal revenue = (BigDecimal) row[1]; // Lấy doanh thu
-            monthlyRevenue.set(month - 1, revenue); // Gán vào danh sách
+            int month = (int) row[0];
+            BigDecimal revenue = (BigDecimal) row[1];
+            if (month >= 1 && month <= 6) {
+                monthlyRevenue.set(month - 1, revenue);
+            }
         }
 
         return monthlyRevenue;
     }
+    public List<Object[]> getTop5CustomersBySpending() {
+        Pageable top5 = PageRequest.of(0, 5);
+        return invoiceRepository.findTop5CustomersBySpending(top5);
+    }
+
+
 
 
     // Lấy tổng số hóa đơn theo User hiện tại
@@ -289,4 +298,22 @@ public InvoiceDetailDTO getInvoice(Long id) {
         }
         return invoiceRepository.findAll(spec,pageable);
     }
+    // Tổng doanh thu theo user và chỉ loại hóa đơn "Sale"
+    public BigDecimal getTotalSaleRevenueByCurrentUser() {
+        User currentUser = getCurrentUser();
+        if (currentUser != null) {
+            return invoiceRepository.getTotalSaleRevenueByUser(currentUser, Invoices.InvoiceType.Sale);
+        }
+        return BigDecimal.ZERO;
+    }
+
+    // Tổng doanh thu theo user + store và chỉ loại hóa đơn "Sale"
+    public BigDecimal getTotalSaleRevenueByUserAndStore(Long storeId) {
+        User currentUser = getCurrentUser();
+        if (currentUser != null && storeId != null) {
+            return invoiceRepository.getTotalSaleRevenueByUserAndStore(currentUser, storeId, Invoices.InvoiceType.Sale);
+        }
+        return BigDecimal.ZERO;
+    }
+
 }
