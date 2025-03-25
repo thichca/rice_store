@@ -3,24 +3,27 @@ package swp.se1889.g1.rice_store.controller;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import swp.se1889.g1.rice_store.dto.ProductDTO;
-import swp.se1889.g1.rice_store.dto.ProductZoneDTO;
 import swp.se1889.g1.rice_store.entity.Product;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
-import swp.se1889.g1.rice_store.entity.Zone;
 import swp.se1889.g1.rice_store.service.ProductService;
 
 import jakarta.validation.Valid;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class ProductController {
@@ -33,27 +36,25 @@ public class ProductController {
 
 
     @GetMapping("owner/products")
-    public String getProducts(@RequestParam(required = false) String searchType,
-                              @RequestParam(required = false) String keyword,
-                              @RequestParam(required = false) BigDecimal minPrice,
-                              @RequestParam(required = false) BigDecimal maxPrice,
+    public String getProducts(@RequestParam(required = false) String productName,
+                              @RequestParam(required = false) String description,
+                              @RequestParam(required = false) BigDecimal priceFrom,
+                              @RequestParam(required = false) BigDecimal priceTo,
+                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdDate,
+                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedDate,
                               @RequestParam(defaultValue = "0") int page,
                               @RequestParam(defaultValue = "5") int size,
                               Model model,
                               HttpSession session) {
 
-        Page<Product> productPage;
+        // Gọi service mới
+        Page<Product> productPage = productService.filterProducts(
+                productName, description, priceFrom, priceTo,
+                createdDate, updatedDate,
+                page, size
+        );
 
-
-        if ("price".equals(searchType) && (minPrice != null || maxPrice != null)) {
-            productPage = productService.searchProducts(searchType, null, minPrice, maxPrice, page, size);
-        } else if (keyword != null && !keyword.trim().isEmpty()) {
-            productPage = productService.searchProducts(searchType, keyword, null, null, page, size);
-        } else {
-            productPage = productService.getProductsByCurrentUser(page, size);
-        }
-
-
+        // Nếu chưa có sản phẩm mới, tạo mới cho form thêm
         if (!model.containsAttribute("newProduct")) {
             model.addAttribute("newProduct", new ProductDTO());
         }
@@ -64,11 +65,15 @@ public class ProductController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("totalItems", productPage.getTotalElements());
-        // Lưu lại thông tin tìm kiếm để Thymeleaf sử dụng
-        model.addAttribute("searchType", searchType);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("minPrice", minPrice);
-        model.addAttribute("maxPrice", maxPrice);
+
+        // Truyền lại filter để giữ trên giao diện
+        model.addAttribute("productName", productName);
+        model.addAttribute("description", description);
+        model.addAttribute("priceFrom", priceFrom);
+        model.addAttribute("priceTo", priceTo);
+        model.addAttribute("createdDate", createdDate);
+        model.addAttribute("updatedDate", updatedDate);
+
         model.addAttribute("editProduct", new ProductDTO());
 
         User user = userService.getCurrentUser();
@@ -76,64 +81,6 @@ public class ProductController {
 
         return "products";
     }
-
-
-
-    @GetMapping("/owner/zones")
-    public String getProductsWithZones(Model model, HttpSession session,
-                                       @RequestParam(defaultValue = "0") int page,
-                                       @RequestParam(defaultValue = "5") int size,
-                                       @RequestParam(required = false) String searchType,
-                                       @RequestParam(required = false) String keyword,
-                                       @RequestParam(required = false) BigDecimal minPrice,
-                                       @RequestParam(required = false) BigDecimal maxPrice) {
-        Store store = (Store) session.getAttribute("store");
-        if (store == null) return "redirect:/login";
-
-        model.addAttribute("store", store);
-
-        Page<Map<String, Object>> productWithZones;
-
-        if (searchType == null || searchType.isEmpty()) {
-            // Nếu không có loại tìm kiếm, lấy tất cả sản phẩm
-            productWithZones = productService.getAllProductsWithZones(store.getId(), page, size);
-        } else if ("name".equals(searchType)) {
-            // Tìm kiếm theo tên sản phẩm
-            productWithZones = productService.searchProductsByName(store.getId(), keyword, page, size);
-        } else if ("description".equals(searchType)) {
-            // Tìm kiếm theo mô tả + lọc khoảng giá
-            if ((minPrice != null && maxPrice != null) && minPrice.compareTo(maxPrice) > 0) {
-                model.addAttribute("error", "Giá tối thiểu không thể lớn hơn giá tối đa.");
-                productWithZones = productService.getAllProductsWithZones(store.getId(), page, size);
-            } else {
-                productWithZones = productService.searchProductsWithDescriptionAndPrice(store.getId(), keyword, minPrice, maxPrice, page, size);
-            }
-        } else {
-            // Nếu không khớp với loại nào, mặc định lấy tất cả sản phẩm
-            productWithZones = productService.getAllProductsWithZones(store.getId(), page, size);
-        }
-
-        // Kiểm tra số lượng sản phẩm lấy được
-        System.out.println("Số lượng sản phẩm tìm thấy: " + productWithZones.getTotalElements());
-
-        model.addAttribute("productWithZones", productWithZones);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", productWithZones.getTotalPages());
-        model.addAttribute("totalItems", productWithZones.getTotalElements());
-        model.addAttribute("searchType", searchType);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("minPrice", minPrice);
-        model.addAttribute("maxPrice", maxPrice);
-        User user = userService.getCurrentUser();
-        model.addAttribute("user", user);
-
-        return "sellProducts";
-    }
-
-
-
-
-
 
     @PostMapping("/products/add")
     @ResponseBody
@@ -183,6 +130,41 @@ public class ProductController {
                                 @RequestParam(defaultValue = "5") int size) {
         productService.deleteProduct(id);
         return "redirect:/owner/products?page=" + page + "&size=" + size;
+    }
+    @GetMapping("/owner/zones")
+    public String getProductsWithZones(Model model, HttpSession session,
+                                       @RequestParam(required = false) String productName,
+                                       @RequestParam(required = false) String description,
+                                       @RequestParam(required = false) BigDecimal minPrice,
+                                       @RequestParam(required = false) BigDecimal maxPrice,
+                                       @RequestParam(required = false) String zoneName,
+                                       @RequestParam(required = false) Integer minQuantity,
+                                       @RequestParam(required = false) Integer maxQuantity,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "5") int size) {
+        Store store = (Store) session.getAttribute("store");
+        if (store == null) return "redirect:/login";
+
+        Page<Map<String, Object>> productWithZones = productService.filterProductZones(
+                store.getId(), productName, description, minPrice, maxPrice, zoneName, minQuantity, maxQuantity, page, size
+        );
+
+        model.addAttribute("productWithZones", productWithZones);
+        model.addAttribute("store", store);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productWithZones.getTotalPages());
+        model.addAttribute("totalItems", productWithZones.getTotalElements());
+
+        // Truyền lại filter
+        model.addAttribute("productName", productName);
+        model.addAttribute("description", description);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("zoneName", zoneName);
+        model.addAttribute("minQuantity", minQuantity);
+        model.addAttribute("maxQuantity", maxQuantity);
+
+        return "sellProducts";
     }
 
 }

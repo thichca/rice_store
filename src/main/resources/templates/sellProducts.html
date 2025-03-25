@@ -14,29 +14,6 @@
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-semibold">Danh sách tồn kho</h1>
     </div>
-    <form id="searchForm" th:action="@{/owner/zones}" method="get" class="mb-4 flex items-center">
-      <!-- Dropdown chọn kiểu tìm kiếm -->
-      <select id="searchType" name="searchType" class="border rounded px-2 py-1 mr-2" onchange="reloadSearchForm()">
-        <option value="name" th:selected="${searchType == 'name'}">Tên sản phẩm</option>
-        <option value="description" th:selected="${searchType == 'description'}">Mô tả</option>
-      </select>
-
-      <!-- Ô nhập từ khóa -->
-      <input type="text" id="keywordInput" name="keyword" class="border rounded px-2 py-1 mr-2"
-             placeholder="Nhập từ khóa..." th:value="${keyword}">
-
-      <!-- Ô nhập giá từ và giá đến, hiển thị nếu tìm kiếm theo mô tả -->
-      <div id="priceInputs" th:style="${searchType == 'description' ? 'display: flex;' : 'display: none;'}">
-        <input type="number" id="minPriceInput" name="minPrice" step="0.01" class="border rounded px-2 py-1 mr-2"
-               placeholder="Giá từ..." th:value="${minPrice}">
-        <input type="number" id="maxPriceInput" name="maxPrice" step="0.01" class="border rounded px-2 py-1 mr-2"
-               placeholder="Giá đến..." th:value="${maxPrice}">
-      </div>
-
-      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Tìm kiếm</button>
-    </form>
-
-
 
 
     <p class="text-gray-600 mb-4">Tổng cộng: <span th:text="${totalItems}"></span> bản ghi</p>
@@ -45,22 +22,58 @@
     <div class="overflow-x-auto">
       <table class="table-auto border-collapse border w-full">
         <thead>
-        <th class="border p-2 relative">Tên Sản Phẩm
-          <div class="resizer"></div>
-        </th>
-        <th class="border p-2 relative">Mô tả
-          <div class="resizer"></div>
-        </th>
-        <th class="border p-2 relative">Giá/Kg
-          <div class="resizer"></div>
-        </th>
-        <th class="border p-2 relative">Khu vực
-          <div class="resizer"></div>
-        </th>
-        <th class="border p-2 relative">Số lượng
-          <div class="resizer"></div>
-        </th>
+        <tr>
+          <th class="border p-2 relative">Tên Sản Phẩm
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Mô tả
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Giá/Kg
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Khu vực
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Số lượng
+            <div class="resizer"></div>
+          </th>
+          <th class="border p-2 relative">Hành động
+            <div class="resizer"></div>
+          </th>
         </tr>
+        <form method="get" action="/owner/zones">
+          <tr class="bg-gray-50">
+            <td class="border p-2">
+              <input type="text" name="productName" th:value="${productName}" class="w-full border rounded p-1" placeholder="Tên sản phẩm">
+            </td>
+            <td class="border p-2">
+              <input type="text" name="description" th:value="${description}" class="w-full border rounded p-1" placeholder="Mô tả">
+            </td>
+            <td class="border p-2">
+              <div class="flex gap-1">
+                <input type="number" name="minPrice" th:value="${minPrice}" step="0.01" class="w-1/2 border rounded p-1" placeholder="Từ">
+                <input type="number" name="maxPrice" th:value="${maxPrice}" step="0.01" class="w-1/2 border rounded p-1" placeholder="Đến">
+              </div>
+            </td>
+            <td class="border p-2">
+              <input type="text" name="zoneName" th:value="${zoneName}" class="w-full border rounded p-1" placeholder="Khu vực">
+            </td>
+            <td class="border p-2">
+              <div class="flex gap-1">
+                <input type="number" name="minQuantity" th:value="${minQuantity}" step="1" class="w-1/2 border rounded p-1" placeholder="Từ">
+                <input type="number" name="maxQuantity" th:value="${maxQuantity}" step="1" class="w-1/2 border rounded p-1" placeholder="Đến">
+              </div>
+            </td>
+            <td class="border p-2">
+              <div class="flex justify-center gap-3">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded min-w-[100px]">Lọc</button>
+                <a href="/owner/zones" class="bg-gray-400 text-white px-4 py-1 rounded min-w-[100px] text-center">Xóa</a>
+              </div>
+            </td>
+          </tr>
+        </form>
+
         </thead>
 
         <tbody id="tableBody">
@@ -85,7 +98,18 @@
       <!-- Hiển thị danh sách số trang -->
       <th:block th:if="${totalPages > 1}">
         <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
-          <a th:href="@{/owner/zones(page=${pageNumber}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+          <a th:href="@{/owner/zones(
+    page=${pageNumber},
+    size=5,
+    name=${name},
+    description=${description},
+    minPrice=${minPrice},
+    maxPrice=${maxPrice},
+    zoneName=${zoneName},
+    minQuantity=${minQuantity},
+    maxQuantity=${maxQuantity}
+)}"
+
              th:text="${pageNumber + 1}"
              th:classappend="${pageNumber == currentPage} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-400 hover:text-white'"
              class="px-4 py-2 rounded transition duration-200">
@@ -95,7 +119,18 @@
 
       <!-- Nút "Sau" -->
       <a th:if="${currentPage + 1 < totalPages}"
-         th:href="@{/owner/zones(page=${currentPage + 1}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+         th:href="@{/owner/zones(
+    page=${pageNumber},
+    size=5,
+    name=${name},
+    description=${description},
+    minPrice=${minPrice},
+    maxPrice=${maxPrice},
+    zoneName=${zoneName},
+    minQuantity=${minQuantity},
+    maxQuantity=${maxQuantity}
+)}"
+
          class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
         Sau
       </a>
@@ -106,47 +141,7 @@
 
   </div>
 </div>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    togglePriceInputs();
-  });
 
-  function togglePriceInputs() {
-    let searchType = document.getElementById("searchType").value;
-    let priceInputs = document.getElementById("priceInputs");
-
-    if (searchType === "description") {
-      priceInputs.style.display = "flex";
-    } else {
-      priceInputs.style.display = "none";
-    }
-  }
-
-  function reloadSearchForm() {
-    let searchType = document.getElementById("searchType").value;
-    let keywordInput = document.getElementById("keywordInput");
-    let minPriceInput = document.getElementById("minPriceInput");
-    let maxPriceInput = document.getElementById("maxPriceInput");
-    let priceInputs = document.getElementById("priceInputs");
-
-    // Xóa dữ liệu cũ khi đổi dropdown
-    keywordInput.value = "";
-    minPriceInput.value = "";
-    maxPriceInput.value = "";
-
-    // Hiển thị hoặc ẩn ô nhập giá dựa vào lựa chọn
-    if (searchType === "description") {
-      priceInputs.style.display = "flex";
-    } else {
-      priceInputs.style.display = "none";
-    }
-
-    // Gửi form tự động để load lại trang
-    document.getElementById("searchForm").submit();
-  }
-
-
-</script>
 
 <div th:replace="~{fragments/script :: script}"></div>
 </body>

@@ -2,6 +2,7 @@ package swp.se1889.g1.rice_store.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,23 +32,50 @@ public class CustomerController {
 
     // 🟢 Hiển thị danh sách khách hàng
     @GetMapping("/customers")
-    public String getCustomers(Model model, HttpSession session) {
-        if (!model.containsAttribute("newCustomer")) {
-            model.addAttribute("newCustomer", new CustomerDTO());
-        }
+    public String getCustomers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String debt,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate createdDate,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate updatedDate,
+            Model model, HttpSession session) {
 
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
+        model.addAttribute("user", userService.getCurrentUser());
 
-        User user = userService.getCurrentUser();
-        model.addAttribute("user", user);
+        // Gọi service filter
+        Page<CustomerDTO> customerPage = customerService.filterCustomers(
+                id, name, phone, address, email, debt, createdDate, updatedDate, page, size);
 
-        // ✅ Truyền danh sách khách hàng trực tiếp từ service
-        model.addAttribute("customers", customerService.getCustomersByCurrentUser());
+        model.addAttribute("customers", customerPage.getContent());
+        model.addAttribute("totalPages", customerPage.getTotalPages());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalItems", customerPage.getTotalElements());
+
+
+        // Để giữ lại các giá trị lọc đã nhập
+        model.addAttribute("id", id);
+        model.addAttribute("name", name);
+        model.addAttribute("phone", phone);
+        model.addAttribute("address", address);
+        model.addAttribute("email", email);
+        model.addAttribute("debt", debt);
+        model.addAttribute("createdDate", createdDate);
+        model.addAttribute("updatedDate", updatedDate);
+
+        model.addAttribute("newCustomer", new CustomerDTO());
         model.addAttribute("editCustomer", new CustomerDTO());
 
         return "customers";
     }
+
+
 
     // 🟢 Xử lý thêm khách hàng mới
     @PostMapping("/customers/add")
@@ -82,23 +110,24 @@ public class CustomerController {
 
     // 🟢 Cập nhật khách hàng
     @PostMapping("/customers/update")
-    public String updateCustomer(@Valid @ModelAttribute("editCustomer") CustomerDTO customerDTO,
-                                 BindingResult result, Model model) {
+    @ResponseBody
+    public ResponseEntity<?> updateCustomerAjax(@Valid @ModelAttribute("editCustomer") CustomerDTO customerDTO,
+                                                BindingResult result) {
         if (result.hasErrors()) {
-            model.addAttribute("customers", customerService.getCustomersByCurrentUser());
-            return "customers";
+            Map<String, String> errors = new HashMap<>();
+            result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);
         }
 
         try {
             customerService.updateCustomer(customerDTO);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật khách hàng thành công!"));
         } catch (RuntimeException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("customers", customerService.getCustomersByCurrentUser());
-            return "customers";
+            return ResponseEntity.badRequest().body(Collections.singletonMap("errorMessage", e.getMessage()));
         }
-
-        return "redirect:/customers";
     }
+
+
 
     @GetMapping("/manageUser")
     public String GetViewManageUser(){

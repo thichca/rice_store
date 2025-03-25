@@ -1,12 +1,11 @@
 
 package swp.se1889.g1.rice_store.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ import swp.se1889.g1.rice_store.repository.UserRepository;
 import swp.se1889.g1.rice_store.repository.ZoneRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +33,10 @@ public class ProductService {
     private ProductRepository productRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private ZoneRepository zoneRepository;
 
+    @Autowired
+    private UserRepository userRepository;
     // Lấy tổng số sản phẩm theo user hiện tại
     public long countProductsByCurrentUser() {
         User currentUser = getCurrentUser();
@@ -44,8 +46,6 @@ public class ProductService {
         return 0;
     }
 
-    @Autowired
-    private ZoneRepository zoneRepository;
 
     public Page<Product> getProductsByCurrentUser(int page, int size) {
         User currentUser = getCurrentUser();
@@ -55,6 +55,34 @@ public class ProductService {
         }
         return Page.empty();
     }
+    public Page<Product> filterProducts(String name,
+                                        String description,
+                                        BigDecimal priceFrom,
+                                        BigDecimal priceTo,
+                                        LocalDate createdDate,
+                                        LocalDate updatedDate,
+                                        int page, int size) {
+        User currentUser = getCurrentUser(); // lấy người dùng đang đăng nhập
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return productRepository.filterProducts(
+                currentUser,
+                name,
+                description,
+                priceFrom,
+                priceTo,
+                createdDate,
+                updatedDate,
+                pageable
+        );
+    }
+
+
+    public List<Product> searchProductsByName(String name) {
+        return productRepository.findByNameContaining(name);
+    }
+
 
     public Product getProductToDelete(Long id) {
         return productRepository.findById(id).orElse(null);
@@ -155,35 +183,6 @@ public class ProductService {
         return productRepository.findAllProductsWithZones(storeId, pageable);
     }
 
-    public Page<Map<String, Object>> searchProductsWithZones(Long storeId, String searchType, String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        if ("description".equals(searchType)) {
-            return productRepository.findProductsByDescription(storeId, "%" + keyword + "%", pageable);
-        } else {
-            return productRepository.findProductsByName(storeId, "%" + keyword + "%", pageable);
-        }
-    }
-
-    public Page<Product> searchProducts(String searchType, String keyword, BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
-        User currentUser = getCurrentUser();
-        if (currentUser == null) {
-            throw new RuntimeException("Không thể xác định người dùng hiện tại.");
-        }
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        String name = null;
-        String description = null;
-
-        if ("name".equals(searchType)) {
-            name = keyword;
-        } else if ("description".equals(searchType)) {
-            description = keyword;
-        }
-
-        return productRepository.searchProductsByUser(currentUser, name, description, minPrice, maxPrice, pageable);
-    }
 
     public Page<Map<String, Object>> searchProductsByName(Long storeId, String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -203,6 +202,18 @@ public class ProductService {
 
     public Product findProductById(Long id) {
         return productRepository.findById(id).get();
+    }
+    public Page<Map<String, Object>> filterProductZones(Long storeId,
+                                                        String productName,
+                                                        String description,
+                                                        BigDecimal minPrice,
+                                                        BigDecimal maxPrice,
+                                                        String zoneName,
+                                                        Integer minQuantity,
+                                                        Integer maxQuantity,
+                                                        int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.filterProductZones(storeId, productName, description, minPrice, maxPrice, zoneName, minQuantity, maxQuantity, pageable);
     }
 
 }

@@ -197,28 +197,7 @@
         <p class="text-gray-600 mb-4">
             Tổng cộng: <span th:text="${totalItems}"></span> bản ghi
         </p>
-        <form id="searchForm" th:action="@{/owner/products}" method="get" class="mb-4 flex items-center">
-            <!-- Dropdown chọn kiểu tìm kiếm -->
-            <select id="searchType" name="searchType" class="border rounded px-2 py-1 mr-2" onchange="reloadSearchForm()">
-                <option value="name" th:selected="${searchType == 'name'}">Tên sản phẩm</option>
-                <option value="description" th:selected="${searchType == 'description'}">Mô tả</option>
-                <option value="price" th:selected="${searchType == 'price'}">Giá</option>
-            </select>
 
-            <!-- Ô nhập từ khóa -->
-            <input type="text" id="keywordInput" name="keyword" class="border rounded px-2 py-1 mr-2"
-                   placeholder="Nhập từ khóa..." th:value="${keyword}">
-
-            <!-- Ô nhập giá từ và giá đến -->
-            <div id="priceInputs" th:style="${searchType == 'price' ? 'display: flex;' : 'display: none;'}">
-                <input type="number" id="minPriceInput" name="minPrice" step="0.01" class="border rounded px-2 py-1 mr-2"
-                       placeholder="Giá từ..." th:value="${minPrice}">
-                <input type="number" id="maxPriceInput" name="maxPrice" step="0.01" class="border rounded px-2 py-1 mr-2"
-                       placeholder="Giá đến..." th:value="${maxPrice}">
-            </div>
-
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Tìm kiếm</button>
-        </form>
 
 
 
@@ -227,26 +206,60 @@
         <div class="relative overflow-x-auto max-h-[500px]">
             <table class="table-auto border-collapse border w-full">
                 <thead class="bg-gray-100 sticky top-0 z-10">
+                <tr class="bg-gray-100">
 
 
-                <th class="border p-2 relative">Tên sản phẩm
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative">Mô tả
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative">Giá/Kg
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative">Ngày tạo
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative">Cập nhật
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative w-[340px]">Hành động
-                    <div class="resizer"></div>
-                </th>
+                    <th class="border p-2 relative">Tên sản phẩm
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Mô tả
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Giá/Kg
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Ngày tạo
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Cập nhật
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative w-[340px]">Hành động
+                        <div class="resizer"></div>
+                    </th>
+                </tr>
+
+
+                <form method="get" action="/owner/products">
+                    <tr class="bg-gray-50">
+                        <td class="border p-2">
+                            <input type="text" name="productName" th:value="${productName}" class="w-full border rounded p-1" placeholder="Tên sản phẩm">
+                        </td>
+                        <td class="border p-2">
+                            <input type="text" name="description" th:value="${description}" class="w-full border rounded p-1" placeholder="Mô tả">
+                        </td>
+                        <td class="border p-2">
+                            <div class="flex gap-1">
+                                <input type="number" name="priceFrom" th:value="${priceFrom}" step="0.01" class="w-1/2 border rounded p-1" placeholder="Từ">
+                                <input type="number" name="priceTo" th:value="${priceTo}" step="0.01" class="w-1/2 border rounded p-1" placeholder="Đến">
+                            </div>
+                        </td>
+                        <td class="border p-2">
+                            <input type="date" name="createdDate" th:value="${createdDate}" class="w-full border rounded p-1">
+                        </td>
+                        <td class="border p-2">
+                            <input type="date" name="updatedDate" th:value="${updatedDate}" class="w-full border rounded p-1">
+                        </td>
+                        <td class="border p-2">
+                            <div class="flex justify-center gap-3">
+                                <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded min-w-[100px]">Lọc</button>
+                                <a href="/owner/products" class="bg-gray-400 text-white px-4 py-1 rounded min-w-[100px] text-center">Xóa</a>
+                            </div>
+
+                        </td>
+                    </tr>
+                </form>
+
                 </thead>
                 <tbody id="tableBody">
                 <tr th:each="product : ${products}">
@@ -254,37 +267,27 @@
                     <td class="border p-2" th:text="${product.description}"></td>
                     <td class="border p-2" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
                     <td class="border p-2"
-                        th:text="${#temporals.format(product.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                        th:text="${#temporals.format(product.createdAt, 'dd/MM/yyyy ')}"></td>
                     <td class="border p-2"
-                        th:text="${#temporals.format(product.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                        th:text="${#temporals.format(product.updatedAt, 'dd/MM/yyyy ')}"></td>
                     <td class="border p-1">
-                        <div class="flex gap-2 w-full">
-                            <button class="w-1/3 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
-                hover:bg-blue-700 hover:text-white transition duration-200"
-                                    th:onclick="|showProductDetail(${product.id})|"
-                                    data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
-                                    data-icon='<i class="fas fa-info"></i>'>
+                        <div class="flex flex-wrap gap-2 justify-center">
+                            <button class="flex-1 min-w-[100px] bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center hover:bg-blue-700 transition duration-200"
+                                    th:onclick="|showProductDetail(${product.id})|">
                                 <i class="fas fa-info mr-1"></i> Chi tiết
                             </button>
 
-                            <button class="w-1/3 bg-blue-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-blue-500 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
-                                    data-icon='<i class="fas fa-pencil-alt"></i>'
+                            <button class="flex-1 min-w-[100px] bg-yellow-400 text-black px-2 py-1 rounded flex items-center justify-center hover:bg-yellow-500 transition duration-200"
                                     th:onclick="|toggleModal('editProductModal-' + ${product.id})|">
                                 <i class="fas fa-pencil-alt mr-1"></i> Sửa
                             </button>
 
-                            <button class="w-1/3 bg-red-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                     hover:bg-red-700 hover:text-white transition duration-200"
-                                    th:onclick="|if(confirm('Bạn có chắc muốn xóa khu vực này?')) window.location.href='@{/delete/{id}(id=${product.id})}'|"
-
-                                    data-full='<i class="fas fa-trash mr-1"></i> Xóa'
-                                    data-icon='<i class="fas fa-trash"></i>'>
+                            <button class="flex-1 min-w-[100px] bg-red-500 text-white px-2 py-1 rounded flex items-center justify-center hover:bg-red-700 transition duration-200"
+                                    th:onclick="|if(confirm('Bạn có chắc muốn xóa sản phẩm này?')) window.location.href='@{/delete/{id}(id=${product.id})}'|">
                                 <i class="fas fa-trash mr-1"></i> Xóa
                             </button>
-
                         </div>
+
                     </td>
                 </tr>
                 </tbody>
@@ -294,14 +297,14 @@
         <div class="w-full flex justify-center items-center mt-4 gap-2" th:if="${totalPages > 0}">
             <!-- Previous Page -->
             <a th:if="${currentPage > 0}"
-               th:href="@{/owner/products(page=${currentPage - 1}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+               th:href="@{/owner/products(page=${currentPage - 1}, size=5, name=${productName}, description=${description}, priceFrom=${priceFrom}, priceTo=${priceTo}, createdDate=${createdDate}, updatedDate=${updatedDate})}"
                class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
                 Trước
             </a>
 
             <!-- Page Numbers -->
             <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
-                <a th:href="@{/owner/products(page=${pageNumber}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                <a th:href="@{/owner/products(page=${pageNumber}, size=5, name=${productName}, description=${description}, priceFrom=${priceFrom}, priceTo=${priceTo}, createdDate=${createdDate}, updatedDate=${updatedDate})}"
                    th:text="${pageNumber + 1}"
                    th:classappend="${pageNumber == currentPage} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-400 hover:text-white'"
                    class="px-4 py-2 rounded transition duration-200">
@@ -310,12 +313,11 @@
 
             <!-- Next Page -->
             <a th:if="${currentPage + 1 < totalPages}"
-               th:href="@{/owner/products(page=${currentPage + 1}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+               th:href="@{/owner/products(page=${currentPage + 1}, size=5, name=${productName}, description=${description}, priceFrom=${priceFrom}, priceTo=${priceTo}, createdDate=${createdDate}, updatedDate=${updatedDate})}"
                class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
                 Sau
             </a>
         </div>
-
 
 
         <div th:replace="~{fragments/script :: script}"></div>
@@ -463,44 +465,8 @@
             togglePriceInput();
         });
 
-        function reloadSearchForm() {
-            let searchType = document.getElementById("searchType").value;
-            let keywordInput = document.getElementById("keywordInput");
-            let minPriceInput = document.getElementById("minPriceInput");
-            let maxPriceInput = document.getElementById("maxPriceInput");
-            let priceInputs = document.getElementById("priceInputs");
 
-            // Xóa dữ liệu không liên quan khi đổi kiểu tìm kiếm
-            keywordInput.value = "";
-            minPriceInput.value = "";
-            maxPriceInput.value = "";
 
-            // Hiển thị hoặc ẩn các ô nhập liệu dựa vào loại tìm kiếm
-            if (searchType === "price") {
-                priceInputs.style.display = "flex";
-            } else {
-                priceInputs.style.display = "none";
-            }
-
-            // Gửi form tự động để load lại trang với kiểu tìm kiếm mới
-            document.getElementById("searchForm").submit();
-        }
-
-        function togglePriceInput() {
-            let searchType = document.getElementById("searchType").value;
-            let keywordInput = document.getElementById("keywordInput");
-            let minPriceInput = document.getElementById("minPriceInput");
-            let maxPriceInput = document.getElementById("maxPriceInput");
-            let priceInputs = document.getElementById("priceInputs");
-
-            if (searchType === "price") {
-                keywordInput.classList.add("hidden");
-                priceInputs.style.display = "flex";
-            } else {
-                keywordInput.classList.remove("hidden");
-                priceInputs.style.display = "none";
-            }
-        }
         async function submitEditProductForm(event, form) {
             event.preventDefault();  // Ngăn form reload trang
 
