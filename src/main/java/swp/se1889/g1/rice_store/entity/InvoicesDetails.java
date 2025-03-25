@@ -1,5 +1,6 @@
 package swp.se1889.g1.rice_store.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +21,8 @@ public class InvoicesDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-     @ManyToOne
+    @JsonIgnore
+    @ManyToOne
      @JoinColumn(name = "product_id" , nullable = false)
      private Product product;
      @ManyToOne
