@@ -163,6 +163,8 @@ public class ProductController {
         model.addAttribute("zoneName", zoneName);
         model.addAttribute("minQuantity", minQuantity);
         model.addAttribute("maxQuantity", maxQuantity);
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
 
         return "sellProducts";
     }
