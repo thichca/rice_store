@@ -20,6 +20,9 @@ import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.service.DebtRecordService;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -71,22 +74,92 @@ public class DebtRecordController {
 
     // Hiển thị trang chi tiết phiếu nợ theo customer id
     @GetMapping("/detail")
-    public String showDebtDetail(@RequestParam("customerId") Long customerId, Model model , HttpSession session ,
-                                 @RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "10") int size) {
-       CustomerDTO customer = customerService.getCustomerById(customerId);
-        Store store = (Store) session.getAttribute("store");
-        model.addAttribute("store", store);
-        User user = userService.getCurrentUser();
-        model.addAttribute("user", user);
+    public String showDebtDetail(
+            @RequestParam("customerId") Long customerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String idMin,
+            @RequestParam(required = false) String idMax,
+            @RequestParam(required = false) String note,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String amountMin,
+            @RequestParam(required = false) String amountMax,
+            @RequestParam(required = false) String dateMin,
+            @RequestParam(required = false) String dateMax,
+            Model model,
+            HttpSession session) {
+        // Parse filter parameters
+        Long parsedIdMin = parseLong(idMin);
+        Long parsedIdMax = parseLong(idMax);
+        BigDecimal parsedAmountMin = parseBigDecimal(amountMin);
+        BigDecimal parsedAmountMax = parseBigDecimal(amountMax);
+        Date parsedDateMin = parseDate(dateMin);
+        Date parsedDateMax = parseDate(dateMax);
+
+        // Fetch filtered debt records
         Pageable pageable = PageRequest.of(page, size);
-        Page<DebtRecords> debtRecords = debtRecordService.getCustomerPage(customerId , pageable);
+        Page<DebtRecords> debtRecords = debtRecordService.getFilteredDebtRecords(
+                customerId, pageable, parsedIdMin, parsedIdMax, note, type, parsedAmountMin, parsedAmountMax, parsedDateMin, parsedDateMax);
+
+        // Add attributes to model
+        CustomerDTO customer = customerService.getCustomerById(customerId);
+        Store store = (Store) session.getAttribute("store");
+        User user = userService.getCurrentUser();
+
         model.addAttribute("debtRecords", debtRecords.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", debtRecords.getTotalPages());
         model.addAttribute("totalItems", debtRecords.getTotalElements());
         model.addAttribute("recordsPerPage", size);
         model.addAttribute("customer", customer);
-        return "debtDetail"; // file debtDetail.html nằm trong thư mục templates
+        model.addAttribute("store", store);
+        model.addAttribute("user", user);
+
+        // Preserve filter values in inputs
+        model.addAttribute("idMin", idMin);
+        model.addAttribute("idMax", idMax);
+        model.addAttribute("note", note);
+        model.addAttribute("type", type);
+        model.addAttribute("amountMin", amountMin);
+        model.addAttribute("amountMax", amountMax);
+        model.addAttribute("dateMin", dateMin);
+        model.addAttribute("dateMax", dateMax);
+
+        return "debtDetail";
+    }
+
+    // Helper methods to parse parameters
+    private Long parseLong(String value) {
+        if (value != null && !value.isEmpty()) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                return null; // Ignore invalid input
+            }
+        }
+        return null;
+    }
+
+    private BigDecimal parseBigDecimal(String value) {
+        if (value != null && !value.isEmpty()) {
+            try {
+                return new BigDecimal(value);
+            } catch (NumberFormatException e) {
+                return null; // Ignore invalid input
+            }
+        }
+        return null;
+    }
+
+    private Date parseDate(String value) {
+        if (value != null && !value.isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                return sdf.parse(value);
+            } catch (ParseException e) {
+                return null; // Ignore invalid input
+            }
+        }
+        return null;
     }
 }

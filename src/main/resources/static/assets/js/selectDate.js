@@ -13,7 +13,7 @@ flatpickr(".flatpickr", {
         time_24hr: true
     },
     enableTime: true,
-    dateFormat: "d/m/Y H:i",
+    dateFormat: "d/m/Y H:i:S",
 });
 
 

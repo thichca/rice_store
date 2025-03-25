@@ -16,6 +16,10 @@ import swp.se1889.g1.rice_store.service.InvoicesService;
 import swp.se1889.g1.rice_store.service.Iservice.UserService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,21 +52,81 @@ public class InvoiceController {
     @GetMapping
     public String listInvoices(Model model, HttpSession session,
                                @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "10") int size) {
+                               @RequestParam(defaultValue = "10") int size,
+                               @RequestParam(required = false) String idMin ,
+                               @RequestParam(required = false) String idMax ,
+                               @RequestParam(required = false) String note ,
+                               @RequestParam(required = false) String status ,
+                               @RequestParam(required = false) String amountMin ,
+                               @RequestParam(required = false) String amountMax ,
+                               @RequestParam(required = false) String dateMin ,
+                               @RequestParam(required = false) String dateMax ,
+                               @RequestParam(required = false) String dateMin1 ,
+                               @RequestParam(required = false) String dateMax1) {
         Store store = (Store) session.getAttribute("store");
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
         model.addAttribute("store", store);
+        Long parsedIdMin = parseLong(idMin);
+        Long parsedIdMax = parseLong(idMax);
+        BigDecimal parsedAmountMin = parseBigDecimal(amountMin);
+        BigDecimal parsedAmountMax = parseBigDecimal(amountMax);
+        Date parsedDateMin = parseDate(dateMin);
+        Date parsedDateMax = parseDate(dateMax);
+        Date parsedDateMin1 = parseDate(dateMin1);
+        Date parsedDateMax1 = parseDate(dateMax1);
         Pageable pageable = PageRequest.of(page, size);
-        Page<Invoices> invoices = invoicesRepository.findInvoicesByStore(store, pageable);
+        Page<Invoices> invoices = invoiceService.getFilter( parsedIdMin, parsedIdMax, note, status, parsedDateMin, parsedDateMax, pageable,  parsedDateMin1, parsedDateMax1 , parsedAmountMin , parsedAmountMax);
         model.addAttribute("invoices", invoices.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", invoices.getTotalPages());
         model.addAttribute("totalItems", invoices.getTotalElements());
         model.addAttribute("recordsPerPage", size);
+        model.addAttribute("idMin", idMin);
+        model.addAttribute("idMax", idMax);
+        model.addAttribute("note", note);
+        model.addAttribute("status", status);
+        model.addAttribute("amountMin", amountMin);
+        model.addAttribute("amountMax", amountMax);
+        model.addAttribute("dateMin", dateMin);
+        model.addAttribute("dateMax", dateMax);
+        model.addAttribute("dateMin1", dateMin1);
+        model.addAttribute("dateMax1", dateMax1);
         return "invoice";
     }
+    private Long parseLong(String value) {
+        if (value != null && !value.isEmpty()) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                return null; // Ignore invalid input
+            }
+        }
+        return null;
+    }
 
+    private BigDecimal parseBigDecimal(String value) {
+        if (value != null && !value.isEmpty()) {
+            try {
+                return new BigDecimal(value);
+            } catch (NumberFormatException e) {
+                return null; // Ignore invalid input
+            }
+        }
+        return null;
+    }
+
+    private Date parseDate(String value) {
+        if (value != null && !value.isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                return sdf.parse(value);
+            } catch (ParseException e) {
+                return null; // Ignore invalid input
+            }
+        }
+        return null;
+    }
 
     @GetMapping("/import")
     public String showImportForm(Model model, HttpSession session, String name) {

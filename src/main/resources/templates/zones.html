@@ -54,7 +54,10 @@
                     <th class="border p-2 relative">Ngày cập nhật
                         <div class="resizer"></div>
                     </th>
-
+                    <th class="border p-2 hidden"></th>
+                    <th class="border p-2 hidden"></th>
+                    <th class="border p-2 hidden"></th>
+                    <th class="border p-2 hidden"></th>
                     <th class="border p-2 relative w-[340px]">Hành động
                         <div class="resizer"></div>
                     </th>
@@ -65,42 +68,45 @@
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
                             <input type="text" class="border rounded w-1/2 py-1 px-2" id="search-zoneid-min" placeholder="Từ"
-                                   style="font-weight: normal;"  oninput="filterZones()" >
+                                   style="font-weight: normal;"  th:value="${idMin}" >
                             <input type="text" class="border rounded w-1/2 py-1 px-2" id="search-zoneid-max" placeholder="Đến"
-                                   style="font-weight: normal;"  oninput="filterZones()">
+                                   style="font-weight: normal;" th:value="${idMax}" >
                         </div>
                     </th>
 
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zonename" oninput="filterZones()" >
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zonename" th:value="${name}" >
                     </td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zoneaddress" oninput="filterZones()" >
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zoneaddress" th:value="${address}">
                     </td>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
                             <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-zonemin" placeholder="Từ"
-                                   style="font-weight: normal;"  oninput="filterZones()">
+                                   style="font-weight: normal;" th:value="${dateMin}" >
                             <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-zonemax" placeholder="Đến"
-                                   style="font-weight: normal;"  oninput="filterZones()">
+                                   style="font-weight: normal;" th:value="${dateMax}" >
                         </div>
                     </th>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
                             <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-update-zonemin" placeholder="Từ"
-                                   style="font-weight: normal;"  oninput="filterZones()" >
+                                   style="font-weight: normal;"  th:value="${dateMin1}" >
                             <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-update-zonemax" placeholder="Đến"
-                                   style="font-weight: normal;"  oninput="filterZones()" >
+                                   style="font-weight: normal;"  th:value="${dateMax1}" >
                         </div>
                     </th>
                     <td class="border p-2">
                         <div class="flex gap-2 w-full">
-                            <button id="clearFilters" class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                            <button id="clearFilters" class="w-1/3 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-red-500 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-times mr-1"></i> Bỏ lọc'
                                     data-icon='<i class="fas fa-times"></i>'>
                                 <i class="fas fa-times mr-1"></i> Bỏ lọc
                             </button>
+                            <button onclick="filterZones()" class="w-1/3 bg-white border border-blue-500 text-white-500 px-2 py-1 rounded flex items-center justify-center toggle-btn hover:bg-red-500 hover:text-white transition duration-200" data-full='<i class="fa fa-filter"></i> Lọc' data-icon='<i class="fa fa-filter"></i>'>
+                                <i class="fa fa-filter"></i> Lọc
+                            </button>
 
-                            <button id="toggleButtons" class="w-1/2 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                            <button id="toggleButtons" class="w-1/3 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
                                 hover:bg-blue-500 hover:text-white transition duration-200">
                                 <i class="fas fa-angle-right mr-1"></i> Thu gọn
                             </button>
@@ -197,6 +203,60 @@
                 window.location.href = '/owner/zone?page=' + pageParam + '&size=' + size; // Chuyển hướng
             }
         }
+    });
+    function filterZones() {
+        var idMin = document.getElementById('search-zoneid-min').value;
+        var idMax = document.getElementById('search-zoneid-max').value;
+        var name = document.getElementById('search-zonename').value;
+        var address = document.getElementById('search-zoneaddress').value;
+        var dateMin = document.getElementById('search-date-zonemin').value;
+        var dateMax = document.getElementById('search-date-zonemax').value;
+        var dateMin1 = document.getElementById('search-update-zonemin').value;
+        var dateMax1 = document.getElementById('search-update-zonemax').value;
+
+        var url = '/owner/zone?' + '&page=0&size=' + document.getElementById('recordsPerPage').value;
+        if (idMin) url += '&idMin=' + idMin;
+        if (idMax) url += '&idMax=' + idMax;
+        if (name) url += '&name=' + encodeURIComponent(name); // Sửa từ ¬e= thành &note=
+        if (address) url += '&address=' + encodeURIComponent(address);
+        if (dateMin) url += '&dateMin=' + encodeURIComponent(dateMin);
+        if (dateMax) url += '&dateMax=' + encodeURIComponent(dateMax);
+        if (dateMin1) url += '&dateMin1=' + encodeURIComponent(dateMin1);
+        if (dateMax1) url += '&dateMax1=' + encodeURIComponent(dateMax1);
+
+        window.location.href = url;
+    }
+    function buildFilterParams() {
+        var params = '';
+        var idMin = document.getElementById('search-zoneid-min').value;
+        if (idMin) params += '&idMin=' + idMin;
+        var idMax = document.getElementById('search-zoneid-max').value;
+        if (idMax) params += '&idMax=' + idMax;
+        var name = document.getElementById('search-zonename').value;
+        if (name) params += '&name=' + encodeURIComponent(name); // Fixed: Changed ¬e to note
+        var address = document.getElementById('search-zoneaddress').value;
+        if (address) params += '&address=' + encodeURIComponent(address);
+        var dateMin = document.getElementById('search-date-zonemin').value;
+        if (dateMin) params += '&dateMin=' + encodeURIComponent(dateMin);
+        var dateMax = document.getElementById('search-date-zonemax').value;
+        if (dateMax) params += '&dateMax=' + encodeURIComponent(dateMax);
+        var dateMin1 = document.getElementById('search-update-zonemin').value;
+        if (dateMin1) params += '&dateMin1=' + encodeURIComponent(dateMin1);
+        var dateMax1 = document.getElementById('search-update-zonemax').value;
+        if (dateMax1) params += '&dateMax1=' + encodeURIComponent(dateMax1);
+        return params;
+    }
+    document.getElementById('clearFilters').addEventListener('click', function() {
+        document.getElementById('search-zoneid-min').value = '';
+        document.getElementById('search-zoneid-max').value = '';
+        document.getElementById('search-zonename').value = '';
+        document.getElementById('search-zoneaddress').value = '';
+        document.getElementById('search-date-zonemin').value = '';
+        document.getElementById('search-date-zonemax').value = '';
+        document.getElementById('search-update-zonemin').value = '';
+        document.getElementById('search-update-zonemax').value = '';
+        var url = '/owner/zone?' + '&page=0&size=' + document.getElementById('recordsPerPage').value;
+        window.location.href = url;
     });
 </script>
 </body>
