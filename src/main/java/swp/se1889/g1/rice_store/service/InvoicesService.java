@@ -263,9 +263,15 @@ public class InvoicesService {
         invoices.setStatus(newStatus);
         return invoiceRepository.save(invoices);
     }
-    public Page<Invoices> getFilter(Long idMin, Long idMax, String note, String status, Date dateMin, Date dateMax, Pageable pageable ,
-                                    Date dateMin1, Date dateMax1,BigDecimal amountMin ,BigDecimal amountMax){
+    public Page<Invoices> getFilter(Store store ,Long idMin, Long idMax, String note, String status, Date dateMin, Date dateMax, Pageable pageable ,
+                                    Date dateMin1, Date dateMax1,BigDecimal amountMin ,BigDecimal amountMax , Invoices.InvoiceType type){
         Specification<Invoices> spec = Specification.where(null);
+        if (store != null) {
+            spec = spec.and(InvoiceSpecifications.hasStore(store));
+        }
+        if (type != null) {
+            spec = spec.and(InvoiceSpecifications.hasType(type));
+        }
         if (idMin != null) {
             spec = spec.and(InvoiceSpecifications.idGreatThan(idMin));
         }
