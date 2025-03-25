@@ -122,7 +122,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("maxQuantity") Integer maxQuantity,
             Pageable pageable);
 
-
+    @Query("SELECT p FROM Product p WHERE p.isDeleted = false AND LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Product> searchProducts(@Param("keyword") String keyword);
 
 }
 
