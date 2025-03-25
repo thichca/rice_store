@@ -2,7 +2,11 @@ package swp.se1889.g1.rice_store.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -10,12 +14,10 @@ import swp.se1889.g1.rice_store.dto.InvoiceDetailDTO;
 import swp.se1889.g1.rice_store.dto.InvoicesDTO;
 import swp.se1889.g1.rice_store.entity.*;
 import swp.se1889.g1.rice_store.repository.*;
+import swp.se1889.g1.rice_store.specification.InvoiceSpecifications;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,9 @@ public class InvoicesService {
             throw new IllegalArgumentException("Store ID cannot be null");
         }
         return invoiceRepository.findByStoreId(storeId);
+    }
+    public Page<Invoices> getPage(Store store , Pageable pageable){
+        return invoiceRepository.findInvoicesByStore(store , pageable);
     }
 public InvoiceDetailDTO getInvoice(Long id) {
     Optional<InvoicesDetails> invoice = invoiceDetailsRepository.findById(id);
@@ -248,5 +253,40 @@ public InvoiceDetailDTO getInvoice(Long id) {
         }
         invoices.setStatus(newStatus);
         return invoiceRepository.save(invoices);
+    }
+    public Page<Invoices> getFilter(Long idMin, Long idMax, String note, String status, Date dateMin, Date dateMax, Pageable pageable ,
+                                    Date dateMin1, Date dateMax1,BigDecimal amountMin ,BigDecimal amountMax){
+        Specification<Invoices> spec = Specification.where(null);
+        if (idMin != null) {
+            spec = spec.and(InvoiceSpecifications.idGreatThan(idMin));
+        }
+        if (idMax != null) {
+            spec = spec.and(InvoiceSpecifications.idLessThan(idMax));
+        }
+        if (note != null && !note.isEmpty()) {
+            spec = spec.and(InvoiceSpecifications.noteContains(note));
+        }
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and(InvoiceSpecifications.hasStatus(status));
+        }
+        if (amountMin != null) {
+            spec = spec.and(InvoiceSpecifications.amountGreaterThanOrEqual(amountMin));
+        }
+        if (amountMax != null) {
+            spec = spec.and(InvoiceSpecifications.amountLessThanOrEqual(amountMax));
+        }
+        if (dateMin != null) {
+            spec = spec.and(InvoiceSpecifications.createdAtAfter(dateMin));
+        }
+        if (dateMax != null) {
+            spec = spec.and(InvoiceSpecifications.createdAtBefore(dateMax));
+        }
+        if (dateMin1 != null) {
+            spec = spec.and(InvoiceSpecifications.updatedAtAfter(dateMin1));
+        }
+        if (dateMax1 != null) {
+            spec = spec.and(InvoiceSpecifications.updatedAtBefore(dateMax1));
+        }
+        return invoiceRepository.findAll(spec,pageable);
     }
 }

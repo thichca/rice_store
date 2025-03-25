@@ -3,6 +3,7 @@ package swp.se1889.g1.rice_store.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -12,9 +13,11 @@ import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.CustomerRepository;
 import swp.se1889.g1.rice_store.repository.DebtRecordRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
+import swp.se1889.g1.rice_store.specification.DebtRecordsSpecifications;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.PriorityQueue;
@@ -53,6 +56,36 @@ public class DebtRecordService {
             throw new RuntimeException("Không tìm thấy khách hàng để cập nhật số dư nợ!");
         }
         return  debtRecord;
+    }
+    public Page<DebtRecords> getFilteredDebtRecords(Long customerId, Pageable pageable, Long idMin, Long idMax,
+                                                    String note, String type, BigDecimal amountMin, BigDecimal amountMax,
+                                                    Date dateMin, Date dateMax) {
+        Specification<DebtRecords> spec = Specification.where(DebtRecordsSpecifications.hasCustomerId(customerId));
+        if (idMin != null) {
+            spec = spec.and(DebtRecordsSpecifications.idGreaterThanOrEqual(idMin));
+        }
+        if (idMax != null) {
+            spec = spec.and(DebtRecordsSpecifications.idLessThanOrEqual(idMax));
+        }
+        if (note != null && !note.isEmpty()) {
+            spec = spec.and(DebtRecordsSpecifications.noteContains(note));
+        }
+        if (type != null && !type.isEmpty()) {
+            spec = spec.and(DebtRecordsSpecifications.hasType(type));
+        }
+        if (amountMin != null) {
+            spec = spec.and(DebtRecordsSpecifications.amountGreaterThanOrEqual(amountMin));
+        }
+        if (amountMax != null) {
+            spec = spec.and(DebtRecordsSpecifications.amountLessThanOrEqual(amountMax));
+        }
+        if (dateMin != null) {
+            spec = spec.and(DebtRecordsSpecifications.createdAtAfter(dateMin));
+        }
+        if (dateMax != null) {
+            spec = spec.and(DebtRecordsSpecifications.createdAtBefore(dateMax));
+        }
+        return debtRecordRepository.findAll(spec, pageable);
     }
 
     // Phương thức lấy danh sách chi tiết nợ theo customer id

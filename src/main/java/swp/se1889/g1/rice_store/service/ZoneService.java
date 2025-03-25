@@ -3,6 +3,7 @@ package swp.se1889.g1.rice_store.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,11 @@ import swp.se1889.g1.rice_store.repository.ProductRepository;
 import swp.se1889.g1.rice_store.repository.StoreRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
 import swp.se1889.g1.rice_store.repository.ZoneRepository;
+import swp.se1889.g1.rice_store.specification.ZoneSpecifications;
 
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,16 +51,18 @@ public class ZoneService {
         return zoneRepository.findByIdAndIsDeletedFalse(id).orElse(null);
 
     }
+
     public List<Zone> searchZonesByName(Store store, String name) {
         return zoneRepository.findByNameContainingIgnoreCaseAndStoreAndIsDeletedFalse(name, store);
     }
 
-    public Page<Zone> getZonesByStoreId(Store store , Pageable pageable) {
-        return zoneRepository.findByStoreAndIsDeletedFalse(store , pageable);
+    public Page<Zone> getZonesByStoreId(Store store, Pageable pageable) {
+        return zoneRepository.findByStoreAndIsDeletedFalse(store, pageable);
     }
-public List<Zone> getZone(Store store){
+
+    public List<Zone> getZone(Store store) {
         return zoneRepository.findByStore(store);
-}
+    }
 
     public Zone createZone(ZoneDTO zoneDTO, Store store) {
         User currentUser = getCurrentUser();
@@ -133,4 +138,33 @@ public List<Zone> getZone(Store store){
         return zoneRepository.save(zone);
     }
 
+    public Page<Zone> getFilter(Long idMin, Long idMax, String name, String address, Date dateMin, Date dateMax, Pageable pageable, Date dateMax1, Date dateMin1) {
+        Specification<Zone> spec = Specification.where(null);
+        if (idMin != null) {
+            spec = spec.and(ZoneSpecifications.idGreateThan(idMin));
+        }
+        if (idMax != null) {
+            spec = spec.and(ZoneSpecifications.idLessThan(idMax));
+        }
+        if (name != null && !name.isEmpty()) {
+            spec = spec.and(ZoneSpecifications.nameContains(name));
+        }
+        if (address != null && !address.isEmpty()) {
+            spec = spec.and(ZoneSpecifications.addressContains(address));
+
+        }
+        if (dateMin != null) {
+            spec = spec.and(ZoneSpecifications.createdAtAfter(dateMin));
+        }
+        if (dateMax != null) {
+            spec = spec.and(ZoneSpecifications.createdAtBefore(dateMax));
+        }
+        if (dateMin1 != null) {
+            spec = spec.and(ZoneSpecifications.updatedAtAfter(dateMin1));
+        }
+        if (dateMax1 != null) {
+            spec = spec.and(ZoneSpecifications.updatedAtBefore(dateMax1));
+        }
+        return zoneRepository.findAll(spec, pageable);
+    }
 }

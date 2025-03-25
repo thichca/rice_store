@@ -21,6 +21,8 @@ import swp.se1889.g1.rice_store.service.UserServiceIpml;
 import swp.se1889.g1.rice_store.service.ZoneService;
 
 import javax.swing.text.html.Option;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,21 +45,64 @@ public class ZoneController {
     @GetMapping
     public String listZones(Model model, HttpSession session,
                             @RequestParam(defaultValue = "0") int page,
-                            @RequestParam(defaultValue = "10") int size
+                            @RequestParam(defaultValue = "10") int size,
+                            @RequestParam(required = false) String idMin,
+                            @RequestParam(required = false) String idMax,
+                            @RequestParam(required = false) String name,
+                            @RequestParam(required = false) String address,
+                            @RequestParam(required = false) String dateMin,
+                            @RequestParam(required = false) String dateMax,
+                            @RequestParam(required = false) String dateMax1,
+                            @RequestParam(required = false) String dateMin1
                            ) {
         Store store = (Store) session.getAttribute("store");
         if (store == null) return "redirect:/login";
         model.addAttribute("store", store);
+        Long parsedIdMin = parseLong(idMin);
+        Long parsedIdMax = parseLong(idMax);
+        Date parsedDateMin = parseDate(dateMin);
+        Date parsedDateMax = parseDate(dateMax);
+        Date parsedDateMax1 = parseDate(dateMax1);
+        Date parsedDateMin1 = parseDate(dateMin1);
         Pageable pageable = PageRequest.of(page, size);
-        Page<Zone> zones = zoneService.getZonesByStoreId(store , pageable);
+        Page<Zone> zones = zoneService.getFilter(parsedIdMin, parsedIdMax, name, address, parsedDateMin, parsedDateMax, pageable, parsedDateMax1, parsedDateMin1);
         model.addAttribute("zones", zones.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", zones.getTotalPages());
         model.addAttribute("totalItems", zones.getTotalElements());
         model.addAttribute("recordsPerPage", size);
+        model.addAttribute("idMin", idMin);
+        model.addAttribute("idMax", idMax);
+        model.addAttribute("name", name);
+        model.addAttribute("address", address);
+        model.addAttribute("dateMin", dateMin);
+        model.addAttribute("dateMax", dateMax);
+        model.addAttribute("dateMax1", dateMax1);
+        model.addAttribute("dateMin1", dateMin1);
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
         return "zones";
+    }
+    private Long parseLong(String value) {
+        if (value != null && !value.isEmpty()) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                return null; // Ignore invalid input
+            }
+        }
+        return null;
+    }
+    private Date parseDate(String value) {
+        if (value != null && !value.isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                return sdf.parse(value);
+            } catch (ParseException e) {
+                return null; // Ignore invalid input
+            }
+        }
+        return null;
     }
 
     @GetMapping("/add")
