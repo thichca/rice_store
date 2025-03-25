@@ -110,10 +110,11 @@
     $(document).ready(function() {
         const storeId = $('[name="storeId"]').val();
         $.ajax({
-            url: `/owner/invoices/zones1?storeId=${storeId}`,
+            url: `/owner/invoices/search-zones?storeId=${storeId}`,
             method: 'GET',
             success: function(data) {
                 zones = data;
+                console.log('Danh sách khu vực:', zones); // In danh sách khu vực ra console
             },
             error: function() {
                 console.error('Lỗi khi lấy danh sách khu vực');
@@ -156,40 +157,41 @@
         });
 
         $('#productList').on('input', '.zoneSearch', function(e) {
-            const query = e.target.value;
+            const query = e.target.value.trim().toLowerCase();
             const row = $(this).closest('tr');
             const $zoneResults = row.find('.zoneResults');
 
-            if (query.length < 2) {
+            // Nếu không có gì được nhập, ẩn kết quả
+            if (query.length === 0) {
                 $zoneResults.addClass('hidden');
                 return;
             }
 
+            // Lọc danh sách zones dựa trên tên
             const filteredZones = zones.filter(zone =>
-                zone.name.toLowerCase().includes(query.toLowerCase())
+                zone.name.toLowerCase().includes(query)
             );
 
             let resultsHtml = '';
-            filteredZones.forEach(zone => {
-                resultsHtml += `
-                    <div class="p-2 hover:bg-gray-100 cursor-pointer"
-                         data-id="${zone.id}"
-                         data-name="${zone.name}"
-                         onclick="selectZone(this)">
-                        ${zone.name}
-                    </div>
-                `;
-            });
+            if (filteredZones.length > 0) {
+                filteredZones.forEach(zone => {
+                    resultsHtml += `
+                <div class="p-2 hover:bg-gray-100 cursor-pointer"
+                     data-id="${zone.id}"
+                     data-name="${zone.name}"
+                     onclick="selectZone(this)">
+                    ${zone.name}
+                </div>
+            `;
+                });
+            } else {
+                resultsHtml = '<div class="p-2 text-gray-500">Không tìm thấy khu vực</div>';
+            }
 
             $zoneResults.html(resultsHtml);
             $zoneResults.removeClass('hidden');
         });
 
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('.zoneSearch, .zoneResults').length) {
-                $('.zoneResults').addClass('hidden');
-            }
-        });
     });
 
     function addProduct(element) {

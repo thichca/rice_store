@@ -141,16 +141,22 @@ public class InvoiceController {
         return "import-invoice";
     }
 
-    @GetMapping("/zones1")
+    @GetMapping("/search-zones")
     @ResponseBody
-    public List<Zone> getZonesByStoreId(@RequestParam("storeId") Long storeId) {
-        return zoneRepository.findByStoreIdAndIsDeletedFalse(storeId);
+    public List<ZoneDTO> getZonesByStoreId(@RequestParam("storeId") Long storeId) {
+        List<Zone> zones = zoneRepository.findByStoreIdAndIsDeletedFalse(storeId);
+        return zones.stream()
+                .map(zone -> new ZoneDTO(zone.getId(), zone.getName()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/search-products")
     @ResponseBody
-    public List<Product> searchProducts(@RequestParam String query) {
-        return productRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(query);
+    public List<ProductDTO> searchProducts(@RequestParam String query) {
+        List<Product> products = productRepository.searchProducts(query);
+        return products.stream()
+                .map(p -> new ProductDTO(p.getId(), p.getName(), p.getDescription(), p.getPrice()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/search-customer")
