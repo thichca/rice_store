@@ -110,7 +110,7 @@
     $(document).ready(function() {
         const storeId = $('[name="storeId"]').val();
         $.ajax({
-            url: `/owner/invoices/zones?storeId=${storeId}`,
+            url: `/owner/invoices/zones1?storeId=${storeId}`,
             method: 'GET',
             success: function(data) {
                 zones = data;
