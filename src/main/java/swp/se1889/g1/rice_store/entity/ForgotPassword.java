@@ -6,7 +6,7 @@ import java.util.Date;
 
 @Entity
 @AllArgsConstructor
-@Table(name = "forgotPassword")
+@Table(name = "forgot_password")
 public class ForgotPassword {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

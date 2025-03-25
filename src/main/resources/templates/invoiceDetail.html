@@ -95,13 +95,17 @@
                     <td class="py-2 px-4 border p-2" th:text="${productNameList[iterStat.index]}"></td>
                     <td class="py-2 px-4 border p-2" th:text="${zoneNameList[iterStat.index]}"></td>
                     <td class="py-2 px-4 border p-2" th:text="${invoiceDetail.quantity}"></td>
-                    <td class="py-2 px-4 border p-2" th:text="${#numbers.formatDecimal(invoiceDetail.unitPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}"</td>
+                    <td class="py-2 px-4 border p-2" th:text="${#numbers.formatDecimal(invoiceDetail.unitPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
                     <td class="py-2 px-4 border p-2" th:text="${#numbers.formatDecimal(invoiceDetail.totalPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
                 </tr>
             </th:block>
             </tbody>
         </table>
     </section>
+    <button class="mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onclick="window.location.href='/invoiceSale'">
+        Quay Lại
+    </button>
 
 </div>
 

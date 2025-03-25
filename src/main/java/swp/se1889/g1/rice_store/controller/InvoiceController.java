@@ -14,15 +14,14 @@ import swp.se1889.g1.rice_store.entity.*;
 import swp.se1889.g1.rice_store.repository.*;
 import swp.se1889.g1.rice_store.service.InvoicesService;
 import swp.se1889.g1.rice_store.service.Iservice.UserService;
+import swp.se1889.g1.rice_store.service.ProductService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
+import swp.se1889.g1.rice_store.service.ZoneService;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -35,11 +34,13 @@ public class InvoiceController {
     private final InvoiceDetailRepository invoiceDetailRepository;
     private final UserServiceIpml userService;
     private final InvoicesRepository invoicesRepository;
+    private final ProductService productService;
+    private final ZoneService zoneService;
 
 
     @Autowired
     public InvoiceController(ProductRepository productRepository, CustomerRepository customerRepository, InvoicesService invoiceService, ZoneRepository zoneRepository, InvoiceDetailRepository invoiceDetailRepository
-            , UserServiceIpml userService, InvoicesRepository invoicesRepository) {
+            , UserServiceIpml userService, InvoicesRepository invoicesRepository, ProductService productService, ZoneService zoneService) {
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.invoiceService = invoiceService;
@@ -47,6 +48,8 @@ public class InvoiceController {
         this.invoiceDetailRepository = invoiceDetailRepository;
         this.userService = userService;
         this.invoicesRepository = invoicesRepository;
+        this.productService = productService;
+        this.zoneService = zoneService;
     }
 
     @GetMapping
@@ -191,6 +194,20 @@ public class InvoiceController {
                 detail.setZoneName("Khu vực đã bị xóa");
             }
         }
+
+        List<String> productNameList =  new ArrayList<>();
+        List<String> zoneNameList = new ArrayList<>();
+        for (InvoicesDetails iD : invoicesDetails) {
+            Product product = productService.findProductById(iD.getId());
+            Zone zone = zoneService.getZoneById(iD.getZone().getId());
+
+            productNameList.add(product.getName());
+            zoneNameList.add(zone.getName());
+        }
+
+        model.addAttribute("productNameList", productNameList);
+        model.addAttribute("zoneNameList", zoneNameList);
+
         model.addAttribute("invoiceDetails", invoicesDetails);
         model.addAttribute("invoice", invoices);
         User user = userService.getCurrentUser();
