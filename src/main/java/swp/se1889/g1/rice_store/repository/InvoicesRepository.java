@@ -47,4 +47,28 @@ public interface InvoicesRepository extends JpaRepository<Invoices, Long> , JpaS
     // Tính tổng doanh thu theo User + Store
     @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.store.id = :storeId AND i.isDeleted = false")
     BigDecimal getTotalRevenueByUserAndStore(@Param("createdBy") User createdBy, @Param("storeId") Long storeId);
+    @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.type = :type AND i.isDeleted = false")
+    BigDecimal getTotalSaleRevenueByUser(@Param("createdBy") User createdBy, @Param("type") Invoices.InvoiceType type);
+
+    @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.store.id = :storeId AND i.type = :type AND i.isDeleted = false")
+    BigDecimal getTotalSaleRevenueByUserAndStore(@Param("createdBy") User createdBy, @Param("storeId") Long storeId, @Param("type") Invoices.InvoiceType type);
+    @Query("SELECT MONTH(i.createdAt) AS month, COALESCE(SUM(i.finalAmount), 0) " +
+            "FROM Invoices i WHERE i.isDeleted = false AND i.type = 'Sale' " +
+            "GROUP BY MONTH(i.createdAt) ORDER BY MONTH(i.createdAt)")
+    List<Object[]> getSaleRevenueByMonth();
+
+    @Query("SELECT MONTH(i.createdAt) AS month, COALESCE(SUM(i.finalAmount), 0) " +
+            "FROM Invoices i WHERE i.store.id = :storeId AND i.isDeleted = false AND i.type = 'Sale' " +
+            "GROUP BY MONTH(i.createdAt) ORDER BY MONTH(i.createdAt)")
+    List<Object[]> getSaleRevenueByMonthAndStore(@Param("storeId") Long storeId);
+
+    @Query("SELECT i.customer.name, SUM(i.finalAmount) " +
+            "FROM Invoices i " +
+            "WHERE i.type = 'Sale' AND i.isDeleted = false " +
+            "GROUP BY i.customer.name " +
+            "ORDER BY SUM(i.finalAmount) DESC")
+    List<Object[]> findTop5CustomersBySpending(Pageable pageable);
+
+
+
 }

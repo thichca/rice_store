@@ -9,24 +9,11 @@
         <div class="container mx-auto flex justify-between items-center py-2 px-4">
             <div class="flex items-center">
                 <span class="ml-2 text-xl font-bold text-blue-900">
-                    <span th:text="${store != null ? store.name : 'Null'}"></span>
+                    <span th:text="${store != null ? store.name : ''}"></span>
                 </span>
             </div>
             <div class="flex items-center space-x-4">
                 <a class="text-gray-600 hover:text-gray-800 text-sm" href="#">
-                    <i class="fas fa-comment-dots">
-                    </i>
-                    Hỗ trợ
-                </a>
-                <a class="text-gray-600 hover:text-gray-800 text-sm" href="#">
-                    <i class="fas fa-comment-alt">
-                    </i>
-                    Góp ý
-                </a>
-                <a class="text-gray-600 hover:text-gray-800 text-sm" href="#">
-                    <i class="fas fa-envelope">
-                    </i>
-                    Thông báo
                     <div class="relative" id="user-dropdown">
                         <a class="text-gray-600 hover:text-gray-800" id="user-dropdown-toggle">
                             <span class="text-gray-600 text-sm"
@@ -57,11 +44,13 @@
     <nav class="bg-blue-600">
         <div class="container mx-auto flex justify-between items-center py-2 px-4">
             <div class="flex space-x-4">
-                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" th:href="@{/home}">
-                    <i class="fas fa-eye mr-2">
-                    </i>
-                    Tổng quan
-                </a>
+                <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
+                    <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700" th:href="@{/home}">
+                        <i class="fas fa-eye mr-2">
+                        </i>
+                        Tổng quan
+                    </a>
+                </div>
                 <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
                     <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
                        th:href="@{/owner/products}">
@@ -70,23 +59,25 @@
                         Sản phẩm
                     </a>
                 </div>
-                <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
+                <div th:if="${user != null && (user.role == 'ROLE_OWNER' || user.role == 'ROLE_EMPLOYEE')}">
                     <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
-                       th:href="@{/owner/zones}">
+                       th:href="@{/zones}">
                         <i class="fas fa-warehouse mr-2"></i>
-                        Tồn kho
+                        Kho hàng
                     </a>
                 </div>
-                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700 transition "
-                   th:href="@{/customers}">
-                    <i class="fas fa-user mr-2"></i>
-                    Khách hàng
-                </a>
+                <div th:if="${user != null && (user.role == 'ROLE_OWNER' || user.role == 'ROLE_EMPLOYEE')}">
+                    <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700 transition "
+                       th:href="@{/customers}">
+                        <i class="fas fa-user mr-2"></i>
+                        Khách hàng
+                    </a>
+                </div>
                 <div th:if="${user != null && user.role == 'ROLE_ADMIN'}">
                     <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
                        th:href="@{/manageUser}">
                         <i class="fas fa-users mr-2"></i>
-                        Người dùng
+                        Chủ cửa hàng
                     </a>
                 </div>
                 <div th:if="${user != null && user.role == 'ROLE_ADMIN'}">
@@ -111,11 +102,13 @@
                         Khu vực
                     </a>
                 </div>
-                <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700 transition "
-                   th:href="@{/invoiceSale}">
-                    <i class="fas fa-calendar mr-2"></i>
-                    Đơn hàng
-                </a>
+                <div th:if="${user != null && (user.role == 'ROLE_OWNER' || user.role == 'ROLE_EMPLOYEE')}">
+                    <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700 transition "
+                       th:href="@{/invoiceSale}">
+                        <i class="fas fa-calendar mr-2"></i>
+                        Đơn hàng
+                    </a>
+                </div>
                 <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
                     <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700 transition "
                        th:href="@{/owner/invoices}">
@@ -124,11 +117,13 @@
                     </a>
                 </div>
             </div>
-            <a class="flex items-center text-white px-3 py-2 rounded-md bg-blue-700" th:href="@{/createOrder}">
-                <i class="fas fa-shopping-basket mr-2">
-                </i>
-                Tạo đơn hàng
-            </a>
+            <div th:if="${user != null && (user.role == 'ROLE_OWNER' || user.role == 'ROLE_EMPLOYEE')}">
+                <a class="flex items-center text-white px-3 py-2 rounded-md bg-blue-700" th:href="@{/createOrder}">
+                    <i class="fas fa-shopping-basket mr-2">
+                    </i>
+                    Tạo đơn hàng
+                </a>
+            </div>
         </div>
     </nav>
 </div>

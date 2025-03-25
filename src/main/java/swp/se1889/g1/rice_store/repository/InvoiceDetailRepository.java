@@ -25,4 +25,10 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoicesDetails, 
     // Chỉ lấy chi tiết hóa đơn có Zone chưa bị xóa
     @Query("SELECT d FROM InvoicesDetails d WHERE d.invoice = :invoice AND d.zone.isDeleted = false")
     List<InvoicesDetails> findActiveInvoiceDetails(@Param("invoice") Invoices invoice);
+    @Query("SELECT d.product.name, SUM(d.quantity) " +
+            "FROM InvoicesDetails d " +
+            "WHERE d.invoice.type = 'Sale' AND d.isDeleted = false " +
+            "GROUP BY d.product.name " +
+            "ORDER BY SUM(d.quantity) DESC")
+    List<Object[]> findTop5ProductsSold(Pageable pageable);
 }

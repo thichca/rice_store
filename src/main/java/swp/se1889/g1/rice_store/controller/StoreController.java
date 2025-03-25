@@ -1,5 +1,6 @@
 package swp.se1889.g1.rice_store.controller;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1889.g1.rice_store.dto.StoreDTO;
 import swp.se1889.g1.rice_store.entity.Store;
+import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.service.StoreService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
@@ -133,7 +135,13 @@ public class StoreController {
     }
 
     @GetMapping("/restore-data")
-    public String GetViewManageUser() {
+    public String GetViewManageUser(Model model,
+                                    HttpSession session) {
+        User user = userService.getCurrentUser();
+        model.addAttribute("user", user);
+
+        Store store = (Store) session.getAttribute("store");
+        model.addAttribute("store", store);
         return "manage-store-restore-data";
     }
 

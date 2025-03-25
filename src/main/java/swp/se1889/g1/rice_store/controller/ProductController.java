@@ -124,6 +124,7 @@ public class ProductController {
             return ResponseEntity.badRequest().body(Collections.singletonMap("errorMessage", e.getMessage()));
         }
     }
+
     @GetMapping("/delete/{id}")
     public String deleteProduct(@PathVariable Long id,
                                 @RequestParam(defaultValue = "0") int page,
@@ -131,7 +132,8 @@ public class ProductController {
         productService.deleteProduct(id);
         return "redirect:/owner/products?page=" + page + "&size=" + size;
     }
-    @GetMapping("/owner/zones")
+
+    @GetMapping("/zones")
     public String getProductsWithZones(Model model, HttpSession session,
                                        @RequestParam(required = false) String productName,
                                        @RequestParam(required = false) String description,

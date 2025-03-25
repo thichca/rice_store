@@ -25,8 +25,8 @@ public class UsersService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Page<User> findAllUser(Pageable pageable){
-        return  usersRepository.findAll(pageable);
+    public Page<User> findAllUser(Pageable pageable) {
+        return usersRepository.findUserByRole("ROLE_ADMIN", pageable);
     }
 
     public User createUser(UserRequest request) {

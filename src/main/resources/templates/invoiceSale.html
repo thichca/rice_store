@@ -172,20 +172,12 @@
                             th:text="${#temporals.format(invoiceSale.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                         <td class="border p-2">
                             <div class="flex gap-2 w-full">
-                                <button class="w-1/2 bg-blue-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                <button class="w-full bg-blue-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-blue-500 hover:text-white transition duration-200"
                                         data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
                                         data-icon='<i class="fas fa-info"></i>'
                                         th:onclick="'window.location.href=\'/invoiceDetail/' + ${invoiceSale.id} + '\''">
                                     <i class="fas fa-info mr-1"></i> Chi tiết
-                                </button>
-
-                                <button class="w-1/2 bg-red-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                     hover:bg-red-700 hover:text-white transition duration-200"
-                                        th:onclick="'showConfirmModal(' + ${invoiceSale.id} + ')'"
-                                        data-full='<i class="fas fa-trash mr-1"></i> Xóa'
-                                        data-icon='<i class="fas fa-trash"></i>'>
-                                    <i class="fas fa-trash mr-1"></i> Xóa
                                 </button>
                             </div>
                         </td>

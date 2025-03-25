@@ -32,7 +32,7 @@ public class SecurityConfig {
             String role = authentication.getAuthorities().toString();
 
             if (role.contains("ROLE_ADMIN")) {
-                response.sendRedirect("/admin");
+                response.sendRedirect("/manageUser");
             } else if (role.contains("ROLE_EMPLOYEE")) {
                 response.sendRedirect("/employee/home");
             } else if (role.contains("ROLE_OWNER")) {
@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/restore/**").permitAll()
                         .requestMatchers("owner/**").hasRole("OWNER")
+                        .requestMatchers("admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")

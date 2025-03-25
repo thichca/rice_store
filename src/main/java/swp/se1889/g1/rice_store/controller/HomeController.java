@@ -31,6 +31,8 @@ public class HomeController {
 
     @Autowired
     private InvoicesService invoiceService;
+    @Autowired
+    private InvoiceDetailService invoiceDetailService;
 
     @PostMapping("/home")
     public String storeSelection(@RequestParam("storeName") String name,
@@ -44,7 +46,7 @@ public class HomeController {
         long totalProducts = productService.countProductsByCurrentUser();
         long totalCustomers = customerService.countCustomersByCurrentUser();
         long totalInvoices = invoiceService.countInvoicesByUserAndStore(store.getId());
-        BigDecimal totalRevenue = invoiceService.getTotalRevenueByUserAndStore(store.getId());
+        BigDecimal totalRevenue = invoiceService.getTotalSaleRevenueByUserAndStore(store.getId());
 
         model.addAttribute("user", user);
         model.addAttribute("totalProducts", totalProducts);
@@ -56,6 +58,12 @@ public class HomeController {
 
         model.addAttribute("monthlyRevenue", monthlyRevenue);
         model.addAttribute("monthLabels", monthLabels);
+        List<Object[]> topCustomers = invoiceService.getTop5CustomersBySpending();
+        List<Object[]> topProducts = invoiceDetailService.getTop5ProductsSold();
+
+        model.addAttribute("topCustomers", topCustomers);
+        model.addAttribute("topProducts", topProducts);
+
         return "home";
     }
 
@@ -70,7 +78,9 @@ public class HomeController {
         long totalProducts = productService.countProductsByCurrentUser();
         long totalCustomers = customerService.countCustomersByCurrentUser();
         long totalInvoices = (store != null) ? invoiceService.countInvoicesByUserAndStore(store.getId()) : invoiceService.countInvoicesByCurrentUser();
-        BigDecimal totalRevenue = (store != null) ? invoiceService.getTotalRevenueByUserAndStore(store.getId()) : invoiceService.getTotalRevenueByCurrentUser();
+        BigDecimal totalRevenue = (store != null)
+                ? invoiceService.getTotalSaleRevenueByUserAndStore(store.getId())
+                : invoiceService.getTotalSaleRevenueByCurrentUser();
 
         model.addAttribute("totalProducts", totalProducts);
         model.addAttribute("totalCustomers", totalCustomers);
@@ -93,10 +103,13 @@ public class HomeController {
         Long createdBy = userService.getCurrentCreatedBy();
         Store store = storeService.getStoreByCreatedBy(createdBy);
         model.addAttribute("store", store);
+
         session.setAttribute("store", store);
+
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
-        return "home";
+
+        return "redirect:/zones";
     }
 
     @GetMapping("/baseFE")

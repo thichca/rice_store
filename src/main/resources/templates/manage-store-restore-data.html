@@ -8,164 +8,217 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <style>
-        .divider { border-right: 2px solid #ddd; height: 100%; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999; justify-content: center; align-items: center; }
-        .modal-content { background-color: white; padding: 20px; border-radius: 8px; width: 60%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
+        .divider {
+            border-right: 2px solid #ddd;
+            height: 100%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 60%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
 <div class="top-0 left-0 w-full">
-    <div th:replace="~{fragments/header :: header}"></div>
-    <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
-        <!-- Previous content unchanged until the View Details Modal -->
-        <div class="overflow-x-auto">
-            <table class="table-auto border-collapse border w-full">
-                <thead>
-                <tr class="bg-gray-100">
-                    <th class="border p-2">Id</th>
-                    <th class="border p-2">Tên cửa hàng</th>
-                    <th class="border p-2">Địa chỉ</th>
-                    <th class="border p-2">SĐT</th>
-                    <th class="border p-2">Email</th>
-                    <th class="border p-2">Ngày tạo</th>
-                    <th class="border p-2">Cập nhật</th>
-                    <th class="border p-2">Trạng thái</th>
-                    <th class="border p-2 w-[340px]">Hành động</th>
-                </tr>
-                <tr class="bg-gray-50">
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="number" class="border rounded w-1/2 py-1 px-2" placeholder="Từ" style="font-weight: normal;" id="search-id-min">
-                            <input type="number" class="border rounded w-1/2 py-1 px-2" placeholder="Đến" style="font-weight: normal;" id="search-id-max">
+    <div class="fixed top-0 left-0 w-full">
+        <div th:replace="~{fragments/header :: header}"></div>
+    </div>
+    <div class="mt-28">
+        <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
+            <!-- Previous content unchanged until the View Details Modal -->
+            <div class="overflow-x-auto">
+                <table class="table-auto border-collapse border w-full">
+                    <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border p-2">Id</th>
+                        <th class="border p-2">Tên cửa hàng</th>
+                        <th class="border p-2">Địa chỉ</th>
+                        <th class="border p-2">SĐT</th>
+                        <th class="border p-2">Email</th>
+                        <th class="border p-2">Ngày tạo</th>
+                        <th class="border p-2">Cập nhật</th>
+                        <th class="border p-2">Trạng thái</th>
+                        <th class="border p-2 w-[340px]">Hành động</th>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <th class="border p-2">
+                            <div class="flex w-full gap-1">
+                                <input type="number" class="border rounded w-1/2 py-1 px-2" placeholder="Từ"
+                                       style="font-weight: normal;" id="search-id-min">
+                                <input type="number" class="border rounded w-1/2 py-1 px-2" placeholder="Đến"
+                                       style="font-weight: normal;" id="search-id-max">
+                            </div>
+                        </th>
+                        <td class="border p-2">
+                            <input type="text" class="w-full border rounded p-1" id="search-name"
+                                   placeholder="Tìm tên cửa hàng">
+                        </td>
+                        <td class="border p-2">
+                            <input type="text" class="w-full border rounded p-1" id="search-address"
+                                   placeholder="Tìm địa chỉ">
+                        </td>
+                        <td class="border p-2">
+                            <input type="text" class="w-full border rounded p-1" id="search-phone"
+                                   placeholder="Tìm SĐT">
+                        </td>
+                        <td class="border p-2">
+                            <input type="text" class="w-full border rounded p-1" id="search-email"
+                                   placeholder="Tìm email">
+                        </td>
+                        <th class="border p-2">
+                            <div class="flex w-full gap-1">
+                                <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;"
+                                       id="search-created-date-min">
+                                <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;"
+                                       id="search-created-date-max">
+                            </div>
+                        </th>
+                        <th class="border p-2">
+                            <div class="flex w-full gap-1">
+                                <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;"
+                                       id="search-updated-date-min">
+                                <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;"
+                                       id="search-updated-date-max">
+                            </div>
+                        </th>
+                        <th class="border p-2">
+                            <select class="w-full border rounded p-1" id="search-status-filter">
+                                <option value="">Tất cả</option>
+                                <option value="active">Đang hoạt động</option>
+                                <option value="inactive">Đã khóa</option>
+                            </select>
+                        </th>
+                        <td class="border p-2">
+                            <div class="flex gap-2 w-full">
+                                <button id="clearFilters"
+                                        class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center hover:bg-red-500 hover:text-white transition duration-200">
+                                    <i class="fas fa-times mr-1"></i> Bỏ lọc
+                                </button>
+                                <button id="toggleButtons"
+                                        class="w-1/2 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center hover:bg-blue-500 hover:text-white transition duration-200">
+                                    <i class="fas fa-angle-right mr-1"></i> Thu gọn
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- View Details Modal with Zone Pagination -->
+            <div id="viewDetailsModal" class="modal">
+                <div class="modal-content">
+                    <h5 class="text-lg font-semibold border-b pb-3 mb-3">Chi tiết cửa hàng</h5>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><strong>Tên cửa hàng:</strong> <span id="detail-name"></span></div>
+                        <div><strong>Địa chỉ:</strong> <span id="detail-address"></span></div>
+                        <div><strong>SĐT:</strong> <span id="detail-phone"></span></div>
+                        <div><strong>Email:</strong> <span id="detail-email"></span></div>
+                        <div><strong>Ngày tạo:</strong> <span id="detail-createdAt"></span></div>
+                        <div><strong>Ngày cập nhật:</strong> <span id="detail-updatedAt"></span></div>
+                        <div><strong>Ghi chú:</strong> <span id="detail-note"></span></div>
+                        <div><strong>Cập nhật bởi:</strong> <span id="detail-updatedBy"></span></div>
+                    </div>
+
+                    <h6 class="text-md font-semibold mt-4 mb-2">Danh sách Zone</h6>
+                    <div class="overflow-x-auto">
+                        <table class="table-auto border-collapse border w-full">
+                            <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border p-2">Tên Zone</th>
+                                <th class="border p-2">Địa chỉ</th>
+                                <th class="border p-2">Tên sản phẩm</th>
+                                <th class="border p-2">Số lượng</th>
+                                <th class="border p-2">Ngày tạo</th>
+                                <th class="border p-2">Ngày cập nhật</th>
+                                <th class="border p-2">Tạo bởi</th>
+                                <th class="border p-2">Cập nhật bởi</th>
+                                <th class="border p-2">Trạng thái</th>
+                            </tr>
+                            </thead>
+                            <tbody id="zoneTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Zone Pagination -->
+                    <div class="w-full flex justify-center items-center mt-4 gap-12">
+                        <button id="zonePrevPage"
+                                class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white">
+                            Trước
+                        </button>
+                        <div class="flex items-center">
+                            <span>Trang</span>
+                            <input type="number" id="zoneCurrentPage"
+                                   class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1" min="1">
+                            <span id="zoneTotalPages">/ 1</span>
                         </div>
-                    </th>
-                    <td class="border p-2">
-                        <input type="text" class="w-full border rounded p-1" id="search-name" placeholder="Tìm tên cửa hàng">
-                    </td>
-                    <td class="border p-2">
-                        <input type="text" class="w-full border rounded p-1" id="search-address" placeholder="Tìm địa chỉ">
-                    </td>
-                    <td class="border p-2">
-                        <input type="text" class="w-full border rounded p-1" id="search-phone" placeholder="Tìm SĐT">
-                    </td>
-                    <td class="border p-2">
-                        <input type="text" class="w-full border rounded p-1" id="search-email" placeholder="Tìm email">
-                    </td>
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;" id="search-created-date-min">
-                            <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;" id="search-created-date-max">
-                        </div>
-                    </th>
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;" id="search-updated-date-min">
-                            <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;" id="search-updated-date-max">
-                        </div>
-                    </th>
-                    <th class="border p-2">
-                        <select class="w-full border rounded p-1" id="search-status-filter">
-                            <option value="">Tất cả</option>
-                            <option value="active">Đang hoạt động</option>
-                            <option value="inactive">Đã khóa</option>
+                        <select id="zoneRecordsPerPage" class="border rounded px-4 py-2">
+                            <option value="5">5 Bản ghi</option>
+                            <option value="10" selected>10 Bản ghi</option>
+                            <option value="20">20 Bản ghi</option>
                         </select>
-                    </th>
-                    <td class="border p-2">
-                        <div class="flex gap-2 w-full">
-                            <button id="clearFilters" class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center hover:bg-red-500 hover:text-white transition duration-200">
-                                <i class="fas fa-times mr-1"></i> Bỏ lọc
-                            </button>
-                            <button id="toggleButtons" class="w-1/2 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center hover:bg-blue-500 hover:text-white transition duration-200">
-                                <i class="fas fa-angle-right mr-1"></i> Thu gọn
+                        <button id="zoneNextPage"
+                                class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white">Sau
+                        </button>
+                    </div>
+
+                    <div class="mt-4">
+                        <button id="restoreButton" class="bg-green-500 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-undo mr-2"></i> Khôi phục dữ liệu
+                        </button>
+                        <div id="restoreDatePicker" class="hidden mt-2">
+                            <label class="block text-sm font-medium text-gray-700">Chọn ngày khôi phục</label>
+                            <input type="date" id="restoreDate" class="mt-1 p-2 border rounded-md">
+                            <button id="confirmRestore" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Xác nhận
                             </button>
                         </div>
-                    </td>
-                </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-
-        <!-- View Details Modal with Zone Pagination -->
-        <div id="viewDetailsModal" class="modal">
-            <div class="modal-content">
-                <h5 class="text-lg font-semibold border-b pb-3 mb-3">Chi tiết cửa hàng</h5>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><strong>Tên cửa hàng:</strong> <span id="detail-name"></span></div>
-                    <div><strong>Địa chỉ:</strong> <span id="detail-address"></span></div>
-                    <div><strong>SĐT:</strong> <span id="detail-phone"></span></div>
-                    <div><strong>Email:</strong> <span id="detail-email"></span></div>
-                    <div><strong>Ngày tạo:</strong> <span id="detail-createdAt"></span></div>
-                    <div><strong>Ngày cập nhật:</strong> <span id="detail-updatedAt"></span></div>
-                    <div><strong>Ghi chú:</strong> <span id="detail-note"></span></div>
-                    <div><strong>Cập nhật bởi:</strong> <span id="detail-updatedBy"></span></div>
-                </div>
-
-                <h6 class="text-md font-semibold mt-4 mb-2">Danh sách Zone</h6>
-                <div class="overflow-x-auto">
-                    <table class="table-auto border-collapse border w-full">
-                        <thead>
-                        <tr class="bg-gray-100">
-                            <th class="border p-2">Tên Zone</th>
-                            <th class="border p-2">Địa chỉ</th>
-                            <th class="border p-2">Tên sản phẩm</th>
-                            <th class="border p-2">Số lượng</th>
-                            <th class="border p-2">Ngày tạo</th>
-                            <th class="border p-2">Ngày cập nhật</th>
-                            <th class="border p-2">Tạo bởi</th>
-                            <th class="border p-2">Cập nhật bởi</th>
-                            <th class="border p-2">Trạng thái</th>
-                        </tr>
-                        </thead>
-                        <tbody id="zoneTableBody"></tbody>
-                    </table>
-                </div>
-
-                <!-- Zone Pagination -->
-                <div class="w-full flex justify-center items-center mt-4 gap-12">
-                    <button id="zonePrevPage" class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white">Trước</button>
-                    <div class="flex items-center">
-                        <span>Trang</span>
-                        <input type="number" id="zoneCurrentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1" min="1">
-                        <span id="zoneTotalPages">/ 1</span>
                     </div>
-                    <select id="zoneRecordsPerPage" class="border rounded px-4 py-2">
-                        <option value="5">5 Bản ghi</option>
-                        <option value="10" selected>10 Bản ghi</option>
-                        <option value="20">20 Bản ghi</option>
-                    </select>
-                    <button id="zoneNextPage" class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white">Sau</button>
-                </div>
 
-                <div class="mt-4">
-                    <button id="restoreButton" class="bg-green-500 text-white px-4 py-2 rounded flex items-center">
-                        <i class="fas fa-undo mr-2"></i> Khôi phục dữ liệu
+                    <button id="closeDetails" class="mt-4 bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400">Đóng
                     </button>
-                    <div id="restoreDatePicker" class="hidden mt-2">
-                        <label class="block text-sm font-medium text-gray-700">Chọn ngày khôi phục</label>
-                        <input type="date" id="restoreDate" class="mt-1 p-2 border rounded-md">
-                        <button id="confirmRestore" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Xác nhận</button>
-                    </div>
                 </div>
-
-                <button id="closeDetails" class="mt-4 bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400">Đóng</button>
             </div>
-        </div>
 
-        <!-- Pagination for Stores -->
-        <div class="w-full flex justify-center items-center mt-4 gap-12">
-            <button id="prevPage" class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white">Trước</button>
-            <div class="flex items-center">
-                <span>Trang</span>
-                <input type="number" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center" value="1" min="1">
-                <span id="totalPages">/ 1</span>
+            <!-- Pagination for Stores -->
+            <div class="w-full flex justify-center items-center mt-4 gap-12">
+                <button id="prevPage"
+                        class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white">Trước
+                </button>
+                <div class="flex items-center">
+                    <span>Trang</span>
+                    <input type="number" id="currentPage" class="w-12 border rounded px-2 py-1 mx-2 text-center"
+                           value="1" min="1">
+                    <span id="totalPages">/ 1</span>
+                </div>
+                <select id="recordsPerPage" class="border rounded px-4 py-2">
+                    <option value="5">5 Bản ghi</option>
+                    <option value="10" selected>10 Bản ghi</option>
+                    <option value="20">20 Bản ghi</option>
+                </select>
+                <button id="nextPage"
+                        class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white">Sau
+                </button>
             </div>
-            <select id="recordsPerPage" class="border rounded px-4 py-2">
-                <option value="5">5 Bản ghi</option>
-                <option value="10" selected>10 Bản ghi</option>
-                <option value="20">20 Bản ghi</option>
-            </select>
-            <button id="nextPage" class="bg-gray-200 text-black px-8 py-2 rounded hover:bg-gray-400 hover:text-white">Sau</button>
         </div>
     </div>
 </div>
@@ -292,7 +345,7 @@
             const formattedDate = date + 'T00:00:00.000'; // Định dạng ngày cho API
             const response = await fetch(`http://localhost:8080/restore/restore-before-date?date=${formattedDate}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' }
+                headers: {'Content-Type': 'application/json'}
             });
             if (!response.ok) throw new Error(`Lỗi HTTP! trạng thái: ${response.status}`);
 
@@ -324,7 +377,7 @@
         try {
             const response = await fetch(`http://localhost:8080/restore/${storeId}/status?isDeleted=${isDeleted}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' }
+                headers: {'Content-Type': 'application/json'}
             });
             if (!response.ok) throw new Error(`Lỗi HTTP! trạng thái: ${response.status}`);
 
