@@ -78,11 +78,12 @@
 
         <tbody id="tableBody">
         <tr th:each="item : ${productWithZones}">
-          <td class="border p-2" th:text="${item['productName']}"></td>
-          <td class="border p-2" th:text="${item['description']}"></td>
-          <td class="border p-2" th:text="${#numbers.formatDecimal(item['price'], 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
-          <td class="border p-2" th:text="${item['zoneName']}"></td>
-          <td class="border p-2" th:text="${item['quantity']}"></td>
+          <td class="border p-2" th:text="${item.productName}"></td>
+          <td class="border p-2" th:text="${item.description}"></td>
+          <td class="border p-2" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+          <td class="border p-2" th:text="${item.zoneName}"></td>
+          <td class="border p-2" th:text="${item.quantity}"></td>
+          <td class="border p-2 text-center">--</td> <!-- Placeholder cho hành động -->
         </tr>
         </tbody>
       </table>
@@ -90,47 +91,53 @@
     <div class="w-full flex justify-center items-center mt-4 gap-2" th:if="${totalPages > 0}">
       <!-- Nút "Trước" -->
       <a th:if="${currentPage > 0}"
-         th:href="@{/owner/zones(page=${currentPage - 1}, size=5, searchType=${searchType}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+         th:href="@{/owner/zones(
+           page=${currentPage - 1},
+           size=5,
+           productName=${productName},
+           description=${description},
+           minPrice=${minPrice},
+           maxPrice=${maxPrice},
+           zoneName=${zoneName},
+           minQuantity=${minQuantity},
+           maxQuantity=${maxQuantity}
+         )}"
          class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
         Trước
       </a>
 
-      <!-- Hiển thị danh sách số trang -->
-      <th:block th:if="${totalPages > 1}">
-        <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
-          <a th:href="@{/owner/zones(
-    page=${pageNumber},
-    size=5,
-    name=${name},
-    description=${description},
-    minPrice=${minPrice},
-    maxPrice=${maxPrice},
-    zoneName=${zoneName},
-    minQuantity=${minQuantity},
-    maxQuantity=${maxQuantity}
-)}"
-
-             th:text="${pageNumber + 1}"
-             th:classappend="${pageNumber == currentPage} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-400 hover:text-white'"
-             class="px-4 py-2 rounded transition duration-200">
-          </a>
-        </th:block>
+      <!-- Danh sách trang -->
+      <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
+        <a th:href="@{/owner/zones(
+             page=${pageNumber},
+             size=5,
+             productName=${productName},
+             description=${description},
+             minPrice=${minPrice},
+             maxPrice=${maxPrice},
+             zoneName=${zoneName},
+             minQuantity=${minQuantity},
+             maxQuantity=${maxQuantity}
+           )}"
+           th:text="${pageNumber + 1}"
+           th:classappend="${pageNumber == currentPage} ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black hover:bg-gray-400 hover:text-white'"
+           class="px-4 py-2 rounded transition duration-200">
+        </a>
       </th:block>
 
       <!-- Nút "Sau" -->
       <a th:if="${currentPage + 1 < totalPages}"
          th:href="@{/owner/zones(
-    page=${pageNumber},
-    size=5,
-    name=${name},
-    description=${description},
-    minPrice=${minPrice},
-    maxPrice=${maxPrice},
-    zoneName=${zoneName},
-    minQuantity=${minQuantity},
-    maxQuantity=${maxQuantity}
-)}"
-
+           page=${currentPage + 1},
+           size=5,
+           productName=${productName},
+           description=${description},
+           minPrice=${minPrice},
+           maxPrice=${maxPrice},
+           zoneName=${zoneName},
+           minQuantity=${minQuantity},
+           maxQuantity=${maxQuantity}
+         )}"
          class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-400 hover:text-white transition duration-200">
         Sau
       </a>

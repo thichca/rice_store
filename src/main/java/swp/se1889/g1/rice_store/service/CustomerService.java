@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import swp.se1889.g1.rice_store.entity.Customer;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.CustomerRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
+import swp.se1889.g1.rice_store.specification.CustomerSpecifications;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,57 +37,6 @@ public class CustomerService {
             return customerRepository.countByCreatedBy(currentUser);
         }
         return 0;
-    }
-
-
-    public Page<CustomerDTO> getCustomersByCurrentUser(int page, int size) {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-            return customerRepository.findByCurrentUser(currentUser, pageable);
-        }
-        return Page.empty();
-    }
-    public Page<CustomerDTO> filterCustomers(String id, String name, String phone,
-                                             String address, String email, String debt,
-                                             LocalDate createdDate, LocalDate updatedDate,
-                                             int page, int size) {
-        User currentUser = getCurrentUser();
-        if (currentUser == null) {
-            return Page.empty();
-        }
-
-        Long parsedId = null;
-        if (id != null && !id.isBlank()) {
-            try {
-                parsedId = Long.parseLong(id);
-            } catch (NumberFormatException e) {
-                throw new RuntimeException("ID không hợp lệ.");
-            }
-        }
-
-        BigDecimal parsedDebt = null;
-        if (debt != null && !debt.isBlank()) {
-            try {
-                parsedDebt = new BigDecimal(debt);
-            } catch (NumberFormatException e) {
-                throw new RuntimeException("Dư nợ không hợp lệ.");
-            }
-        }
-
-        // ✅ Chuyển LocalDate thành khoảng thời gian để so sánh chính xác 1 ngày
-        LocalDateTime createdFrom = createdDate != null ? createdDate.atStartOfDay() : null;
-        LocalDateTime createdTo = createdDate != null ? createdDate.plusDays(1).atStartOfDay() : null;
-
-        LocalDateTime updatedFrom = updatedDate != null ? updatedDate.atStartOfDay() : null;
-        LocalDateTime updatedTo = updatedDate != null ? updatedDate.plusDays(1).atStartOfDay() : null;
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        return customerRepository.filterByFields(
-                currentUser.getId(), parsedId, name, phone, address, email, parsedDebt,
-                createdFrom, createdTo, updatedFrom, updatedTo, pageable
-        );
     }
 
 
@@ -189,6 +140,46 @@ public class CustomerService {
             return userRepository.findByUsername(username);
         }
         return null;
+    }
+    public Page<CustomerDTO> filterCustomersWithSpec(String id, String name, String phone,
+                                                     String address, String email, String debt,
+                                                     LocalDate createdDate, LocalDate updatedDate,
+                                                     int page, int size) {
+        User currentUser = getCurrentUser();
+        if (currentUser == null) return Page.empty();
+
+        Long parsedId = null;
+        BigDecimal parsedDebt = null;
+
+        try {
+            if (id != null && !id.isBlank()) parsedId = Long.parseLong(id);
+            if (debt != null && !debt.isBlank()) parsedDebt = new BigDecimal(debt);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("ID hoặc dư nợ không hợp lệ.");
+        }
+
+        LocalDateTime createdFrom = createdDate != null ? createdDate.atStartOfDay() : null;
+        LocalDateTime createdTo = createdDate != null ? createdDate.plusDays(1).atStartOfDay() : null;
+
+        LocalDateTime updatedFrom = updatedDate != null ? updatedDate.atStartOfDay() : null;
+        LocalDateTime updatedTo = updatedDate != null ? updatedDate.plusDays(1).atStartOfDay() : null;
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.notDeleted())
+                .and(CustomerSpecifications.createdBy(currentUser.getId()));
+
+        if (parsedId != null) spec = spec.and(CustomerSpecifications.idEquals(parsedId));
+        if (name != null && !name.isBlank()) spec = spec.and(CustomerSpecifications.nameContains(name));
+        if (phone != null && !phone.isBlank()) spec = spec.and(CustomerSpecifications.phoneContains(phone));
+        if (address != null && !address.isBlank()) spec = spec.and(CustomerSpecifications.addressContains(address));
+        if (email != null && !email.isBlank()) spec = spec.and(CustomerSpecifications.emailContains(email));
+        if (parsedDebt != null) spec = spec.and(CustomerSpecifications.debtEquals(parsedDebt));
+        if (createdFrom != null && createdTo != null) spec = spec.and(CustomerSpecifications.createdAtBetween(createdFrom, createdTo));
+        if (updatedFrom != null && updatedTo != null) spec = spec.and(CustomerSpecifications.updatedAtBetween(updatedFrom, updatedTo));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return customerRepository.findAll(spec, pageable).map(CustomerDTO::new);
     }
 
 

@@ -50,7 +50,7 @@ public class CustomerController {
         model.addAttribute("user", userService.getCurrentUser());
 
         // Gọi service filter
-        Page<CustomerDTO> customerPage = customerService.filterCustomers(
+        Page<CustomerDTO> customerPage = customerService.filterCustomersWithSpec(
                 id, name, phone, address, email, debt, createdDate, updatedDate, page, size);
 
         model.addAttribute("customers", customerPage.getContent());

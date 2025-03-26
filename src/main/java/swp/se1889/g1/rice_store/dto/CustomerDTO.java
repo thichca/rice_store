@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import swp.se1889.g1.rice_store.entity.Customer;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -33,6 +35,19 @@ public class CustomerDTO {
     private LocalDateTime updatedAt;  // Ngày cập nhật
     private String createdBy; // Người thêm
     private String updatedBy; // Người sửa
+    public CustomerDTO(Customer customer) {
+        this.id = customer.getId();
+        this.name = customer.getName();
+        this.phone = customer.getPhone();
+        this.address = customer.getAddress();
+        this.email = customer.getEmail();
+        this.debtBalance = customer.getDebtBalance();
+        this.createdBy = customer.getCreatedBy() != null ? customer.getCreatedBy().getUsername() : null;
+        this.updatedBy = customer.getUpdatedBy();
+        this.createdAt = customer.getCreatedAt();
+        this.updatedAt = customer.getUpdatedAt();
+    }
+
 
     public CustomerDTO(Long id, String name, String phone, String address, String email, BigDecimal debtBalance, String createdBy, String updatedBy) {
         this.id = id;
