@@ -43,6 +43,7 @@
                     <div>
                         <label class="block text-gray-700">Chọn phương thức:
                             <select name="paymentMethod" id="paymentMethod" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                <option value="">Chọn phương thức thanh toán</option>
                                 <option value="onlyProduct">Tiền Hàng</option>
                                 <option value="productAndDebt">Tiền Hàng + Nợ</option>
                             </select>
@@ -110,10 +111,11 @@
     $(document).ready(function() {
         const storeId = $('[name="storeId"]').val();
         $.ajax({
-            url: `/owner/invoices/zones1?storeId=${storeId}`,
+            url: `/owner/invoices/search-zones?storeId=${storeId}`,
             method: 'GET',
             success: function(data) {
                 zones = data;
+                console.log('Danh sách khu vực:', zones); // In danh sách khu vực ra console
             },
             error: function() {
                 console.error('Lỗi khi lấy danh sách khu vực');
@@ -156,40 +158,41 @@
         });
 
         $('#productList').on('input', '.zoneSearch', function(e) {
-            const query = e.target.value;
+            const query = e.target.value.trim().toLowerCase();
             const row = $(this).closest('tr');
             const $zoneResults = row.find('.zoneResults');
 
-            if (query.length < 2) {
+            // Nếu không có gì được nhập, ẩn kết quả
+            if (query.length === 0) {
                 $zoneResults.addClass('hidden');
                 return;
             }
 
+            // Lọc danh sách zones dựa trên tên
             const filteredZones = zones.filter(zone =>
-                zone.name.toLowerCase().includes(query.toLowerCase())
+                zone.name.toLowerCase().includes(query)
             );
 
             let resultsHtml = '';
-            filteredZones.forEach(zone => {
-                resultsHtml += `
-                    <div class="p-2 hover:bg-gray-100 cursor-pointer"
-                         data-id="${zone.id}"
-                         data-name="${zone.name}"
-                         onclick="selectZone(this)">
-                        ${zone.name}
-                    </div>
-                `;
-            });
+            if (filteredZones.length > 0) {
+                filteredZones.forEach(zone => {
+                    resultsHtml += `
+                <div class="p-2 hover:bg-gray-100 cursor-pointer"
+                     data-id="${zone.id}"
+                     data-name="${zone.name}"
+                     onclick="selectZone(this)">
+                    ${zone.name}
+                </div>
+            `;
+                });
+            } else {
+                resultsHtml = '<div class="p-2 text-gray-500">Không tìm thấy khu vực</div>';
+            }
 
             $zoneResults.html(resultsHtml);
             $zoneResults.removeClass('hidden');
         });
 
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('.zoneSearch, .zoneResults').length) {
-                $('.zoneResults').addClass('hidden');
-            }
-        });
     });
 
     function addProduct(element) {
@@ -306,23 +309,32 @@
         $('[name="totalPrice"]').val(total.toFixed(2));
         calculateRemaining();
     }
+    function updateTotal() {
+        const paidAmount = parseFloat($('[name="paidAmount"]').val()) || 0;
+        $('[name="totalPrice"]').val(paidAmount.toFixed(2)); // Tổng tiền bằng thanh toán
+    }
 
+    // Gọi hàm khi người dùng nhập thanh toán
+    $('[name="paidAmount"]').on('input', updateTotal);
     function calculateRemaining() {
         const total = parseFloat($('[name="totalPrice"]').val()) || 0;
         const balance = parseFloat($('#customerBalance').val()) || 0;
         const paidAmount = parseFloat($('[name="paidAmount"]').val()) || 0;
         const paymentMethod = $('#paymentMethod').val();
-
         let remaining;
         if (paymentMethod === "productAndDebt") {
             const totalDue = total + balance;
             if (paidAmount < totalDue) {
-                remaining = totalDue - paidAmount;
+                remaining = totalDue - paidAmount; // Còn nợ nếu trả chưa đủ
             } else {
-                remaining = 0; // Nếu thanh toán đủ hoặc dư, nợ mới = 0
+                remaining = paidAmount - totalDue; // Trả thừa, hiển thị số dư dương
             }
         } else {
-            remaining = total - paidAmount; // Chỉ tính cho tiền hàng
+            if (paidAmount < total) {
+                remaining = total - paidAmount; // Còn nợ nếu trả chưa đủ tiền hàng
+            } else {
+                remaining = paidAmount - total; // Trả thừa, hiển thị số dư dương
+            }
         }
         $('[name="remainingAmount"]').val(remaining.toFixed(2));
     }

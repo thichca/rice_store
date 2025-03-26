@@ -43,4 +43,8 @@ public interface ZoneRepository extends JpaRepository<Zone, Long> , JpaSpecifica
             "JOIN z.product p " +
             "WHERE z.isDeleted = false AND p.name LIKE %:query%")
     List<ProductZoneDTO> searchProductZoneDetails(@Param("query") String query);
+
+    @Query("SELECT new swp.se1889.g1.rice_store.dto.ZoneDTO(z.id, z.name) " +
+            "FROM Zone z WHERE z.store.id = :storeId AND z.isDeleted = false")
+    List<Zone> findByStoreIdAndIsDeletedFalseCustom(@Param("storeId") Long storeId);
 }

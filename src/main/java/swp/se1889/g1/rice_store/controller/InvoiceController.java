@@ -62,11 +62,22 @@ public class InvoiceController {
                                @RequestParam(required = false) String dateMin ,
                                @RequestParam(required = false) String dateMax ,
                                @RequestParam(required = false) String dateMin1 ,
-                               @RequestParam(required = false) String dateMax1) {
+                               @RequestParam(required = false) String dateMax1,
+                               @RequestParam(required = false) String type) {
         Store store = (Store) session.getAttribute("store");
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
         model.addAttribute("store", store);
+        // Chuyển đổi type thành Invoices.InvoiceType
+        Invoices.InvoiceType invoiceType = null;
+        if (type != null && !type.isEmpty()) {
+            try {
+                invoiceType = Invoices.InvoiceType.valueOf(type.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Có thể thêm thông báo lỗi nếu type không hợp lệ
+                model.addAttribute("error", "Loại hóa đơn không hợp lệ: " + type);
+            }
+        }
         Long parsedIdMin = parseLong(idMin);
         Long parsedIdMax = parseLong(idMax);
         BigDecimal parsedAmountMin = parseBigDecimal(amountMin);
@@ -76,7 +87,7 @@ public class InvoiceController {
         Date parsedDateMin1 = parseDate(dateMin1);
         Date parsedDateMax1 = parseDate(dateMax1);
         Pageable pageable = PageRequest.of(page, size);
-        Page<Invoices> invoices = invoiceService.getFilter( parsedIdMin, parsedIdMax, note, status, parsedDateMin, parsedDateMax, pageable,  parsedDateMin1, parsedDateMax1 , parsedAmountMin , parsedAmountMax);
+        Page<Invoices> invoices = invoiceService.getFilter(store , parsedIdMin, parsedIdMax, note, status, parsedDateMin, parsedDateMax, pageable,  parsedDateMin1, parsedDateMax1 , parsedAmountMin , parsedAmountMax , invoiceType);
         model.addAttribute("invoices", invoices.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", invoices.getTotalPages());
@@ -92,6 +103,7 @@ public class InvoiceController {
         model.addAttribute("dateMax", dateMax);
         model.addAttribute("dateMin1", dateMin1);
         model.addAttribute("dateMax1", dateMax1);
+        model.addAttribute("type", type);
         return "invoice";
     }
     private Long parseLong(String value) {
@@ -141,16 +153,22 @@ public class InvoiceController {
         return "import-invoice";
     }
 
-    @GetMapping("/zones1")
+    @GetMapping("/search-zones")
     @ResponseBody
-    public List<Zone> getZonesByStoreId(@RequestParam("storeId") Long storeId) {
-        return zoneRepository.findByStoreIdAndIsDeletedFalse(storeId);
+    public List<ZoneDTO> getZonesByStoreId(@RequestParam("storeId") Long storeId) {
+        List<Zone> zones = zoneRepository.findByStoreIdAndIsDeletedFalse(storeId);
+        return zones.stream()
+                .map(zone -> new ZoneDTO(zone.getId(), zone.getName()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/search-products")
     @ResponseBody
-    public List<Product> searchProducts(@RequestParam String query) {
-        return productRepository.findByIsDeletedFalseAndNameContainingIgnoreCase(query);
+    public List<ProductDTO> searchProducts(@RequestParam String query) {
+        List<Product> products = productRepository.searchProducts(query);
+        return products.stream()
+                .map(p -> new ProductDTO(p.getId(), p.getName(), p.getDescription(), p.getPrice()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/search-customer")

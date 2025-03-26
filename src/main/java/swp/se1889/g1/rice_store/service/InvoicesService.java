@@ -93,14 +93,14 @@ public class InvoicesService {
             if (paidAmount.compareTo(totalDue) < 0) {
                 newDebtBalance = totalDue.subtract(paidAmount); // Còn nợ nếu trả chưa đủ
             } else {
-                newDebtBalance = BigDecimal.ZERO; // Hết nợ nếu trả đủ hoặc dư
+                newDebtBalance = paidAmount.subtract(totalDue).negate(); // Trả thừa, nợ mới là số âm (số dư dương)
             }
         } else if ("onlyProduct".equals(paymentMethod)) {
             // Chỉ tiền hàng: Chỉ trả cho hóa đơn, nợ cũ giữ nguyên
             if (paidAmount.compareTo(finalAmount) < 0) {
                 newDebtBalance = debtBalance.add(finalAmount.subtract(paidAmount)); // Tăng nợ nếu trả thiếu
             } else {
-                newDebtBalance = debtBalance; // Nợ không đổi nếu trả đủ hoặc dư
+                newDebtBalance = debtBalance.subtract(paidAmount.subtract(finalAmount)); // Trả thừa, giảm nợ (có thể âm)
             }
         } else {
             throw new RuntimeException("Phương thức thanh toán không hợp lệ");
@@ -112,7 +112,7 @@ public class InvoicesService {
         Invoices invoice = new Invoices();
         invoice.setStore(storeFromDb);  // Lưu trữ cửa hàng đã xác thực
         invoice.setCustomer(customer);
-        invoice.setTotalPrice(totalPrice);
+        invoice.setTotalPrice(paidAmount);
         invoice.setDiscount(discount);
         invoice.setFinalAmount(finalAmount);
         invoice.setNote(dto.getNote());
@@ -263,9 +263,15 @@ public class InvoicesService {
         invoices.setStatus(newStatus);
         return invoiceRepository.save(invoices);
     }
-    public Page<Invoices> getFilter(Long idMin, Long idMax, String note, String status, Date dateMin, Date dateMax, Pageable pageable ,
-                                    Date dateMin1, Date dateMax1,BigDecimal amountMin ,BigDecimal amountMax){
+    public Page<Invoices> getFilter(Store store ,Long idMin, Long idMax, String note, String status, Date dateMin, Date dateMax, Pageable pageable ,
+                                    Date dateMin1, Date dateMax1,BigDecimal amountMin ,BigDecimal amountMax , Invoices.InvoiceType type){
         Specification<Invoices> spec = Specification.where(null);
+        if (store != null) {
+            spec = spec.and(InvoiceSpecifications.hasStore(store));
+        }
+        if (type != null) {
+            spec = spec.and(InvoiceSpecifications.hasType(type));
+        }
         if (idMin != null) {
             spec = spec.and(InvoiceSpecifications.idGreatThan(idMin));
         }

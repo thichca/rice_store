@@ -2,6 +2,7 @@ package swp.se1889.g1.rice_store.specification;
 import org.springframework.data.jpa.domain.Specification;
 import swp.se1889.g1.rice_store.entity.DebtRecords;
 import swp.se1889.g1.rice_store.entity.Invoices;
+import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.Zone;
 
 import java.math.BigDecimal;
@@ -37,5 +38,12 @@ public class InvoiceSpecifications {
     }
     public static Specification<Invoices> updatedAtAfter(Date dateMin1){
         return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("updatedAt"), dateMin1);
+    }
+    public static Specification<Invoices> hasStore(Store store) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("store"), store);
+    }
+
+    public static Specification<Invoices> hasType(Invoices.InvoiceType type) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("type"), type);
     }
 }
