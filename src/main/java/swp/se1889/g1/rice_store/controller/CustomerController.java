@@ -127,13 +127,4 @@ public class CustomerController {
     }
 
 
-    @GetMapping("/manageUser")
-    public String GetViewManageUser(Model model, HttpSession session) {
-        User user = userService.getCurrentUser();
-        model.addAttribute("user", user);
-
-        Store store = (Store) session.getAttribute("store");
-        model.addAttribute("store", store);
-        return "manage-user";
-    }
 }
