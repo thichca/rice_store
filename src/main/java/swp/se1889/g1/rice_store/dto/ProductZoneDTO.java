@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 public class ProductZoneDTO {
     private Long productId;
     private String productName;
+    private String description;
+
     private Long zoneId;
     private String zoneName;
     private BigDecimal price;
@@ -17,6 +19,25 @@ public class ProductZoneDTO {
         this.zoneName = zoneName;
         this.price = price;
         this.quantity = quantity;
+    }
+    public ProductZoneDTO(Long productId, String productName, String description,
+                          Long zoneId, String zoneName, BigDecimal price, Integer quantity) {
+        this.productId = productId;
+        this.productName = productName;
+        this.description = description;
+        this.zoneId = zoneId;
+        this.zoneName = zoneName;
+        this.price = price;
+        this.quantity = quantity;
+    }
+
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Long getProductId() {

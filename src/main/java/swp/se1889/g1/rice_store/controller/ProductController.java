@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import swp.se1889.g1.rice_store.dto.ProductDTO;
+import swp.se1889.g1.rice_store.dto.ProductZoneDTO;
 import swp.se1889.g1.rice_store.entity.Product;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
@@ -48,7 +49,7 @@ public class ProductController {
                               HttpSession session) {
 
         // Gọi service mới
-        Page<Product> productPage = productService.filterProducts(
+        Page<Product> productPage = productService.filterProductsWithSpec(
                 productName, description, priceFrom, priceTo,
                 createdDate, updatedDate,
                 page, size
@@ -142,20 +143,23 @@ public class ProductController {
                                        @RequestParam(required = false) Integer maxQuantity,
                                        @RequestParam(defaultValue = "0") int page,
                                        @RequestParam(defaultValue = "5") int size) {
+
         Store store = (Store) session.getAttribute("store");
         if (store == null) return "redirect:/login";
 
-        Page<Map<String, Object>> productWithZones = productService.filterProductZones(
+        // ✅ Đúng kiểu dữ liệu sau khi chuyển sang Specification
+        Page<ProductZoneDTO> productWithZones = productService.filterProductZonesWithSpec(
                 store.getId(), productName, description, minPrice, maxPrice, zoneName, minQuantity, maxQuantity, page, size
         );
 
-        model.addAttribute("productWithZones", productWithZones);
+        // ✅ Truyền danh sách vào model
+        model.addAttribute("productWithZones", productWithZones.getContent());
         model.addAttribute("store", store);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productWithZones.getTotalPages());
         model.addAttribute("totalItems", productWithZones.getTotalElements());
 
-        // Truyền lại filter
+        // ✅ Truyền lại filter để giữ form lọc
         model.addAttribute("productName", productName);
         model.addAttribute("description", description);
         model.addAttribute("minPrice", minPrice);
@@ -163,11 +167,13 @@ public class ProductController {
         model.addAttribute("zoneName", zoneName);
         model.addAttribute("minQuantity", minQuantity);
         model.addAttribute("maxQuantity", maxQuantity);
+
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
 
         return "sellProducts";
     }
+
 
 }
 
