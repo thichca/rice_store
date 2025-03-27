@@ -42,9 +42,13 @@ public class HomeController {
         Store store = storeService.getStoreByNameAndCreatedBy(name, createdBy);
         session.setAttribute("store", store);
         model.addAttribute("store", store);
+
         User user = userService.getCurrentUser();
         long totalProducts = productService.countProductsByCurrentUser();
-        long totalCustomers = customerService.countCustomersByCurrentUser();
+
+        // ✅ Sử dụng hàm mới để đếm theo store
+        long totalCustomers = customerService.countCustomersByStore(store);
+
         long totalInvoices = invoiceService.countInvoicesByUserAndStore(store.getId());
         BigDecimal totalRevenue = invoiceService.getTotalSaleRevenueByUserAndStore(store.getId());
 
@@ -53,11 +57,13 @@ public class HomeController {
         model.addAttribute("totalCustomers", totalCustomers);
         model.addAttribute("totalInvoices", totalInvoices);
         model.addAttribute("totalRevenue", totalRevenue);
+
         List<BigDecimal> monthlyRevenue = invoiceService.getRevenueByMonth(store != null ? store.getId() : null);
         List<String> monthLabels = Arrays.asList("Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6");
 
         model.addAttribute("monthlyRevenue", monthlyRevenue);
         model.addAttribute("monthLabels", monthLabels);
+
         List<Object[]> topCustomers = invoiceService.getTop5CustomersBySpending();
         List<Object[]> topProducts = invoiceDetailService.getTop5ProductsSold();
 
@@ -66,6 +72,7 @@ public class HomeController {
 
         return "home";
     }
+
 
     @GetMapping("/home")
     public String getHome(HttpSession session, Model model) {
@@ -76,7 +83,7 @@ public class HomeController {
         model.addAttribute("user", user);
 
         long totalProducts = productService.countProductsByCurrentUser();
-        long totalCustomers = customerService.countCustomersByCurrentUser();
+        long totalCustomers = customerService.countCustomersByStore(store);
         long totalInvoices = (store != null) ? invoiceService.countInvoicesByUserAndStore(store.getId()) : invoiceService.countInvoicesByCurrentUser();
         BigDecimal totalRevenue = (store != null)
                 ? invoiceService.getTotalSaleRevenueByUserAndStore(store.getId())

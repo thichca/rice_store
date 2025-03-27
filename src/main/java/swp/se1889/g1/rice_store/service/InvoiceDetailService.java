@@ -20,8 +20,8 @@ public class InvoiceDetailService {
 //        return invoiceDetailRepository.findByInvoiceId(invoiceId);
 //    }
     public List<Object[]> getTop5ProductsSold() {
-        Pageable top5 = PageRequest.of(0, 5);
-        return invoiceDetailRepository.findTop5ProductsSold(top5);
+        // Lấy top 5 sản phẩm bán chạy nhất (sắp xếp theo số lượng giảm dần)
+        return invoiceDetailRepository.findTop5ProductsSold(PageRequest.of(0, 5));
     }
 
 }

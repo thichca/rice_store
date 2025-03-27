@@ -207,8 +207,7 @@ public class InvoicesService {
     }
 
     public List<Object[]> getTop5CustomersBySpending() {
-        Pageable top5 = PageRequest.of(0, 5);
-        return invoiceRepository.findTop5CustomersBySpending(top5);
+        return invoiceRepository.findTop5CustomersBySpending(PageRequest.of(0, 5));
     }
 
 

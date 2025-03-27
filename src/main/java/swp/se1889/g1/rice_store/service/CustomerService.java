@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
 import swp.se1889.g1.rice_store.entity.Customer;
+import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.CustomerRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
@@ -220,6 +221,13 @@ public class CustomerService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return customerRepository.findAll(spec, pageable).map(CustomerDTO::new);
+    }
+
+    public long countCustomersByStore(Store store) {
+        User owner = userRepository.findByUsername(store.getCreatedBy());
+        if (owner == null) return 0;
+
+        return customerRepository.countByOwnerAndEmployees(owner.getId());
     }
 
 
