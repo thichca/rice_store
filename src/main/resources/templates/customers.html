@@ -16,6 +16,7 @@
         .bg-gray-900.bg-opacity-50 {
             z-index: 999;
         }
+
         #errorToast {
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
             opacity: 0;
@@ -27,6 +28,7 @@
             opacity: 1;
             transform: translateX(0);
         }
+
         #errorToast ul {
             list-style-type: disc;
             padding-left: 1rem;
@@ -38,6 +40,7 @@
             color: #fff;
             margin-bottom: 4px; /* Tạo khoảng cách giữa các lỗi */
         }
+
         #successToast {
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
             opacity: 0;
@@ -49,7 +52,6 @@
             opacity: 1;
             transform: translateX(0);
         }
-
 
 
     </style>
@@ -70,9 +72,11 @@
     <div th:if="${errorMessage}" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
         <span th:text="${errorMessage}"></span>
     </div>
-    <div id="errorToast" class="hidden fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
+    <div id="errorToast"
+         class="hidden fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
     </div>
-    <div id="successToast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
+    <div id="successToast"
+         class="hidden fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
     </div>
 
 </div>
@@ -144,8 +148,8 @@
                           th:onsubmit="|submitUpdateForm(event, '${customer.id}')|">
 
                         <input type="hidden" name="id" th:value="${customer.id}">
-                        <input type="hidden" name="page" th:value="${currentPage}" />
-                        <input type="hidden" name="size" value="5" />
+                        <input type="hidden" name="page" th:value="${currentPage}"/>
+                        <input type="hidden" name="size" value="5"/>
 
                         <div class="mb-3">
                             <label class="block text-gray-700 font-medium">Tên khách hàng</label>
@@ -194,8 +198,6 @@
         </p>
 
 
-
-
         <!-- ĐÚNG: Bảng không bị giới hạn chiều cao -->
         <div class="relative overflow-x-auto">
 
@@ -203,28 +205,28 @@
                 <thead class="bg-gray-100 sticky top-0 z-10">
 
                 <tr class="bg-gray-100">
-                    <th class="border p-2 relative w-[90px]">Id
+                    <th class="border p-2 relative ">Id
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative w-[140px]">Tên
+                    <th class="border p-2 relative ">Tên
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative w-[150px]">Địa chỉ
+                    <th class="border p-2 relative ">Địa chỉ
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative w-[80px]">SĐT
+                    <th class="border p-2 relative ">SĐT
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative w-[90px]">Email
+                    <th class="border p-2 relative">Email
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative w-[90px]">Tổng nợ
+                    <th class="border p-2 relative">Tổng nợ
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative w-[120px]">Ngày thêm
+                    <th class="border p-2 relative">Ngày thêm
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative w-[120px]">Ngày sửa
+                    <th class="border p-2 relative">Ngày sửa
                         <div class="resizer"></div>
                     </th>
 
@@ -237,16 +239,24 @@
 
                 <form method="get" action="/customers">
                     <tr class="bg-gray-50">
-                        <td class="border p-2"><input type="text" name="id" th:value="${id}" class="w-full border rounded p-1" placeholder="ID"></td>
-                        <td class="border p-2"><input type="text" name="name" th:value="${name}" class="w-full border rounded p-1" placeholder="Tên"></td>
-                        <td class="border p-2"><input type="text" name="address" th:value="${address}" class="w-full border rounded p-1" placeholder="Địa chỉ"></td>
-                        <td class="border p-2"><input type="text" name="phone" th:value="${phone}" class="w-full border rounded p-1" placeholder="SĐT"></td>
-                        <td class="border p-2"><input type="text" name="email" th:value="${email}" class="w-full border rounded p-1" placeholder="Email"></td>
-                        <td class="border p-2"><input type="text" name="debt" th:value="${debt}" class="w-full border rounded p-1" placeholder="Dư nợ"></td>
-                        <td class="border p-2"><input type="date" name="createdDate" th:value="${createdDate}" class="w-full border rounded p-1"></td>
-                        <td class="border p-2"><input type="date" name="updatedDate" th:value="${updatedDate}" class="w-full border rounded p-1"></td>
+                        <td class="border p-2"><input type="text" name="id" th:value="${id}"
+                                                      class="w-full border rounded p-1" placeholder="ID"></td>
+                        <td class="border p-2"><input type="text" name="name" th:value="${name}"
+                                                      class="w-full border rounded p-1" placeholder="Tên"></td>
+                        <td class="border p-2"><input type="text" name="address" th:value="${address}"
+                                                      class="w-full border rounded p-1" placeholder="Địa chỉ"></td>
+                        <td class="border p-2"><input type="text" name="phone" th:value="${phone}"
+                                                      class="w-full border rounded p-1" placeholder="SĐT"></td>
+                        <td class="border p-2"><input type="text" name="email" th:value="${email}"
+                                                      class="w-full border rounded p-1" placeholder="Email"></td>
+                        <td class="border p-2"><input type="text" name="debt" th:value="${debt}"
+                                                      class="w-full border rounded p-1" placeholder="Dư nợ"></td>
+                        <td class="border p-2"><input type="date" name="createdDate" th:value="${createdDate}"
+                                                      class="w-full border rounded p-1"></td>
+                        <td class="border p-2"><input type="date" name="updatedDate" th:value="${updatedDate}"
+                                                      class="w-full border rounded p-1"></td>
                         <td class="border p-2">
-                            <div class="flex gap-2 justify-end">
+                            <div class="flex gap-2 justify-center">
                                 <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded">Lọc</button>
                                 <a href="/customers" class="bg-gray-400 text-white px-4 py-1 rounded">Xóa</a>
                             </div>
@@ -264,14 +274,16 @@
                     <td class="border p-2" th:text="${customer.address}"></td>
                     <td class="border p-2" th:text="${customer.phone}"></td>
                     <td class="border p-2" th:text="${customer.email}"></td>
-                    <td class="border p-2" th:text="${customer.debtBalance}"></td>
+                    <td class="border p-2"
+                        th:text="${#numbers.formatDecimal(customer.debtBalance, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                    </td>
                     <td class="border p-2" th:text="${#temporals.format(customer.createdAt, 'dd/MM/yyyy')}"></td>
                     <td class="border p-2" th:text="${#temporals.format(customer.updatedAt, 'dd/MM/yyyy')}"></td>
 
 
                     <td class="border p-2">
                         <div class="flex gap-2 w-full">
-                            <button class="w-1/4 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
+                            <button class="w-1/3 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-blue-700 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
                                     data-icon='<i class="fas fa-info"></i>'
@@ -279,7 +291,7 @@
                                 <i class="fas fa-info mr-1"></i>
                             </button>
 
-                            <button class="w-1/2 bg-white border border-green-500 text-green-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                            <button class="w-1/3 bg-white border border-green-500 text-green-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-green-500 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-plus mr-1"></i> Thêm phiếu nợ'
                                     data-icon='<i class="fas fa-plus"></i>'
@@ -287,7 +299,7 @@
                                 <i class="fas fa-plus mr-1"></i>
                             </button>
 
-                            <button class="w-1/4 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                            <button class="w-1/3 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-yellow-500 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
                                     data-icon='<i class="fas fa-pencil-alt"></i>'
@@ -335,7 +347,6 @@
             </div>
 
 
-
         </div>
 
     </div>
@@ -346,6 +357,7 @@
         const modal = document.getElementById(modalId);
         modal.classList.toggle("hidden");
     }
+
     async function submitCustomerForm(event) {
         event.preventDefault();  // Ngăn form reload trang mặc định
 
@@ -399,8 +411,6 @@
     });
 
 
-
-
     function showErrorToast(message) {
         let toast = document.getElementById("errorToast");
 
@@ -423,6 +433,7 @@
             setTimeout(() => toast.classList.add("hidden"), 500);
         }, 2000);
     }
+
     function showSuccessToast(message) {
         let toast = document.getElementById("successToast");
         toast.textContent = message;
@@ -474,13 +485,8 @@
     }
 
 
-
-
-
 </script>
 <div th:replace="~{fragments/script :: script}"></div>
-
-
 
 
 </body>

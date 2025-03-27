@@ -2,10 +2,12 @@ package swp.se1889.g1.rice_store.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import swp.se1889.g1.rice_store.entity.Invoices;
 import swp.se1889.g1.rice_store.entity.Store;
@@ -13,13 +15,18 @@ import swp.se1889.g1.rice_store.entity.User;
 
 import java.math.BigDecimal;
 import java.util.List;
+
 @Repository
-public interface InvoicesRepository extends JpaRepository<Invoices, Long> , JpaSpecificationExecutor<Invoices> {
+public interface InvoicesRepository extends JpaRepository<Invoices, Long>, JpaSpecificationExecutor<Invoices> {
     List<Invoices> findByType(Invoices.InvoiceType type);
+
     Page<Invoices> findByStoreAndType(Store store, Invoices.InvoiceType type, Pageable pageable);
+
     List<Invoices> findByStoreId(Long storeID);
+
     Page<Invoices> findById(Long id, Pageable pageable);
-    Page<Invoices> findInvoicesByStore(Store store , Pageable pageable);
+
+    Page<Invoices> findInvoicesByStore(Store store, Pageable pageable);
 
     @Query("SELECT MONTH(i.createdAt) AS month, COALESCE(SUM(i.finalAmount), 0) " +
             "FROM Invoices i WHERE i.isDeleted = false " +
@@ -47,11 +54,13 @@ public interface InvoicesRepository extends JpaRepository<Invoices, Long> , JpaS
     // Tính tổng doanh thu theo User + Store
     @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.store.id = :storeId AND i.isDeleted = false")
     BigDecimal getTotalRevenueByUserAndStore(@Param("createdBy") User createdBy, @Param("storeId") Long storeId);
+
     @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.type = :type AND i.isDeleted = false")
     BigDecimal getTotalSaleRevenueByUser(@Param("createdBy") User createdBy, @Param("type") Invoices.InvoiceType type);
 
     @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.store.id = :storeId AND i.type = :type AND i.isDeleted = false")
     BigDecimal getTotalSaleRevenueByUserAndStore(@Param("createdBy") User createdBy, @Param("storeId") Long storeId, @Param("type") Invoices.InvoiceType type);
+
     @Query("SELECT MONTH(i.createdAt) AS month, COALESCE(SUM(i.finalAmount), 0) " +
             "FROM Invoices i WHERE i.isDeleted = false AND i.type = 'Sale' " +
             "GROUP BY MONTH(i.createdAt) ORDER BY MONTH(i.createdAt)")
@@ -68,7 +77,5 @@ public interface InvoicesRepository extends JpaRepository<Invoices, Long> , JpaS
             "GROUP BY i.customer.name " +
             "ORDER BY SUM(i.finalAmount) DESC")
     List<Object[]> findTop5CustomersBySpending(Pageable pageable);
-
-
 
 }

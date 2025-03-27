@@ -30,6 +30,7 @@ public class CustomerService {
 
     @Autowired
     private UserRepository userRepository;
+
     // Lấy tổng số khách hàng theo user hiện tại
     public long countCustomersByCurrentUser() {
         User currentUser = getCurrentUser();
@@ -38,8 +39,6 @@ public class CustomerService {
         }
         return 0;
     }
-
-
 
 
     public CustomerDTO getCustomerById(Long id) {
@@ -141,6 +140,7 @@ public class CustomerService {
         }
         return null;
     }
+
     public Page<CustomerDTO> filterCustomersWithSpec(String id, String name, String phone,
                                                      String address, String email, String debt,
                                                      LocalDate createdDate, LocalDate updatedDate,
@@ -164,9 +164,7 @@ public class CustomerService {
         LocalDateTime updatedFrom = updatedDate != null ? updatedDate.atStartOfDay() : null;
         LocalDateTime updatedTo = updatedDate != null ? updatedDate.plusDays(1).atStartOfDay() : null;
 
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.notDeleted())
-                .and(CustomerSpecifications.createdBy(currentUser.getId()));
+        Specification<Customer> spec = Specification.where(CustomerSpecifications.notDeleted());
 
         if (parsedId != null) spec = spec.and(CustomerSpecifications.idEquals(parsedId));
         if (name != null && !name.isBlank()) spec = spec.and(CustomerSpecifications.nameContains(name));
@@ -174,14 +172,15 @@ public class CustomerService {
         if (address != null && !address.isBlank()) spec = spec.and(CustomerSpecifications.addressContains(address));
         if (email != null && !email.isBlank()) spec = spec.and(CustomerSpecifications.emailContains(email));
         if (parsedDebt != null) spec = spec.and(CustomerSpecifications.debtEquals(parsedDebt));
-        if (createdFrom != null && createdTo != null) spec = spec.and(CustomerSpecifications.createdAtBetween(createdFrom, createdTo));
-        if (updatedFrom != null && updatedTo != null) spec = spec.and(CustomerSpecifications.updatedAtBetween(updatedFrom, updatedTo));
+        if (createdFrom != null && createdTo != null)
+            spec = spec.and(CustomerSpecifications.createdAtBetween(createdFrom, createdTo));
+        if (updatedFrom != null && updatedTo != null)
+            spec = spec.and(CustomerSpecifications.updatedAtBetween(updatedFrom, updatedTo));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         return customerRepository.findAll(spec, pageable).map(CustomerDTO::new);
     }
-
 
 
     public List<CustomerDTO> searchCustomers(String query) {

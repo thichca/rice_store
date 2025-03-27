@@ -45,9 +45,11 @@ public class InvoicesService {
         }
         return invoiceRepository.findByStoreId(storeId);
     }
-    public Page<Invoices> getPage(Store store , Pageable pageable){
-        return invoiceRepository.findInvoicesByStore(store , pageable);
+
+    public Page<Invoices> getPage(Store store, Pageable pageable) {
+        return invoiceRepository.findInvoicesByStore(store, pageable);
     }
+
     public InvoiceDetailDTO getInvoice(Long id) {
         Optional<InvoicesDetails> invoice = invoiceDetailsRepository.findById(id);
         if (invoice.isPresent()) {
@@ -167,8 +169,6 @@ public class InvoicesService {
     }
 
 
-
-
     private BigDecimal calculateTotalPrice(List<InvoiceDetailDTO> details) {
         return details.stream()
                 .map(d -> d.getUnitPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
@@ -184,6 +184,7 @@ public class InvoicesService {
         }
         return null;
     }
+
     public List<BigDecimal> getRevenueByMonth(Long storeId) {
         List<BigDecimal> monthlyRevenue = new ArrayList<>(Collections.nCopies(6, BigDecimal.ZERO));
         List<Object[]> results;
@@ -204,12 +205,11 @@ public class InvoicesService {
 
         return monthlyRevenue;
     }
+
     public List<Object[]> getTop5CustomersBySpending() {
         Pageable top5 = PageRequest.of(0, 5);
         return invoiceRepository.findTop5CustomersBySpending(top5);
     }
-
-
 
 
     // Lấy tổng số hóa đơn theo User hiện tại
@@ -247,6 +247,7 @@ public class InvoicesService {
         }
         return BigDecimal.ZERO;
     }
+
     public Invoices update(Long id, String newStatus) {
         Invoices invoices = invoiceRepository.findById(id).orElse(null);
         if (invoices == null) {
@@ -263,8 +264,9 @@ public class InvoicesService {
         invoices.setStatus(newStatus);
         return invoiceRepository.save(invoices);
     }
-    public Page<Invoices> getFilter(Store store ,Long idMin, Long idMax, String note, String status, Date dateMin, Date dateMax, Pageable pageable ,
-                                    Date dateMin1, Date dateMax1,BigDecimal amountMin ,BigDecimal amountMax , Invoices.InvoiceType type){
+
+    public Page<Invoices> getFilter(Store store, Long idMin, Long idMax, String note, String status, Date dateMin, Date dateMax, Pageable pageable,
+                                    Date dateMin1, Date dateMax1, BigDecimal amountMin, BigDecimal amountMax, Invoices.InvoiceType type) {
         Specification<Invoices> spec = Specification.where(null);
         if (store != null) {
             spec = spec.and(InvoiceSpecifications.hasStore(store));
@@ -302,8 +304,9 @@ public class InvoicesService {
         if (dateMax1 != null) {
             spec = spec.and(InvoiceSpecifications.updatedAtBefore(dateMax1));
         }
-        return invoiceRepository.findAll(spec,pageable);
+        return invoiceRepository.findAll(spec, pageable);
     }
+
     // Tổng doanh thu theo user và chỉ loại hóa đơn "Sale"
     public BigDecimal getTotalSaleRevenueByCurrentUser() {
         User currentUser = getCurrentUser();
@@ -321,5 +324,6 @@ public class InvoicesService {
         }
         return BigDecimal.ZERO;
     }
+
 
 }

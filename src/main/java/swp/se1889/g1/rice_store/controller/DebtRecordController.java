@@ -114,6 +114,10 @@ public class DebtRecordController {
         model.addAttribute("customer", customer);
         model.addAttribute("store", store);
         model.addAttribute("user", user);
+        model.addAttribute("customerName", customer.getName());
+        model.addAttribute("customerPhone", customer.getPhone());
+
+
 
         // Preserve filter values in inputs
         model.addAttribute("idMin", idMin);

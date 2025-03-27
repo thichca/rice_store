@@ -97,7 +97,7 @@
                             <!-- Các sản phẩm sẽ được hiển thị tại đây -->
                             </tbody>
                         </table>
-                        <div class="mb-4">
+                        <div class="mb-4" style="display: none;">
                             <p class="text-gray-700 font-bold">
                                 Giảm giá:
                             </p>
@@ -108,11 +108,12 @@
                                        onchange="updateTotalAmount()"/>
                             </div>
                         </div>
-
-                        <p class="text-gray-700 mb-2">
-                            <span class="font-bold">Số tiền giảm: </span>
-                            <span id="discount-amount">0 đ</span> <!-- Số tiền giảm giá -->
-                        </p>
+                        <div style="display: none;">
+                            <p class="text-gray-700 mb-2">
+                                <span class="font-bold">Số tiền giảm: </span>
+                                <span id="discount-amount">0 đ</span> <!-- Số tiền giảm giá -->
+                            </p>
+                        </div>
                         <p class="text-gray-700 mb-2">
                             <span class="font-bold">Tổng cộng: </span>
                             <span id="total-amount">0 đ</span> <!-- Tổng cộng sau khi giảm giá -->
