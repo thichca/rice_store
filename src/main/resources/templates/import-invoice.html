@@ -283,18 +283,28 @@
         const balance = parseFloat($('#customerBalance').val()) || 0;
 
         if (paymentMethod === "onlyProduct") {
+            // Tiền Hàng: Thanh toán = tổng tiền, Còn nợ = số dư khách hàng
             $('[name="paidAmount"]').val(total.toFixed(2));
+            $('[name="remainingAmount"]').val(balance.toFixed(2));
         } else if (paymentMethod === "productAndDebt") {
-            // Nếu không nhập paidAmount, mặc định thanh toán hết tổng tiền + nợ
-            if (!$('[name="paidAmount"]').val()) {
-                $('[name="paidAmount"]').val((total + balance).toFixed(2));
-            }
+            // Tiền Hàng + Nợ: Thanh toán = tổng tiền + số dư khách hàng, Còn nợ = 0
+            const totalDue = total + balance;
+            $('[name="paidAmount"]').val(totalDue.toFixed(2));
+            $('[name="remainingAmount"]').val('0.00');
         }
-        calculateRemaining();
     });
 
     $('[name="paidAmount"]').on('input', function() {
-        calculateRemaining();
+        const paymentMethod = $('#paymentMethod').val();
+        const balance = parseFloat($('#customerBalance').val()) || 0;
+
+        if (paymentMethod === "onlyProduct") {
+            // Tiền Hàng: Còn nợ luôn là số dư khách hàng
+            $('[name="remainingAmount"]').val(balance.toFixed(2));
+        } else if (paymentMethod === "productAndDebt") {
+            // Tiền Hàng + Nợ: Còn nợ luôn là 0
+            $('[name="remainingAmount"]').val('0.00');
+        }
     });
 
     function calculateTotal() {
@@ -307,15 +317,11 @@
             total += totalPrice;
         });
         $('[name="totalPrice"]').val(total.toFixed(2));
+        // Kích hoạt sự kiện change của paymentMethod để cập nhật lại
+        $('#paymentMethod').trigger('change');
         calculateRemaining();
     }
-    function updateTotal() {
-        const paidAmount = parseFloat($('[name="paidAmount"]').val()) || 0;
-        $('[name="totalPrice"]').val(paidAmount.toFixed(2)); // Tổng tiền bằng thanh toán
-    }
 
-    // Gọi hàm khi người dùng nhập thanh toán
-    $('[name="paidAmount"]').on('input', updateTotal);
     function calculateRemaining() {
         const total = parseFloat($('[name="totalPrice"]').val()) || 0;
         const balance = parseFloat($('#customerBalance').val()) || 0;
@@ -338,6 +344,13 @@
         }
         $('[name="remainingAmount"]').val(remaining.toFixed(2));
     }
+    function updateTotal() {
+        const paidAmount = parseFloat($('[name="paidAmount"]').val()) || 0;
+        $('[name="totalPrice"]').val(paidAmount.toFixed(2)); // Tổng tiền bằng thanh toán
+    }
+
+    // Gọi hàm khi người dùng nhập thanh toán
+    $('[name="paidAmount"]').on('input', updateTotal);
 </script>
 <div th:replace="~{fragments/noti :: noti}"></div>
 <div th:replace="~{fragments/script :: script}"></div>

@@ -138,8 +138,11 @@ public class ZoneService {
         return zoneRepository.save(zone);
     }
 
-    public Page<Zone> getFilter(Long idMin, Long idMax, String name, String address, Date dateMin, Date dateMax, Pageable pageable, Date dateMax1, Date dateMin1) {
+    public Page<Zone> getFilter(Store store ,Long idMin, Long idMax, String name, String address, Date dateMin, Date dateMax, Pageable pageable, Date dateMax1, Date dateMin1) {
         Specification<Zone> spec = Specification.where(null);
+        if (store != null) {
+            spec = spec.and(ZoneSpecifications.hasStores(store));
+        }
         if (idMin != null) {
             spec = spec.and(ZoneSpecifications.idGreateThan(idMin));
         }
