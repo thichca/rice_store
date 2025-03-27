@@ -8,9 +8,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import swp.se1889.g1.rice_store.dto.CustomerChangeHistoryDTO;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
+import swp.se1889.g1.rice_store.service.CustomerChangeHistoryService;
 import swp.se1889.g1.rice_store.service.CustomerService;
 
 import jakarta.validation.Valid;
@@ -29,6 +31,9 @@ public class CustomerController {
 
     @Autowired
     private UserServiceIpml userService;
+
+    @Autowired
+    private CustomerChangeHistoryService customerChangeHistoryService;
 
     // 🟢 Hiển thị danh sách khách hàng
     @GetMapping("/customers")
@@ -136,4 +141,6 @@ public class CustomerController {
         model.addAttribute("store", store);
         return "manage-user";
     }
+
+
 }

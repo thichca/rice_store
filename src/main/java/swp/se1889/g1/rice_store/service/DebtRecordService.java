@@ -23,13 +23,19 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 
 @Service
-public class DebtRecordService {
+public class    DebtRecordService {
 
     //    @Autowired
 //    private DebtRecordRepository debtRecordRepository;
     @Autowired private DebtRecordRepository debtRecordRepository;
     @Autowired private CustomerRepository customerRepository;
     @Autowired private UserRepository userRepository;
+    private  CustomerService customerService;
+    private final CustomerChangeHistoryService changeHistoryService;
+
+    public DebtRecordService(CustomerChangeHistoryService changeHistoryService) {
+        this.changeHistoryService = changeHistoryService;
+    }
 
 
     //public Page<DebtRecords> getPage(Long customerId, int page, int size){
@@ -51,7 +57,7 @@ public class DebtRecordService {
         Optional<Customer> customerOpt = customerRepository.findById(debtRecord.getCustomerId());
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            updateDebtBalances(customer );
+            updateDebtBalances(customer, currentUser );
         } else {
             throw new RuntimeException("Không tìm thấy khách hàng để cập nhật số dư nợ!");
         }
@@ -95,7 +101,7 @@ public class DebtRecordService {
      public Page<DebtRecords> getCustomerPage(Long customerId , Pageable pageable){
         return debtRecordRepository.findByCustomerId(customerId , pageable);
  }
-    private void updateDebtBalances(Customer customer ) {
+    private void updateDebtBalances(Customer customer, User currentUser ) {
         // Lấy tất cả các bản ghi nợ của khách hàng, không nhất thiết đã được sắp xếp
         List<DebtRecords> debtRecords = debtRecordRepository.findByCustomerId(customer.getId() );
 
@@ -118,8 +124,24 @@ public class DebtRecordService {
             }
         }
 
+        Customer updatedCustomer = new Customer();
+        updatedCustomer.setId(customer.getId());
+        updatedCustomer.setName(customer.getName());
+        updatedCustomer.setPhone(customer.getPhone());
+        updatedCustomer.setAddress(customer.getAddress());
+        updatedCustomer.setEmail(customer.getEmail());
+        updatedCustomer.setDebtBalance(customer.getDebtBalance());
+
+
+
         // Cập nhật số dư nợ cho khách hàng và lưu lại vào cơ sở dữ liệu
         customer.setDebtBalance(debtBalance);
+
+        changeHistoryService.trackCustomerChanges(
+                updatedCustomer,
+                customer,
+                currentUser
+        );
         customerRepository.save(customer);
     }
 

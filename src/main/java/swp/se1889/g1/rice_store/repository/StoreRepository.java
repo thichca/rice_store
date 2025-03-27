@@ -30,5 +30,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     Store findByAddressAndCreatedBy(String address, String createdBy);
 
     Page<Store> findByCreatedByAndIsDeletedFalse(String createdBy, Pageable pageable);
+
+    Store findById(long id);
 }
 

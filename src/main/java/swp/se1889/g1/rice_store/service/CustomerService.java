@@ -1,6 +1,7 @@
 package swp.se1889.g1.rice_store.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,15 @@ public class CustomerService {
 
     @Autowired
     private UserRepository userRepository;
+
+
+    private final CustomerChangeHistoryService changeHistoryService;
+
+    public CustomerService(CustomerRepository customerRepository, @Lazy CustomerChangeHistoryService changeHistoryService) {
+        this.customerRepository = customerRepository;
+        this.changeHistoryService = changeHistoryService;
+    }
+
     // Lấy tổng số khách hàng theo user hiện tại
     public long countCustomersByCurrentUser() {
         User currentUser = getCurrentUser();
@@ -38,8 +48,6 @@ public class CustomerService {
         }
         return 0;
     }
-
-
 
 
     public CustomerDTO getCustomerById(Long id) {
@@ -80,6 +88,14 @@ public class CustomerService {
                 throw new RuntimeException("Email đã tồn tại, vui lòng nhập email khác.");
             }
 
+            Customer updatedCustomer = new Customer();
+            updatedCustomer.setId(customer.getId());
+            updatedCustomer.setName(customer.getName());
+            updatedCustomer.setPhone(customer.getPhone());
+            updatedCustomer.setAddress(customer.getAddress());
+            updatedCustomer.setEmail(customer.getEmail());
+            updatedCustomer.setDebtBalance(customer.getDebtBalance());
+
             customer.setName(customerDTO.getName());
             customer.setPhone(customerDTO.getPhone());
             customer.setAddress(customerDTO.getAddress());
@@ -91,6 +107,12 @@ public class CustomerService {
             if (currentUser != null) {
                 customer.setUpdatedBy(currentUser.getUsername());
             }
+
+            changeHistoryService.trackCustomerChanges(
+                    customer,
+                    updatedCustomer,
+                    currentUser
+            );
 
             customerRepository.save(customer);
         } else {
@@ -133,7 +155,7 @@ public class CustomerService {
     }
 
     // 🟢 Lấy thông tin người dùng hiện tại từ SecurityContext
-    private User getCurrentUser() {
+    public User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
             String username = ((UserDetails) principal).getUsername();
@@ -141,10 +163,13 @@ public class CustomerService {
         }
         return null;
     }
-    public Page<CustomerDTO> filterCustomersWithSpec(String id, String name, String phone,
-                                                     String address, String email, String debt,
-                                                     LocalDate createdDate, LocalDate updatedDate,
-                                                     int page, int size) {
+
+    public Page<CustomerDTO> filterCustomersWithSpec(
+            String id, String name, String phone,
+            String address, String email, String debt,
+            LocalDate createdDate, LocalDate updatedDate,
+            int page, int size) {
+
         User currentUser = getCurrentUser();
         if (currentUser == null) return Page.empty();
 
@@ -164,24 +189,38 @@ public class CustomerService {
         LocalDateTime updatedFrom = updatedDate != null ? updatedDate.atStartOfDay() : null;
         LocalDateTime updatedTo = updatedDate != null ? updatedDate.plusDays(1).atStartOfDay() : null;
 
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.notDeleted())
-                .and(CustomerSpecifications.createdBy(currentUser.getId()));
+        Specification<Customer> spec = Specification.where(CustomerSpecifications.notDeleted());
 
+        // ✅ Lấy danh sách userId được phép truy cập theo Owner
+        Long ownerId = currentUser.getRole().equals("ROLE_OWNER")
+                ? currentUser.getId()
+                : currentUser.getCreatedBy();
+
+        if (ownerId == null) return Page.empty();
+
+        // Lấy toàn bộ user id của owner và các nhân viên mà owner đã tạo
+        List<Long> allowedCreatedByIds = userRepository.findAll().stream()
+                .filter(u -> u.getId() == ownerId || u.getCreatedBy() == ownerId)
+                .map(User::getId)
+                .toList();
+
+        spec = spec.and(CustomerSpecifications.createdByIn(allowedCreatedByIds));
+
+        // Các điều kiện lọc khác
         if (parsedId != null) spec = spec.and(CustomerSpecifications.idEquals(parsedId));
         if (name != null && !name.isBlank()) spec = spec.and(CustomerSpecifications.nameContains(name));
         if (phone != null && !phone.isBlank()) spec = spec.and(CustomerSpecifications.phoneContains(phone));
         if (address != null && !address.isBlank()) spec = spec.and(CustomerSpecifications.addressContains(address));
         if (email != null && !email.isBlank()) spec = spec.and(CustomerSpecifications.emailContains(email));
         if (parsedDebt != null) spec = spec.and(CustomerSpecifications.debtEquals(parsedDebt));
-        if (createdFrom != null && createdTo != null) spec = spec.and(CustomerSpecifications.createdAtBetween(createdFrom, createdTo));
-        if (updatedFrom != null && updatedTo != null) spec = spec.and(CustomerSpecifications.updatedAtBetween(updatedFrom, updatedTo));
+        if (createdFrom != null && createdTo != null)
+            spec = spec.and(CustomerSpecifications.createdAtBetween(createdFrom, createdTo));
+        if (updatedFrom != null && updatedTo != null)
+            spec = spec.and(CustomerSpecifications.updatedAtBetween(updatedFrom, updatedTo));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
         return customerRepository.findAll(spec, pageable).map(CustomerDTO::new);
     }
-
 
 
     public List<CustomerDTO> searchCustomers(String query) {

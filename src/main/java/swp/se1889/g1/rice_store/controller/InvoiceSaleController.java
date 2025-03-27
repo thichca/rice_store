@@ -18,6 +18,7 @@ import swp.se1889.g1.rice_store.entity.*;
 import swp.se1889.g1.rice_store.repository.DebtRecordRepository;
 import swp.se1889.g1.rice_store.repository.InvoiceSaleDetailRepository;
 import swp.se1889.g1.rice_store.repository.InvoiceSaleRepository;
+import swp.se1889.g1.rice_store.repository.ZoneRepository;
 import swp.se1889.g1.rice_store.service.*;
 
 import java.math.BigDecimal;
@@ -44,8 +45,9 @@ public class InvoiceSaleController {
     private final InvoiceSaleDetailRepository invoiceSaleDetailRepository;
 
     private final ZoneService zoneService;
+    private final ZoneRepository zoneRepository;
 
-    public InvoiceSaleController(InvoiceSaleRepository invoiceSaleRepository, InvoiceSaleService invoiceSaleService, UserServiceIpml userService, CustomerService customerService, DebtRecordRepository debtRecordRepository, ProductService productService, InvoiceSaleDetailRepository invoiceSaleDetailRepository, InvoiceSaleDetailService invoiceSaleDetailService, ZoneService zoneService) {
+    public InvoiceSaleController(InvoiceSaleRepository invoiceSaleRepository, InvoiceSaleService invoiceSaleService, UserServiceIpml userService, CustomerService customerService, DebtRecordRepository debtRecordRepository, ProductService productService, InvoiceSaleDetailRepository invoiceSaleDetailRepository, InvoiceSaleDetailService invoiceSaleDetailService, ZoneService zoneService, ZoneRepository zoneRepository) {
         this.invoiceSaleRepository = invoiceSaleRepository;
         this.invoiceSaleService = invoiceSaleService;
         this.userService = userService;
@@ -55,6 +57,7 @@ public class InvoiceSaleController {
         this.invoiceSaleDetailRepository = invoiceSaleDetailRepository;
         this.invoiceSaleDetailService = invoiceSaleDetailService;
         this.zoneService = zoneService;
+        this.zoneRepository = zoneRepository;
     }
 
     @GetMapping("invoiceSale")
@@ -124,6 +127,10 @@ public class InvoiceSaleController {
             invoiceDetail.setProductId(product.getProductId());
             invoiceDetail.setQuantity(product.getQuantity());
 
+            Zone zone = zoneService.getZoneById(product.getZoneId());
+            zone.setQuantity(zone.getQuantity() - product.getQuantity());
+            zoneRepository.save(zone);
+
             Product selectProduct = productService.findProductById(product.getProductId());
             invoiceDetail.setUnitPrice(selectProduct.getPrice());
             BigDecimal totalPrice = selectProduct.getPrice().multiply(BigDecimal.valueOf(product.getQuantity()));
@@ -173,19 +180,6 @@ public class InvoiceSaleController {
 
         return "invoiceDetail";
     }
-
-    @GetMapping("/deleteInvoice/{invoiceId}")
-    public String deleteInvoice(@PathVariable Long invoiceId,
-                                RedirectAttributes redirectAttributes) {
-        try {
-            invoiceSaleService.deleteInvoice(invoiceId);
-            redirectAttributes.addFlashAttribute("success", "Hóa đơn đã được xóa!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi xóa hóa đơn!");
-        }
-        return "redirect:/invoiceSale";
-    }
-
 
     @PostMapping("/updateInvoiceStatus")
     public String updatePaymentStatus(@RequestParam Long id,
