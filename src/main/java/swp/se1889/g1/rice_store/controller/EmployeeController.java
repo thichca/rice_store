@@ -19,6 +19,7 @@ import swp.se1889.g1.rice_store.service.EmployeeService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/owner/employees")
@@ -159,11 +160,13 @@ public class EmployeeController {
         if (store == null) {
             return "redirect:/owner/store";
         }
-        model.addAttribute("employeeDTO", new EmployeeDTO());
-        model.addAttribute("store", store);
 
+        model.addAttribute("store", store);
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
+        if (!model.containsAttribute("employeeDTO")) {
+            model.addAttribute("employeeDTO", new EmployeeDTO());
+        }
         return "addEmployee";
     }
 
@@ -173,26 +176,26 @@ public class EmployeeController {
         if (store == null) {
             return "redirect:/owner/store";
         }
-
+        model.addAttribute("store", store);
         if (bindingResult.hasErrors()) {
-            for (FieldError fieldError : bindingResult.getFieldErrors()) {
-                redirectAttributes.addFlashAttribute("error", fieldError.getDefaultMessage());
-            }
+            User user1 = userService.getCurrentUser();
+            model.addAttribute("user", user1);
+            model.addAttribute("error", bindingResult);
             model.addAttribute("employeeDTO", employeeDTO);
-            model.addAttribute("store", store);
-            return "redirect:/owner/employees/addEmployee";
+            return "addEmployee";
         }
 
-        try {
-            User user = employeeService.addNewEmployee(store.getId(), employeeDTO, redirectAttributes);
-            if (user == null) {
-                return "redirect:/owner/employees/addEmployee";
-            }
-            model.addAttribute("store", store);
+        User user = employeeService.addNewEmployee(store.getId(), employeeDTO, redirectAttributes);
+
+        if (user != null) {
             redirectAttributes.addFlashAttribute("success", "Thêm nhân viên thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
+            return "redirect:/owner/employees/addEmployee";
+        } else {
+            User user1 = userService.getCurrentUser();
+
+            model.addAttribute("user", user1);
+            model.addAttribute("employeeDTO", employeeDTO);
+            return "addEmployee";
         }
-        return "redirect:/owner/employees/addEmployee";
     }
 }

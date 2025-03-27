@@ -8,9 +8,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import swp.se1889.g1.rice_store.dto.CustomerChangeHistoryDTO;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
+import swp.se1889.g1.rice_store.service.CustomerChangeHistoryService;
 import swp.se1889.g1.rice_store.service.CustomerService;
 
 import jakarta.validation.Valid;
@@ -30,7 +32,6 @@ public class CustomerController {
     @Autowired
     private UserServiceIpml userService;
 
-    // 🟢 Hiển thị danh sách khách hàng
     @GetMapping("/customers")
     public String getCustomers(
             @RequestParam(defaultValue = "0") int page,
@@ -49,7 +50,7 @@ public class CustomerController {
         model.addAttribute("store", store);
         model.addAttribute("user", userService.getCurrentUser());
 
-        // Gọi service filter
+
         Page<CustomerDTO> customerPage = customerService.filterCustomersWithSpec(
                 id, name, phone, address, email, debt, createdDate, updatedDate, page, size);
 
@@ -59,7 +60,6 @@ public class CustomerController {
         model.addAttribute("totalItems", customerPage.getTotalElements());
 
 
-        // Để giữ lại các giá trị lọc đã nhập
         model.addAttribute("id", id);
         model.addAttribute("name", name);
         model.addAttribute("phone", phone);
@@ -76,7 +76,6 @@ public class CustomerController {
     }
 
 
-    // 🟢 Xử lý thêm khách hàng mới
     @PostMapping("/customers/add")
     @ResponseBody
     public ResponseEntity<?> addCustomer(@Valid @ModelAttribute("newCustomer") CustomerDTO customerDTO,
@@ -95,7 +94,6 @@ public class CustomerController {
         }
     }
 
-    // 🟢 API lấy thông tin khách hàng để chỉnh sửa
     @GetMapping("/edit-customer/{id}")
     @ResponseBody
     public ResponseEntity<?> getCustomerForEdit(@PathVariable Long id) {
@@ -107,7 +105,7 @@ public class CustomerController {
         }
     }
 
-    // 🟢 Cập nhật khách hàng
+
     @PostMapping("/customers/update")
     @ResponseBody
     public ResponseEntity<?> updateCustomerAjax(@Valid @ModelAttribute("editCustomer") CustomerDTO customerDTO,
@@ -136,4 +134,6 @@ public class CustomerController {
         model.addAttribute("store", store);
         return "manage-user";
     }
+
+
 }

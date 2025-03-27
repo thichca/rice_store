@@ -1,6 +1,7 @@
 package swp.se1889.g1.rice_store.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
 import swp.se1889.g1.rice_store.entity.Customer;
+import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.CustomerRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
@@ -31,16 +33,13 @@ public class CustomerService {
     @Autowired
     private UserRepository userRepository;
 
-    // Lấy tổng số khách hàng theo user hiện tại
-    public long countCustomersByCurrentUser() {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return customerRepository.countByCreatedBy(currentUser);
-        }
-        return 0;
+
+    private final CustomerChangeHistoryService changeHistoryService;
+
+    public CustomerService(CustomerRepository customerRepository, @Lazy CustomerChangeHistoryService changeHistoryService) {
+        this.customerRepository = customerRepository;
+        this.changeHistoryService = changeHistoryService;
     }
-
-
     public CustomerDTO getCustomerById(Long id) {
         Optional<Customer> customerOpt = customerRepository.findById(id);
         if (customerOpt.isPresent()) {
@@ -52,32 +51,36 @@ public class CustomerService {
                     customer.getAddress(),
                     customer.getEmail(),
                     customer.getDebtBalance(),
-                    customer.getCreatedBy().getUsername(), // Lấy username của người tạo
-                    customer.getUpdatedBy() // Lấy username của người sửa (có thể null)
+                    customer.getCreatedBy().getUsername(),
+                    customer.getUpdatedBy()
             );
         }
         throw new RuntimeException("Không tìm thấy khách hàng có ID: " + id);
     }
 
-    // 🟢 Cập nhật thông tin khách hàng (Thêm updatedBy)
+
     public void updateCustomer(CustomerDTO customerDTO) {
         Optional<Customer> customerOpt = customerRepository.findById(customerDTO.getId());
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-
-            // ✅ Kiểm tra trùng số điện thoại với khách hàng khác
             List<Customer> samePhone = customerRepository.findByPhone(customerDTO.getPhone());
             boolean phoneExists = samePhone.stream().anyMatch(c -> !c.getId().equals(customer.getId()));
             if (phoneExists) {
                 throw new RuntimeException("Số điện thoại đã tồn tại, vui lòng nhập số khác.");
             }
-
-            // ✅ Kiểm tra trùng email với khách hàng khác
             List<Customer> sameEmail = customerRepository.findByemail(customerDTO.getEmail());
             boolean emailExists = sameEmail.stream().anyMatch(c -> !c.getId().equals(customer.getId()));
             if (emailExists) {
                 throw new RuntimeException("Email đã tồn tại, vui lòng nhập email khác.");
             }
+
+            Customer updatedCustomer = new Customer();
+            updatedCustomer.setId(customer.getId());
+            updatedCustomer.setName(customer.getName());
+            updatedCustomer.setPhone(customer.getPhone());
+            updatedCustomer.setAddress(customer.getAddress());
+            updatedCustomer.setEmail(customer.getEmail());
+            updatedCustomer.setDebtBalance(customer.getDebtBalance());
 
             customer.setName(customerDTO.getName());
             customer.setPhone(customerDTO.getPhone());
@@ -91,21 +94,24 @@ public class CustomerService {
                 customer.setUpdatedBy(currentUser.getUsername());
             }
 
+            changeHistoryService.trackCustomerChanges(
+                    customer,
+                    updatedCustomer,
+                    currentUser
+            );
+
             customerRepository.save(customer);
         } else {
             throw new RuntimeException("Không tìm thấy khách hàng để cập nhật!");
         }
     }
 
-
-    // 🟢 Tạo khách hàng mới (Đảm bảo có updatedBy khi tạo)
     public void createCustomer(CustomerDTO customerDTO) {
         User currentUser = getCurrentUser();
         if (currentUser == null) {
             throw new RuntimeException("Không thể xác định người dùng hiện tại.");
         }
 
-        // Kiểm tra số điện thoại đã tồn tại hay chưa
         List<Customer> existingCustomers = customerRepository.findByPhone(customerDTO.getPhone());
         if (!existingCustomers.isEmpty()) {
             throw new RuntimeException("Số điện thoại đã tồn tại, vui lòng nhập số khác.");
@@ -125,14 +131,11 @@ public class CustomerService {
         customer.setCreatedAt(LocalDateTime.now());
         customer.setUpdatedAt(LocalDateTime.now());
 
-        // ✅ Khi tạo, "Người sửa" cũng là người tạo
 //        customer.setUpdatedBy(currentUser.getUsername());
-
         customerRepository.save(customer);
     }
 
-    // 🟢 Lấy thông tin người dùng hiện tại từ SecurityContext
-    private User getCurrentUser() {
+    public User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
             String username = ((UserDetails) principal).getUsername();
@@ -141,10 +144,12 @@ public class CustomerService {
         return null;
     }
 
-    public Page<CustomerDTO> filterCustomersWithSpec(String id, String name, String phone,
-                                                     String address, String email, String debt,
-                                                     LocalDate createdDate, LocalDate updatedDate,
-                                                     int page, int size) {
+    public Page<CustomerDTO> filterCustomersWithSpec(
+            String id, String name, String phone,
+            String address, String email, String debt,
+            LocalDate createdDate, LocalDate updatedDate,
+            int page, int size) {
+
         User currentUser = getCurrentUser();
         if (currentUser == null) return Page.empty();
 
@@ -166,6 +171,20 @@ public class CustomerService {
 
         Specification<Customer> spec = Specification.where(CustomerSpecifications.notDeleted());
 
+        // Lấy danh sách userId được phép truy cập theo Owner
+        Long ownerId = currentUser.getRole().equals("ROLE_OWNER")
+                ? currentUser.getId()
+                : currentUser.getCreatedBy();
+
+        if (ownerId == null) return Page.empty();
+
+        List<Long> allowedCreatedByIds = userRepository.findAll().stream()
+                .filter(u -> u.getId() == ownerId || u.getCreatedBy() == ownerId)
+                .map(User::getId)
+                .toList();
+
+        spec = spec.and(CustomerSpecifications.createdByIn(allowedCreatedByIds));
+
         if (parsedId != null) spec = spec.and(CustomerSpecifications.idEquals(parsedId));
         if (name != null && !name.isBlank()) spec = spec.and(CustomerSpecifications.nameContains(name));
         if (phone != null && !phone.isBlank()) spec = spec.and(CustomerSpecifications.phoneContains(phone));
@@ -178,8 +197,14 @@ public class CustomerService {
             spec = spec.and(CustomerSpecifications.updatedAtBetween(updatedFrom, updatedTo));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
         return customerRepository.findAll(spec, pageable).map(CustomerDTO::new);
+    }
+
+    public long countCustomersByStore(Store store) {
+        User owner = userRepository.findByUsername(store.getCreatedBy());
+        if (owner == null) return 0;
+
+        return customerRepository.countByOwnerAndEmployees(owner.getId());
     }
 
 

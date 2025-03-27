@@ -108,11 +108,11 @@
             <td class="border p-2" th:text="${debt.id}"></td>
             <td class="border p-2" th:text="${debt.note}"></td>
             <td class="border p-2" th:text="${debt.type}"></td>
-            <td class="border p-2" th:text="${#numbers.formatDecimal(debt.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+            <td class="border p-2" th:text="${debt.amount}"></td>
             <td class="border p-2" th:text="${#temporals.format(debt.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
             <td class="border p-2">
               <button class="w-32 h-10 text-lg font-semibold bg-blue-500 text-white px-4 py-2 rounded flex items-center justify-center hover:bg-blue-700 transition duration-200"
-                      th:attr="onclick=|showDetail('${debt.id}','${customerName}','${customerPhone}', '${debt.note}', '${debt.type}', '${debt.amount}', '${#temporals.format(debt.createdAt, 'dd/MM/yyyy HH:mm:ss')}')|"
+                      th:attr="onclick=|showDetail('${debt.id}', '${debt.note}', '${debt.type}', '${debt.amount}', '${#temporals.format(debt.createdAt, 'dd/MM/yyyy HH:mm:ss')}')|"
                       data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
                       data-icon='<i class="fas fa-info"></i>'>
                 <i class="fas fa-info mr-1"></i> Chi tiết
@@ -151,7 +151,8 @@
       </div>
     </div>
   </div>
-  <div th:replace="~{fragments/noti :: noti}"></div>
+
+
 </div>
 <!-- Modal Chi Tiết -->
 <div id="detailModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
@@ -163,14 +164,7 @@
         <label class="text-sm font-semibold">ID:</label>
         <input type="text" id="detailId" class="border p-1 w-full text-sm" readonly>
       </div>
-      <div>
-        <label class="text-sm font-semibold">Tên khách hàng:</label>
-        <input type="text" id="detailName" class="border p-1 w-full text-sm" readonly>
-      </div>
-      <div>
-        <label class="text-sm font-semibold">Số điện thoại:</label>
-        <input type="text" id="detailPhone" class="border p-1 w-full text-sm" readonly>
-      </div>
+
       <div>
         <label class="text-sm font-semibold">Ghi chú:</label>
         <input type="text" id="detailNote" class="border p-1 w-full text-sm" readonly>
@@ -194,27 +188,23 @@
 
     <button onclick="closeModal()" class="mt-3 w-full p-2 bg-red-500 text-white text-sm rounded">Đóng</button>
   </div>
+  <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
 <div th:replace="~{fragments/script :: script}"></div>
 <script th:inline="javascript">
   var customerId = [[${customer.id}]];
 </script>
 <script>
-  function showDetail(id,  customerName , customerPhone ,note, type, amount, date ) {
+  function showDetail(id, note, type, amount, date) {
     // Giảm z-index của thead để không đè lên modal
     document.querySelector("thead").style.zIndex = "0";
     // Hiển thị modal
     document.getElementById("detailModal").style.display = "flex";
     document.getElementById("detailId").value = id;
-    document.getElementById("detailName").value = customerName;
-    document.getElementById("detailPhone").value = customerPhone;
     document.getElementById("detailNote").value = note || "Không có ghi chú";
     document.getElementById("detailType").value = type;
-    let formattedAmount = new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 0 }).format(amount).replace(/\./g, ",") + " đ";
-    document.getElementById("detailAmount").value = formattedAmount;
+    document.getElementById("detailAmount").value = amount;
     document.getElementById("detailDate").value = date;
-
-
 
     document.getElementById("detailModal").style.display = "flex";
   }

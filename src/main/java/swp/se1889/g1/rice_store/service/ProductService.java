@@ -60,7 +60,7 @@ public class ProductService {
         Optional<Product> productOpt = productRepository.findById(id);
         if (productOpt.isPresent()) {
             Product product = productOpt.get();
-            return new ProductDTO(product); // Dùng constructor DTO thay vì set thủ công
+            return new ProductDTO(product);
         }
         throw new RuntimeException("Không tìm thấy sản phẩm có ID: " + id);
     }
@@ -74,7 +74,7 @@ public class ProductService {
         if (productDTO.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Giá sản phẩm phải lớn hơn 0.");
         }
-        // Kiểm tra xem sản phẩm có tên trùng với sản phẩm cũ hay không
+
         boolean isProductNameExists = productRepository.existsByCreatedByAndName(currentUser, productDTO.getName());
         if (isProductNameExists) {
             throw new RuntimeException("Sản phẩm với tên này đã tồn tại.");
@@ -106,18 +106,17 @@ public class ProductService {
                 throw new RuntimeException("Tên sản phẩm đã tồn tại, vui lòng chọn tên khác.");
             }
 
-            // Kiểm tra giá phải lớn hơn 0
+
             if (productDTO.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new RuntimeException("Giá sản phẩm phải lớn hơn 0.");
             }
 
-            // Cập nhật thông tin sản phẩm
             product.setName(productDTO.getName());
             product.setDescription(productDTO.getDescription());
             product.setPrice(productDTO.getPrice());
             product.setUpdatedAt(LocalDateTime.now());
 
-            // Cập nhật người sửa
+
             User currentUser = getCurrentUser();
             if (currentUser != null) {
                 product.setUpdatedBy(currentUser.getUsername());
@@ -231,8 +230,7 @@ public class ProductService {
             return new ProductZoneDTO(
                     product.getId(),
                     product.getName(),
-                    product.getDescription(), // thêm dòng này
-
+                    product.getDescription(),
                     zone.getId(),
                     zone.getName(),
                     product.getPrice(),
