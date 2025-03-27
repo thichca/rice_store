@@ -1,6 +1,7 @@
 package swp.se1889.g1.rice_store.controller;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,7 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1889.g1.rice_store.dto.*;
 import swp.se1889.g1.rice_store.entity.*;
 import swp.se1889.g1.rice_store.repository.*;
@@ -67,7 +70,7 @@ public class InvoiceController {
                                @RequestParam(required = false) String dateMax,
                                @RequestParam(required = false) String dateMin1,
                                @RequestParam(required = false) String dateMax1,
-                               @RequestParam(required = false) String type) {
+                               @RequestParam(required = false) String type ) {
         Store store = (Store) session.getAttribute("store");
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
@@ -109,6 +112,7 @@ public class InvoiceController {
         model.addAttribute("dateMin1", dateMin1);
         model.addAttribute("dateMax1", dateMax1);
         model.addAttribute("type", type);
+
         return "invoice";
     }
 
@@ -147,7 +151,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/import")
-    public String showImportForm(Model model, HttpSession session, String name) {
+    public String showImportForm(Model model, HttpSession session, String name ) {
         model.addAttribute("invoice", new InvoicesDTO());
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
@@ -184,16 +188,26 @@ public class InvoiceController {
     }
 
     @PostMapping("/import")
-    public String saveInvoice(@ModelAttribute InvoicesDTO invoiceDTO,
-                              Authentication authentication, HttpSession session, Model model) {
+    public String saveInvoice(@Valid @ModelAttribute InvoicesDTO invoiceDTO,
+                              BindingResult bindingResult,
+                              Authentication authentication, HttpSession session, Model model, RedirectAttributes redirectAttributes ) {
         String username = authentication.getName(); // Lấy tên người dùng đã đăng nhập
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
-
+        // Kiểm tra lỗi validation
+        if (bindingResult.hasErrors()) {
+            // Thu thập tất cả thông báo lỗi từ BindingResult và nối thành một chuỗi
+            String errorMessage = bindingResult.getFieldErrors().stream()
+                    .map(error -> error.getDefaultMessage())
+                    .collect(Collectors.joining(", "));
+            // Gửi chuỗi lỗi về trang nhập hóa đơn qua flash attribute
+            redirectAttributes.addFlashAttribute("error", errorMessage);
+            return "redirect:/owner/invoices/import"; // Quay lại trang nhập hóa đơn
+        }
         // Xử lý logic lưu vào database thông qua service
         Invoices invoices = invoiceService.createImportInvoice(invoiceDTO, store);
         if (invoices != null) {
-            model.addAttribute("success", "Lưu thành công");
+          redirectAttributes.addFlashAttribute("success", "Lưu thành công");
         }
         return "redirect:/owner/invoices";
     }

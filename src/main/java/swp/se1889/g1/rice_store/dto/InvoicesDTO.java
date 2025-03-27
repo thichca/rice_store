@@ -1,7 +1,9 @@
 package swp.se1889.g1.rice_store.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,9 +17,12 @@ public class InvoicesDTO {
     private String customerBalance;
     private String paymentMethod;
     private double totalPrice;
+    @PositiveOrZero(message = "Thanh toán không được âm")
     private BigDecimal paidAmount;
     private double remainingAmount;
+    @NotBlank(message = "Ghi chú không được để trống")
     private String note;
+    @Valid
     private List<InvoiceDetailDTO> details;
     private BigDecimal discount;
     private BigDecimal finalAmount;

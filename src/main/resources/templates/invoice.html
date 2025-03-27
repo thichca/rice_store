@@ -138,8 +138,14 @@
                 <tr th:each="invoice : ${invoices}">
                     <td class="border p-2" th:text="${invoice.id}"></td>
                     <td class="border p-2"  th:text="${invoice.note}"></td>
-                    <td class="border p-2" th:text="${invoice.status}"></td>
-                    <td class="border p-2" th:text="${invoice.totalPrice}"></td>
+                    <td class="border p-2">
+                        <span th:if="${invoice.status == 'Unpaid'}">Chưa thanh toán</span>
+                        <span th:if="${invoice.status == 'Paid'}">Đã thanh toán</span>
+                    </td>
+                    <td class="border p-2"  th:text="${#numbers.formatDecimal(invoice.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+
+                    </td>
+
                     <td class="border p-2" th:text="${#temporals.format(invoice.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                     <td class="border p-2" th:text="${#temporals.format(invoice.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                     <td class="border p-2">

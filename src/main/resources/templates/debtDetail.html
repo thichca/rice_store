@@ -108,7 +108,7 @@
             <td class="border p-2" th:text="${debt.id}"></td>
             <td class="border p-2" th:text="${debt.note}"></td>
             <td class="border p-2" th:text="${debt.type}"></td>
-            <td class="border p-2" th:text="${debt.amount}"></td>
+            <td class="border p-2" th:text="${#numbers.formatDecimal(debt.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
             <td class="border p-2" th:text="${#temporals.format(debt.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
             <td class="border p-2">
               <button class="w-32 h-10 text-lg font-semibold bg-blue-500 text-white px-4 py-2 rounded flex items-center justify-center hover:bg-blue-700 transition duration-200"
@@ -151,8 +151,7 @@
       </div>
     </div>
   </div>
-
-
+  <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
 <!-- Modal Chi Tiết -->
 <div id="detailModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
@@ -195,7 +194,6 @@
 
     <button onclick="closeModal()" class="mt-3 w-full p-2 bg-red-500 text-white text-sm rounded">Đóng</button>
   </div>
-  <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
 <div th:replace="~{fragments/script :: script}"></div>
 <script th:inline="javascript">
@@ -212,7 +210,8 @@
     document.getElementById("detailPhone").value = customerPhone;
     document.getElementById("detailNote").value = note || "Không có ghi chú";
     document.getElementById("detailType").value = type;
-    document.getElementById("detailAmount").value = amount;
+    let formattedAmount = new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 0 }).format(amount).replace(/\./g, ",") + " đ";
+    document.getElementById("detailAmount").value = formattedAmount;
     document.getElementById("detailDate").value = date;
 
 

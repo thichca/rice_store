@@ -80,17 +80,17 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700">Tên khách hàng:
-                        <input type="text" name="customerName" id="customerName" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nhập tên khách hàng" readonly>
+                        <input type="text" name="customerName" id="customerName" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nhập tên khách hàng" th:disabled>
                     </label>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700">Địa chỉ khách hàng:
-                        <input type="text" name="customerAddress" id="customerAddress" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nhập địa chỉ khách hàng" readonly>
+                        <input type="text" name="customerAddress" id="customerAddress" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nhập địa chỉ khách hàng" th:disabled>
                     </label>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700">Số dư khách hàng:
-                        <input type="text" name="customerBalance" id="customerBalance" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nhập số dư khách hàng" readonly>
+                        <input type="text" name="customerBalance" id="customerBalance" class="w-full bg-gray-50 text-black border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nhập số dư khách hàng" th:disabled>
                     </label>
                 </div>
             </div>
@@ -102,6 +102,7 @@
             <button type="button" class="mt-6 bg-red-500 text-white px-4 py-2 rounded-lg" th:onclick="|window.location.href='@{/owner/invoices}'|">Quay Lại</button>
         </div>
     </form>
+    <div th:replace="~{fragments/noti :: noti}"></div>
 </div>
 
 <script>
@@ -208,10 +209,10 @@
                     <input type="hidden" name="details[${productIndex}].productId" value="${product.id}">
                 </td>
                 <td class="py-2 px-4">
-                    <input type="number" name="details[${productIndex}].quantity" class="quantity w-20 p-1 border rounded" value="1" min="1" required>
+                    <input type="number" name="details[${productIndex}].quantity" class="quantity w-20 p-1 border rounded" >
                 </td>
                 <td class="py-2 px-4">
-                    <input type="number" name="details[${productIndex}].unitPrice" class="unitPrice w-24 p-1 border rounded" step="0.01" value="${product.unitPrice}" min="0" required>
+                    <input type="number" name="details[${productIndex}].unitPrice" class="unitPrice w-24 p-1 border rounded" step="0.01" value="${product.unitPrice}"  >
                 </td>
                 <td class="py-2 px-4">
                     <input type="text" class="zoneSearch w-full p-1 border rounded" placeholder="Tìm kiếm khu vực...">
@@ -352,7 +353,7 @@
     // Gọi hàm khi người dùng nhập thanh toán
     $('[name="paidAmount"]').on('input', updateTotal);
 </script>
-<div th:replace="~{fragments/noti :: noti}"></div>
+
 <div th:replace="~{fragments/script :: script}"></div>
 </body>
 </html>
