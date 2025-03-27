@@ -55,7 +55,7 @@ public class ProductController {
                 page, size
         );
 
-        // Nếu chưa có sản phẩm mới, tạo mới cho form thêm
+
         if (!model.containsAttribute("newProduct")) {
             model.addAttribute("newProduct", new ProductDTO());
         }
@@ -67,7 +67,7 @@ public class ProductController {
         model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("totalItems", productPage.getTotalElements());
 
-        // Truyền lại filter để giữ trên giao diện
+
         model.addAttribute("productName", productName);
         model.addAttribute("description", description);
         model.addAttribute("priceFrom", priceFrom);
@@ -149,19 +149,17 @@ public class ProductController {
         Store store = (Store) session.getAttribute("store");
         if (store == null) return "redirect:/login";
 
-        // ✅ Đúng kiểu dữ liệu sau khi chuyển sang Specification
+
         Page<ProductZoneDTO> productWithZones = productService.filterProductZonesWithSpec(
                 store.getId(), productName, description, minPrice, maxPrice, zoneName, minQuantity, maxQuantity, page, size
         );
 
-        // ✅ Truyền danh sách vào model
         model.addAttribute("productWithZones", productWithZones.getContent());
         model.addAttribute("store", store);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productWithZones.getTotalPages());
         model.addAttribute("totalItems", productWithZones.getTotalElements());
 
-        // ✅ Truyền lại filter để giữ form lọc
         model.addAttribute("productName", productName);
         model.addAttribute("description", description);
         model.addAttribute("minPrice", minPrice);

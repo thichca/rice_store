@@ -45,10 +45,7 @@ public class HomeController {
 
         User user = userService.getCurrentUser();
         long totalProducts = productService.countProductsByCurrentUser();
-
-        // ✅ Sử dụng hàm mới để đếm theo store
         long totalCustomers = customerService.countCustomersByStore(store);
-
         long totalInvoices = invoiceService.countInvoicesByUserAndStore(store.getId());
         BigDecimal totalRevenue = invoiceService.getTotalSaleRevenueByUserAndStore(store.getId());
 

@@ -40,17 +40,6 @@ public class CustomerService {
         this.customerRepository = customerRepository;
         this.changeHistoryService = changeHistoryService;
     }
-
-    // Lấy tổng số khách hàng theo user hiện tại
-    public long countCustomersByCurrentUser() {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return customerRepository.countByCreatedBy(currentUser);
-        }
-        return 0;
-    }
-
-
     public CustomerDTO getCustomerById(Long id) {
         Optional<Customer> customerOpt = customerRepository.findById(id);
         if (customerOpt.isPresent()) {
@@ -62,27 +51,23 @@ public class CustomerService {
                     customer.getAddress(),
                     customer.getEmail(),
                     customer.getDebtBalance(),
-                    customer.getCreatedBy().getUsername(), // Lấy username của người tạo
-                    customer.getUpdatedBy() // Lấy username của người sửa (có thể null)
+                    customer.getCreatedBy().getUsername(),
+                    customer.getUpdatedBy()
             );
         }
         throw new RuntimeException("Không tìm thấy khách hàng có ID: " + id);
     }
 
-    // 🟢 Cập nhật thông tin khách hàng (Thêm updatedBy)
+
     public void updateCustomer(CustomerDTO customerDTO) {
         Optional<Customer> customerOpt = customerRepository.findById(customerDTO.getId());
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-
-            // ✅ Kiểm tra trùng số điện thoại với khách hàng khác
             List<Customer> samePhone = customerRepository.findByPhone(customerDTO.getPhone());
             boolean phoneExists = samePhone.stream().anyMatch(c -> !c.getId().equals(customer.getId()));
             if (phoneExists) {
                 throw new RuntimeException("Số điện thoại đã tồn tại, vui lòng nhập số khác.");
             }
-
-            // ✅ Kiểm tra trùng email với khách hàng khác
             List<Customer> sameEmail = customerRepository.findByemail(customerDTO.getEmail());
             boolean emailExists = sameEmail.stream().anyMatch(c -> !c.getId().equals(customer.getId()));
             if (emailExists) {
@@ -121,15 +106,12 @@ public class CustomerService {
         }
     }
 
-
-    // 🟢 Tạo khách hàng mới (Đảm bảo có updatedBy khi tạo)
     public void createCustomer(CustomerDTO customerDTO) {
         User currentUser = getCurrentUser();
         if (currentUser == null) {
             throw new RuntimeException("Không thể xác định người dùng hiện tại.");
         }
 
-        // Kiểm tra số điện thoại đã tồn tại hay chưa
         List<Customer> existingCustomers = customerRepository.findByPhone(customerDTO.getPhone());
         if (!existingCustomers.isEmpty()) {
             throw new RuntimeException("Số điện thoại đã tồn tại, vui lòng nhập số khác.");
@@ -149,13 +131,10 @@ public class CustomerService {
         customer.setCreatedAt(LocalDateTime.now());
         customer.setUpdatedAt(LocalDateTime.now());
 
-        // ✅ Khi tạo, "Người sửa" cũng là người tạo
 //        customer.setUpdatedBy(currentUser.getUsername());
-
         customerRepository.save(customer);
     }
 
-    // 🟢 Lấy thông tin người dùng hiện tại từ SecurityContext
     public User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -192,14 +171,13 @@ public class CustomerService {
 
         Specification<Customer> spec = Specification.where(CustomerSpecifications.notDeleted());
 
-        // ✅ Lấy danh sách userId được phép truy cập theo Owner
+        // Lấy danh sách userId được phép truy cập theo Owner
         Long ownerId = currentUser.getRole().equals("ROLE_OWNER")
                 ? currentUser.getId()
                 : currentUser.getCreatedBy();
 
         if (ownerId == null) return Page.empty();
 
-        // Lấy toàn bộ user id của owner và các nhân viên mà owner đã tạo
         List<Long> allowedCreatedByIds = userRepository.findAll().stream()
                 .filter(u -> u.getId() == ownerId || u.getCreatedBy() == ownerId)
                 .map(User::getId)
@@ -207,7 +185,6 @@ public class CustomerService {
 
         spec = spec.and(CustomerSpecifications.createdByIn(allowedCreatedByIds));
 
-        // Các điều kiện lọc khác
         if (parsedId != null) spec = spec.and(CustomerSpecifications.idEquals(parsedId));
         if (name != null && !name.isBlank()) spec = spec.and(CustomerSpecifications.nameContains(name));
         if (phone != null && !phone.isBlank()) spec = spec.and(CustomerSpecifications.phoneContains(phone));

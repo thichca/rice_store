@@ -22,11 +22,8 @@ import swp.se1889.g1.rice_store.entity.Zone;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
-    List<Product> findByCreatedBy(User createdBy);
 
-    List<Product> findAllByName(String name);
     boolean existsByCreatedByAndNameAndIdNot(User createdBy, String name, Long id);
-
 
     Optional<Product> findById(Long id);
 
