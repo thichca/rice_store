@@ -13,7 +13,7 @@ public class StoreManagePage {
     private UserServiceIpml userService;
 
 
-    @GetMapping("/admin/manage-store")
+    @GetMapping("/owner/manage-store")
     public String GetViewManageOwner(Model model, HttpSession session){
         model.addAttribute("user", userService.getCurrentUser());
 

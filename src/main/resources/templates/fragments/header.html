@@ -80,9 +80,9 @@
                         Chủ cửa hàng
                     </a>
                 </div>
-                <div th:if="${user != null && user.role == 'ROLE_ADMIN'}">
+                <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
                     <a class="flex items-center text-white px-3 py-2 rounded-md hover:bg-blue-700"
-                       th:href="@{/admin/manage-store}">
+                       th:href="@{/owner/manage-store}">
                         <i class="fas fa-store mr-2"></i>
                         Cửa hàng
                     </a>
