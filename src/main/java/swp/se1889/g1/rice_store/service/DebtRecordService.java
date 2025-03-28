@@ -27,9 +27,12 @@ public class DebtRecordService {
 
     //    @Autowired
 //    private DebtRecordRepository debtRecordRepository;
-    @Autowired private DebtRecordRepository debtRecordRepository;
-    @Autowired private CustomerRepository customerRepository;
-    @Autowired private UserRepository userRepository;
+    @Autowired
+    private DebtRecordRepository debtRecordRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
+    private UserRepository userRepository;
 
 
     //public Page<DebtRecords> getPage(Long customerId, int page, int size){
@@ -39,7 +42,7 @@ public class DebtRecordService {
     public DebtRecords addDebt(DebtRecords debtRecord) {
         // return debtRecordRepository.save(debtRecord);
         User currentUser = getCurrentUser();
-        if(currentUser == null) {
+        if (currentUser == null) {
             throw new RuntimeException("Không tìm thấy thông tin người dùng");
         }
         //   DebtRecords newDebtRecord = new DebtRecords();
@@ -51,12 +54,13 @@ public class DebtRecordService {
         Optional<Customer> customerOpt = customerRepository.findById(debtRecord.getCustomerId());
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            updateDebtBalances(customer );
+            updateDebtBalances(customer);
         } else {
             throw new RuntimeException("Không tìm thấy khách hàng để cập nhật số dư nợ!");
         }
-        return  debtRecord;
+        return debtRecord;
     }
+
     public Page<DebtRecords> getFilteredDebtRecords(Long customerId, Pageable pageable, Long idMin, Long idMax,
                                                     String note, String type, BigDecimal amountMin, BigDecimal amountMax,
                                                     Date dateMin, Date dateMax) {
@@ -89,15 +93,17 @@ public class DebtRecordService {
     }
 
     // Phương thức lấy danh sách chi tiết nợ theo customer id
-    public List<DebtRecords> getDebtDetailsByCustomerId(Long customerId ) {
-        return debtRecordRepository.findByCustomerId(customerId );
+    public List<DebtRecords> getDebtDetailsByCustomerId(Long customerId) {
+        return debtRecordRepository.findByCustomerId(customerId);
     }
-     public Page<DebtRecords> getCustomerPage(Long customerId , Pageable pageable){
-        return debtRecordRepository.findByCustomerId(customerId , pageable);
- }
-    private void updateDebtBalances(Customer customer ) {
+
+    public Page<DebtRecords> getCustomerPage(Long customerId, Pageable pageable) {
+        return debtRecordRepository.findByCustomerId(customerId, pageable);
+    }
+
+    public void updateDebtBalances(Customer customer) {
         // Lấy tất cả các bản ghi nợ của khách hàng, không nhất thiết đã được sắp xếp
-        List<DebtRecords> debtRecords = debtRecordRepository.findByCustomerId(customer.getId() );
+        List<DebtRecords> debtRecords = debtRecordRepository.findByCustomerId(customer.getId());
 
         // Sử dụng PriorityQueue để sắp xếp các bản ghi theo thời gian tạo (createdAt)
         PriorityQueue<DebtRecords> queue = new PriorityQueue<>(

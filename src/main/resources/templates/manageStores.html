@@ -61,67 +61,92 @@
 
                 </tr>
 
-                <tr class="bg-gray-50">
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterFromId"
-                                   placeholder="Từ"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="filterToId" placeholder="Đến"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                        </div>
-                    </th>
+                <form id="searchForm" th:action="@{/owner/manageStores}" method="get">
+                    <tr class="bg-gray-50">
+                        <!-- ID -->
+                        <th class="border p-2">
+                            <div class="flex w-full gap-1">
+                                <input type="text" name="startId" class="border rounded w-1/2 py-1 px-2"
+                                       style="font-weight: normal;"
+                                       placeholder="Từ" th:value="${param.startId}" oninput="autoSearch()">
+                                <input type="text" name="endId" class="border rounded w-1/2 py-1 px-2"
+                                       style="font-weight: normal;"
+                                       placeholder="Đến" th:value="${param.endId}" oninput="autoSearch()">
+                            </div>
+                        </th>
 
-                    <td class="border p-2"><input type="text" id="filterName" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
-                    <td class="border p-2"><input type="text" id="filterAddress" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
-                    <td class="border p-2"><input type="text" id="filterPhone" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
-                    <td class="border p-2"><input type="text" id="filterEmail" class="w-full border rounded p-1"
-                                                  oninput="filterStores()"></td>
+                        <!-- Tên cửa hàng -->
+                        <td class="border p-2">
+                            <input type="text" name="storeName" class="w-full border rounded p-1"
+                                   style="font-weight: normal;"
+                                   th:value="${param.storeName}" placeholder="Nhập tên cửa hàng" oninput="autoSearch()">
+                        </td>
 
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterFromCreated"
-                                   placeholder="Từ"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterToCreated"
-                                   placeholder="Đến"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                        </div>
-                    </th>
+                        <!-- Địa chỉ -->
+                        <td class="border p-2">
+                            <input type="text" name="storeAddress" class="w-full border rounded p-1"
+                                   style="font-weight: normal;"
+                                   th:value="${param.storeAddress}" placeholder="Nhập địa chỉ" oninput="autoSearch()">
+                        </td>
 
-                    <th class="border p-2">
-                        <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterFromUpdated"
-                                   placeholder="Từ"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="filterToUpdated"
-                                   placeholder="Đến"
-                                   style="font-weight: normal;" oninput="filterStores()">
-                        </div>
-                    </th>
+                        <!-- Số điện thoại -->
+                        <td class="border p-2">
+                            <input type="text" name="storePhone" class="w-full border rounded p-1"
+                                   style="font-weight: normal;"
+                                   th:value="${param.storePhone}" placeholder="Nhập số điện thoại"
+                                   oninput="autoSearch()">
+                        </td>
 
+                        <!-- Email -->
+                        <td class="border p-2">
+                            <input type="text" name="storeEmail" class="w-full border rounded p-1"
+                                   style="font-weight: normal;"
+                                   th:value="${param.storeEmail}" placeholder="Nhập email" oninput="autoSearch()">
+                        </td>
 
-                    <td class="border p-2">
-                        <div class="flex gap-2 w-full">
-                            <button id="clearFilters" class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                        <!-- Ngày tạo -->
+                        <th class="border p-2">
+                            <div class="flex w-full gap-1">
+                                <input type="text" name="startCreatedAt"
+                                       class="border rounded w-1/2 py-1 px-2 flatpickr" style="font-weight: normal;"
+                                       placeholder="Từ" th:value="${param.startCreatedAt}" oninput="autoSearch()">
+                                <input type="text" name="endCreatedAt" class="border rounded w-1/2 py-1 px-2 flatpickr"
+                                       style="font-weight: normal;"
+                                       placeholder="Đến" th:value="${param.endCreatedAt}" oninput="autoSearch()">
+                            </div>
+                        </th>
+
+                        <!-- Ngày cập nhật -->
+                        <th class="border p-2">
+                            <div class="flex w-full gap-1">
+                                <input type="text" name="startUpdatedAt"
+                                       class="border rounded w-1/2 py-1 px-2 flatpickr" style="font-weight: normal;"
+                                       placeholder="Từ" th:value="${param.startUpdatedAt}" oninput="autoSearch()">
+                                <input type="text" name="endUpdatedAt" class="border rounded w-1/2 py-1 px-2 flatpickr"
+                                       style="font-weight: normal;"
+                                       placeholder="Đến" th:value="${param.endUpdatedAt}" oninput="autoSearch()">
+                            </div>
+                        </th>
+
+                        <td class="border p-2">
+                            <div class="flex gap-2 w-full">
+                                <button id="clearFilters" class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-red-500 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-times mr-1"></i> Bỏ lọc'
-                                    data-icon='<i class="fas fa-times"></i>'>
-                                <i class="fas fa-times mr-1"></i> Bỏ lọc
-                            </button>
+                                        data-full='<i class="fas fa-times mr-1"></i> Bỏ lọc'
+                                        data-icon='<i class="fas fa-times"></i>'>
+                                    <i class="fas fa-times mr-1"></i> Bỏ lọc
+                                </button>
 
 
-                            <button id="toggleButtons" class="w-1/2 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                <button id="toggleButtons" class="w-1/2 bg-white border border-blue-500 text-blue-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
                                 hover:bg-blue-500 hover:text-white transition duration-200">
-                                <i class="fas fa-angle-right mr-1"></i> Thu gọn
-                            </button>
-                        </div>
-                    </td>
+                                    <i class="fas fa-angle-right mr-1"></i> Thu gọn
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </form>
 
-                </tr>
                 </thead>
 
                 <tbody id="tableBody">
@@ -212,3 +237,23 @@
 <div th:replace="~{fragments/script :: script}"></div>
 </body>
 </html>
+
+<script>
+    let timeout = null;
+
+    function autoSearch() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            document.getElementById("searchForm").submit();
+        }, 500); // Chờ 500ms sau khi nhập xong mới gửi request
+    }
+</script>
+
+<script>
+    document.getElementById("toggleButtons").addEventListener("click", function (event) {
+        event.preventDefault(); // Ngăn form bị submit
+        console.log("Nút thu gọn được nhấn!"); // Debug
+    });
+</script>
+
+

@@ -45,16 +45,12 @@
                 <i class="fas fa-plus mr-2"></i> Thêm người dùng
             </button>
         </div>
-
-        <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-            <i class="fas fa-calendar mr-2"></i> Lịch hoạt động
-        </button>
-
         <div class="flex justify-between items-center mb-4">
             <p id="totalRecords" class="text-gray-600 mb-4">Tổng cộng: <span id="recordCount">3</span> bản ghi</p>
             <div class="w-1/6 mb-4 bg-white rounded-lg p-4">
                 <select id="search-status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="active" selected>Đang hoạt động</option>
+                    <option value="all" selected>All</option>
+                    <option value="active">Đang hoạt động</option>
                     <option value="inactive">Đã khóa</option>
                 </select>
             </div>
@@ -130,7 +126,7 @@
                     <th class="border p-2 relative">Email<div class="resizer"></div></th>
                     <th class="border p-2 relative">Ngày tạo<div class="resizer"></div></th>
                     <th class="border p-2 relative">Cập nhật<div class="resizer"></div></th>
-                    <th class="border p-2 relative w-[340px]">Hành động<div class="resizer"></div></th>
+                    <th class="border p-2 relative w-[340px] action-column">Hành động<div class="resizer"></div></th>
                 </tr>
                 <tr class="bg-gray-50">
                     <th class="border p-2">
@@ -145,14 +141,14 @@
                     <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-email"></td>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ" style="font-weight: normal;" id="search-created-date-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến" style="font-weight: normal;" id="search-created-date-max">
+                            <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;" id="search-created-date-min">
+                            <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;" id="search-created-date-max">
                         </div>
                     </th>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Từ" style="font-weight: normal;" id="search-updated-date-min">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" placeholder="Đến" style="font-weight: normal;" id="search-updated-date-max">
+                            <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;" id="search-updated-date-min">
+                            <input type="date" class="border rounded w-1/2 py-1 px-2" style="font-weight: normal;" id="search-updated-date-max">
                         </div>
                     </th>
                     <td class="border p-2">
@@ -176,7 +172,7 @@
                     <td class="border p-2">nguyenvana@gmail.com</td>
                     <td class="border p-2">2025-01-01</td>
                     <td class="border p-2">2025-03-10</td>
-                    <td class="border p-2">
+                    <td class="border p-2 action-column">
                         <div class="flex gap-2 w-full">
                             <form action="#" method="get" onsubmit="return confirm('Bạn có chắc chắn muốn khóa?');" class="w-1/2">
                                 <button type="submit" class="w-full bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-red-600 transition duration-200">
@@ -362,7 +358,7 @@
             <td class="border p-2">${formatTimestamp(user.createdAt)}</td>
             <td class="border p-2">${formatTimestamp(user.updatedAt)}</td>
             <td class="border p-2">
-                <div class="flex gap-2 w-full">
+                <div class="flex gap-2 w-full action-column">
                     <form action="#" method="get" onsubmit="deleteUserHandler(event, ${user.id}, ${user.deleted}); return false;" class="w-1/2">
                         <button type="submit" class="w-full ${user.deleted ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'} text-white px-4 py-2 rounded-lg flex items-center justify-center transition duration-200">
                             <i class="fas fa-${user.deleted ? 'undo' : 'trash-alt'}"></i>
@@ -399,7 +395,6 @@
         };
 
         state.filteredUsers = state.allUsers.filter(user => {
-            // Không lọc mặc định theo deleted, chỉ lọc khi người dùng chọn
             if (filters.idMin && user.id < parseInt(filters.idMin)) return false;
             if (filters.idMax && user.id > parseInt(filters.idMax)) return false;
             if (filters.name && !(user.name?.toLowerCase().includes(filters.name) || user.username.toLowerCase().includes(filters.name))) return false;
@@ -407,16 +402,32 @@
             if (filters.phone && !user.phone?.includes(filters.phone)) return false;
             if (filters.email && !user.email.toLowerCase().includes(filters.email)) return false;
 
-            const createdTimestamp = new Date(user.createdAt).getTime();
-            if (filters.createdDateMin && createdTimestamp < new Date(filters.createdDateMin).getTime()) return false;
-            if (filters.createdDateMax && createdTimestamp > new Date(filters.createdDateMax).getTime()) return false;
+            const createdDate = new Date(user.createdAt);
+            if (filters.createdDateMin) {
+                const minDate = new Date(filters.createdDateMin);
+                if (createdDate < minDate) return false;
+            }
+            if (filters.createdDateMax) {
+                const maxDate = new Date(filters.createdDateMax);
+                maxDate.setHours(23, 59, 59, 999);
+                if (createdDate > maxDate) return false;
+            }
 
-            const updatedTimestamp = new Date(user.updatedAt).getTime();
-            if (filters.updatedDateMin && updatedTimestamp < new Date(filters.updatedDateMin).getTime()) return false;
-            if (filters.updatedDateMax && updatedTimestamp > new Date(filters.updatedDateMax).getTime()) return false;
+            const updatedDate = new Date(user.updatedAt);
+            if (filters.updatedDateMin) {
+                const minDate = new Date(filters.updatedDateMin);
+                if (updatedDate < minDate) return false;
+            }
+            if (filters.updatedDateMax) {
+                const maxDate = new Date(filters.updatedDateMax);
+                maxDate.setHours(23, 59, 59, 999);
+                if (updatedDate > maxDate) return false;
+            }
 
-            if (filters.status === 'active' && user.deleted) return false;
-            if (filters.status === 'inactive' && !user.deleted) return false;
+            if (filters.status !== 'all') {
+                if (filters.status === 'active' && user.deleted) return false;
+                if (filters.status === 'inactive' && !user.deleted) return false;
+            }
 
             return true;
         });
@@ -579,16 +590,33 @@
         getElement('clearFilters').addEventListener('click', () => {
             filterIds.forEach(id => {
                 const el = getElement(id);
-                el.value = ''; // Reset tất cả bộ lọc về rỗng
+                if (id === 'search-status') {
+                    el.value = 'all';
+                } else {
+                    el.value = '';
+                }
             });
             applyFilters();
         });
 
-        getElement('toggleButtons').addEventListener('click', (e) => {
-            const filterRow = document.querySelector('thead tr:nth-child(2)');
-            const isHidden = filterRow.style.display === 'none';
-            filterRow.style.display = isHidden ? '' : 'none';
-            e.target.innerHTML = `<i class="fas fa-angle-${isHidden ? 'right' : 'down'} mr-1"></i> ${isHidden ? 'Thu gọn' : 'Mở rộng'}`;
+        getElement('toggleButtons').addEventListener('click', () => {
+            const actionColumns = document.querySelectorAll('.action-column');
+            const toggleButton = getElement('toggleButtons');
+
+            const isCollapsed = actionColumns[0].classList.contains('collapsed');
+            actionColumns.forEach(column => {
+                if (isCollapsed) {
+                    column.style.width = '340px';
+                    column.classList.remove('collapsed');
+                } else {
+                    column.style.width = '100px';
+                    column.classList.add('collapsed');
+                }
+            });
+
+            toggleButton.innerHTML = isCollapsed
+                ? '<i class="fas fa-angle-right mr-1"></i> Thu gọn'
+                : '<i class="fas fa-angle-down mr-1"></i> Mở rộng';
         });
 
         // Overlay

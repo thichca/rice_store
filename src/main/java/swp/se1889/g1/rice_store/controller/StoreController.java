@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,6 +19,8 @@ import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.service.StoreService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
+
+import java.time.LocalDateTime;
 
 @Controller
 public class StoreController {
@@ -50,10 +53,25 @@ public class StoreController {
 
     @GetMapping("owner/manageStores")
     public String manageStores(@RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "10") int size,
+                               @RequestParam(defaultValue = "5") int size,
+                               @RequestParam(required = false) Long startId,
+                               @RequestParam(required = false) Long endId,
+                               @RequestParam(required = false) String storeName,
+                               @RequestParam(required = false) String storeAddress,
+                               @RequestParam(required = false) String storePhone,
+                               @RequestParam(required = false) String storeEmail,
+                               @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") LocalDateTime startCreatedAt,
+                               @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") LocalDateTime endCreatedAt,
+                               @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") LocalDateTime startUpdatedAt,
+                               @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") LocalDateTime endUpdatedAt,
                                Model model) {
         String username = userService.getCurrentUsername();
-        Page<Store> storePage = storeService.getStoresByUserName(username, page, size);
+
+        Page<Store> storePage = storeService.searchStore(username, startId, endId, storeName,
+                storeAddress, storePhone, storeEmail,
+                startCreatedAt, endCreatedAt,
+                startUpdatedAt, endUpdatedAt,
+                page, size);
 
         model.addAttribute("stores", storePage.getContent());
         model.addAttribute("currentPage", page);

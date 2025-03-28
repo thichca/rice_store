@@ -12,6 +12,7 @@ import swp.se1889.g1.rice_store.dto.StoreDTO;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.repository.StoreRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -147,6 +148,53 @@ public class StoreService {
             store.setDelete(true);
             storeRepository.save(store);
         }
+    }
+
+    public Page<Store> searchStore(String username,
+                                   Long startId, Long endId,
+                                   String storeName, String storeAddress,
+                                   String storePhone, String storeEmail,
+                                   LocalDateTime startCreatedAt, LocalDateTime endCreatedAt,
+                                   LocalDateTime startUpdatedAt, LocalDateTime endUpdatedAt,
+                                   int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        boolean isEmptySearch = (startId == null && endId == null &&
+                (storeName == null || storeName.trim().isEmpty()) &&
+                (storeAddress == null || storeAddress.trim().isEmpty()) &&
+                (storePhone == null || storePhone.trim().isEmpty()) &&
+                (storeEmail == null || storeEmail.trim().isEmpty()) &&
+                startCreatedAt == null && endCreatedAt == null &&
+                startUpdatedAt == null && endUpdatedAt == null);
+
+        if (isEmptySearch) {
+            return storeRepository.findByCreatedByAndIsDeletedFalse(username, pageable);
+        }
+
+        if (startId != null && endId == null) {
+            endId = Long.MAX_VALUE;
+        }
+        if (startId == null && endId != null) {
+            startId = 0L;
+        }
+
+        if (startCreatedAt != null && endCreatedAt == null) {
+            endCreatedAt = LocalDateTime.now();
+        }
+        if (startCreatedAt == null && endCreatedAt != null) {
+            startCreatedAt = LocalDateTime.of(1970, 1, 1, 0, 0);
+        }
+
+        if (startUpdatedAt != null && endUpdatedAt == null) {
+            endUpdatedAt = LocalDateTime.now();
+        }
+        if (startUpdatedAt == null && endUpdatedAt != null) {
+            startUpdatedAt = LocalDateTime.of(1970, 1, 1, 0, 0);
+        }
+
+        return storeRepository.searchStore(username, startId, endId, storeName, storeAddress,
+                storePhone, storeEmail, startCreatedAt, endCreatedAt,
+                startUpdatedAt, endUpdatedAt, pageable);
     }
 
 }

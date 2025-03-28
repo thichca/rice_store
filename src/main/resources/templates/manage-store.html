@@ -11,6 +11,25 @@
         .divider { border-right: 2px solid #ddd; height: 100%; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999; justify-content: center; align-items: center; }
         .modal-content { background-color: white; padding: 20px; border-radius: 8px; width: 60%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
+        .action-column {
+            transition: width 0.3s ease; /* Hiệu ứng mượt mà */
+        }
+        .action-column {
+            transition: width 0.3s ease; /* Hiệu ứng mượt mà khi thay đổi kích thước */
+        }
+        .action-column .flex {
+            flex-direction: row; /* Mặc định là ngang */
+            gap: 2px; /* Khoảng cách giữa các nút */
+        }
+        .action-column.collapsed .flex {
+            flex-direction: column; /* Khi thu gọn, chuyển thành dọc */
+            gap: 4px; /* Tăng khoảng cách khi xếp dọc */
+        }
+        .action-column button {
+            white-space: nowrap; /* Ngăn text xuống dòng */
+            overflow: hidden; /* Ẩn phần text bị tràn */
+            text-overflow: ellipsis; /* Thêm dấu "..." nếu text bị cắt */
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
@@ -30,7 +49,7 @@
                     <th class="border p-2">Ngày tạo</th>
                     <th class="border p-2">Cập nhật</th>
                     <th class="border p-2">Trạng thái</th>
-                    <th class="border p-2 w-[340px]">Hành động</th>
+                    <th class="border p-2 w-[340px] action-column">Hành động</th>
                 </tr>
                 <tr class="bg-gray-50">
                     <th class="border p-2">
@@ -177,7 +196,21 @@
     let debounceTimer; // Biến để xử lý debounce
 
     // Hàm lấy danh sách cửa hàng từ API (chỉ gọi một lần ban đầu)
+    // Hàm lấy danh sách cửa hàng từ API
     async function fetchStores(page = 0, size = 10) {
+        const userNameLogin = sessionStorage.getItem('userNameLogin'); // Lấy userNameLogin từ sessionStorage
+        if (!userNameLogin) {
+            console.error('Không tìm thấy userNameLogin trong sessionStorage');
+            Toastify({
+                text: "Vui lòng đăng nhập để xem danh sách cửa hàng",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#ff4444"
+            }).showToast();
+            return;
+        }
+
         const url = new URL('http://localhost:8080/restore/get-stores');
         url.searchParams.append('page', page);
         url.searchParams.append('size', size);
@@ -186,8 +219,9 @@
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Lỗi HTTP! trạng thái: ${response.status}`);
             const data = await response.json();
-            allStores = data.content; // Lưu toàn bộ dữ liệu cửa hàng vào biến toàn cục
-            renderStores(allStores, page, size); // Hiển thị dữ liệu ban đầu
+            // Lọc dữ liệu phía client dựa trên createdBy
+            allStores = data.content.filter(store => store.createdBy === userNameLogin || store.createdBy?.username === userNameLogin);
+            renderStores(allStores, page, size); // Hiển thị dữ liệu đã lọc
         } catch (error) {
             console.error('Lỗi khi lấy danh sách cửa hàng:', error);
             Toastify({
@@ -202,7 +236,7 @@
 
     // Hàm lấy chi tiết cửa hàng và zone với phân trang
     async function fetchStoreDetails(storeId, page = 0, size = 10) {
-        currentStoreId = storeId; // Lưu ID cửa hàng hiện tại để dùng cho phân trang zone
+        currentStoreId = storeId;
         const url = new URL(`http://localhost:8080/restore/get-store/${storeId}`);
         url.searchParams.append('page', page);
         url.searchParams.append('size', size);
@@ -212,9 +246,9 @@
             if (!response.ok) throw new Error(`Lỗi HTTP! trạng thái: ${response.status}`);
             const data = await response.json();
 
-            // Nếu không có dữ liệu zone (content rỗng), vẫn hiển thị modal nhưng với thông báo "Không có dữ liệu"
+            // Nếu không có dữ liệu
             if (!data.content || data.content.length === 0) {
-                const store = allStores.find(s => s.id === parseInt(storeId)) || {}; // Lấy thông tin cửa hàng từ allStores nếu có
+                const store = allStores.find(s => s.id === parseInt(storeId)) || {};
                 document.getElementById('detail-name').textContent = store.name || '';
                 document.getElementById('detail-address').textContent = store.address || '';
                 document.getElementById('detail-phone').textContent = store.phone || '';
@@ -224,24 +258,35 @@
                 document.getElementById('detail-note').textContent = store.note || 'Không có';
                 document.getElementById('detail-updatedBy').textContent = store.updatedBy || 'Chưa cập nhật';
 
-                const zoneTableBody = document.getElementById('zoneTableBody');
-                zoneTableBody.innerHTML = `
+                document.getElementById('zoneTableBody').innerHTML = `
                 <tr>
                     <td colspan="9" class="border p-2 text-center">Không có dữ liệu</td>
                 </tr>
             `;
-
                 document.getElementById('zoneTotalPages').textContent = `/ 1`;
                 document.getElementById('zoneCurrentPage').value = 1;
                 document.getElementById('zonePrevPage').disabled = true;
                 document.getElementById('zoneNextPage').disabled = true;
-
                 document.getElementById('viewDetailsModal').style.display = 'flex';
                 return;
             }
 
-            // Cập nhật thông tin chi tiết cửa hàng (lấy từ zone đầu tiên)
-            const store = data.content[0].store;
+            // Lấy bản ghi đầu tiên để truy cập store và product.zones
+            const firstZone = data.content.find(item => typeof item === 'object' && item.id) || {};
+            const store = firstZone.store || {};
+            const allZonesFromProduct = firstZone.product?.zones || [];
+
+            // Tạo danh sách zones đầy đủ
+            const validZones = data.content.map(item => {
+                if (typeof item === 'object' && item.id) {
+                    return item; // Bản ghi đầy đủ
+                } else {
+                    // Tìm thông tin chi tiết từ product.zones dựa trên ID
+                    return allZonesFromProduct.find(zone => zone.id === item) || { id: item };
+                }
+            });
+
+            // Cập nhật thông tin chi tiết cửa hàng
             document.getElementById('detail-name').textContent = store.name || '';
             document.getElementById('detail-address').textContent = store.address || '';
             document.getElementById('detail-phone').textContent = store.phone || '';
@@ -253,15 +298,15 @@
 
             // Cập nhật bảng danh sách zone
             const zoneTableBody = document.getElementById('zoneTableBody');
-            zoneTableBody.innerHTML = data.content.map(zone => `
+            zoneTableBody.innerHTML = validZones.map(zone => `
             <tr>
-                <td class="border p-2">${zone.name || ''}</td>
-                <td class="border p-2">${zone.address || ''}</td>
-                <td class="border p-2">${zone.product?.name || ''}</td>
-                <td class="border p-2">${zone.quantity || ''}</td>
-                <td class="border p-2">${zone.createdAt || ''}</td>
-                <td class="border p-2">${zone.updatedAt || ''}</td>
-                <td class="border p-2">${zone.createdBy?.username || zone.createdBy || ''}</td>
+                <td class="border p-2">${zone.name || 'Không có dữ liệu'}</td>
+                <td class="border p-2">${zone.address || 'Không có dữ liệu'}</td>
+                <td class="border p-2">${zone.product?.name || (typeof zone.product === 'number' ? 'ID: ' + zone.product : 'Không có dữ liệu')}</td>
+                <td class="border p-2">${zone.quantity || 'Không có dữ liệu'}</td>
+                <td class="border p-2">${zone.createdAt || 'Không có dữ liệu'}</td>
+                <td class="border p-2">${zone.updatedAt || 'Không có dữ liệu'}</td>
+                <td class="border p-2">${zone.createdBy?.username || zone.createdBy || 'Không có dữ liệu'}</td>
                 <td class="border p-2">${zone.updatedBy?.username || zone.updatedBy || 'Chưa cập nhật'}</td>
                 <td class="border p-2">${zone.isDeleted ? 'Đã xóa' : 'Hoạt động'}</td>
             </tr>
@@ -273,7 +318,7 @@
             document.getElementById('zonePrevPage').disabled = page === 0;
             document.getElementById('zoneNextPage').disabled = page === data.totalPages - 1;
 
-            document.getElementById('viewDetailsModal').style.display = 'flex'; // Hiển thị modal
+            document.getElementById('viewDetailsModal').style.display = 'flex';
         } catch (error) {
             console.error('Lỗi khi lấy chi tiết cửa hàng:', error);
             Toastify({
@@ -425,7 +470,7 @@
             <td class="border p-2">${store.createdAt || ''}</td>
             <td class="border p-2">${store.updatedAt || ''}</td>
             <td class="border p-2">${store.deleted ? 'Đã khóa' : 'Đang hoạt động'}</td>
-            <td class="border p-2">
+            <td class="border p-2 action-column"> <!-- Thêm class action-column -->
                 <div class="flex gap-2 w-full">
                     <button class="viewDetailsBtn w-1/2 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center hover:bg-blue-600" data-id="${store.id}">
                         <i class="fas fa-eye mr-1"></i> Xem chi tiết
@@ -527,10 +572,25 @@
     });
 
     document.getElementById('toggleButtons').addEventListener('click', () => {
-        const filterRow = document.querySelector('thead tr:nth-child(2)');
-        const isHidden = filterRow.style.display === 'none';
-        filterRow.style.display = isHidden ? '' : 'none';
-        document.getElementById('toggleButtons').innerHTML = isHidden
+        const actionColumns = document.querySelectorAll('.action-column');
+        const toggleButton = document.getElementById('toggleButtons');
+
+        // Kiểm tra trạng thái hiện tại dựa trên chiều rộng của cột đầu tiên
+        const isCollapsed = actionColumns[0].classList.contains('collapsed');
+
+        // Thay đổi kích thước và hướng của cột Hành động
+        actionColumns.forEach(column => {
+            if (isCollapsed) {
+                column.style.width = '340px'; // Kích thước ban đầu
+                column.classList.remove('collapsed'); // Xóa class để nút trở lại ngang
+            } else {
+                column.style.width = '100px'; // Kích thước thu gọn
+                column.classList.add('collapsed'); // Thêm class để nút xếp dọc
+            }
+        });
+
+        // Cập nhật nội dung nút
+        toggleButton.innerHTML = isCollapsed
             ? '<i class="fas fa-angle-right mr-1"></i> Thu gọn'
             : '<i class="fas fa-angle-down mr-1"></i> Mở rộng';
     });

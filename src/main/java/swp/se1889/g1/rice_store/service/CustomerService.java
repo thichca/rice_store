@@ -6,11 +6,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
+import swp.se1889.g1.rice_store.dto.CustomerInvoiceDTO;
+import swp.se1889.g1.rice_store.dto.StoreDTO;
 import swp.se1889.g1.rice_store.entity.Customer;
+import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 import swp.se1889.g1.rice_store.repository.CustomerRepository;
 import swp.se1889.g1.rice_store.repository.UserRepository;
@@ -30,6 +35,7 @@ public class CustomerService {
 
     @Autowired
     private UserRepository userRepository;
+
     // Lấy tổng số khách hàng theo user hiện tại
     public long countCustomersByCurrentUser() {
         User currentUser = getCurrentUser();
@@ -38,8 +44,6 @@ public class CustomerService {
         }
         return 0;
     }
-
-
 
 
     public CustomerDTO getCustomerById(Long id) {
@@ -141,6 +145,7 @@ public class CustomerService {
         }
         return null;
     }
+
     public Page<CustomerDTO> filterCustomersWithSpec(String id, String name, String phone,
                                                      String address, String email, String debt,
                                                      LocalDate createdDate, LocalDate updatedDate,
@@ -164,9 +169,7 @@ public class CustomerService {
         LocalDateTime updatedFrom = updatedDate != null ? updatedDate.atStartOfDay() : null;
         LocalDateTime updatedTo = updatedDate != null ? updatedDate.plusDays(1).atStartOfDay() : null;
 
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.notDeleted())
-                .and(CustomerSpecifications.createdBy(currentUser.getId()));
+        Specification<Customer> spec = Specification.where(CustomerSpecifications.notDeleted());
 
         if (parsedId != null) spec = spec.and(CustomerSpecifications.idEquals(parsedId));
         if (name != null && !name.isBlank()) spec = spec.and(CustomerSpecifications.nameContains(name));
@@ -174,14 +177,15 @@ public class CustomerService {
         if (address != null && !address.isBlank()) spec = spec.and(CustomerSpecifications.addressContains(address));
         if (email != null && !email.isBlank()) spec = spec.and(CustomerSpecifications.emailContains(email));
         if (parsedDebt != null) spec = spec.and(CustomerSpecifications.debtEquals(parsedDebt));
-        if (createdFrom != null && createdTo != null) spec = spec.and(CustomerSpecifications.createdAtBetween(createdFrom, createdTo));
-        if (updatedFrom != null && updatedTo != null) spec = spec.and(CustomerSpecifications.updatedAtBetween(updatedFrom, updatedTo));
+        if (createdFrom != null && createdTo != null)
+            spec = spec.and(CustomerSpecifications.createdAtBetween(createdFrom, createdTo));
+        if (updatedFrom != null && updatedTo != null)
+            spec = spec.and(CustomerSpecifications.updatedAtBetween(updatedFrom, updatedTo));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         return customerRepository.findAll(spec, pageable).map(CustomerDTO::new);
     }
-
 
 
     public List<CustomerDTO> searchCustomers(String query) {
@@ -194,5 +198,45 @@ public class CustomerService {
 
     public Customer saveCustomer(Customer customer) {
         return customerRepository.save(customer);
+    }
+
+    public long countCustomersByStore(Store store) {
+        User owner = userRepository.findByUsername(store.getCreatedBy());
+        if (owner == null) return 0;
+
+        return customerRepository.countByOwnerAndEmployees(owner.getId());
+    }
+
+    public Customer createCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO, RedirectAttributes redirectAttributes) {
+        boolean hasError = false;
+
+        if (customerRepository.findCustomerByEmail(customerInvoiceDTO.getCustomerInvoiceEmail()) != null) {
+            redirectAttributes.addFlashAttribute("error", "Email khách hàng đã tồn tại");
+            hasError = true;
+        }
+
+        if (customerRepository.findCustomerByPhone(customerInvoiceDTO.getCustomerInvoicePhone()) != null) {
+            redirectAttributes.addFlashAttribute("error", "Số điện thoại khách hàng đã tồn tại");
+            hasError = true;
+        }
+
+        if (hasError) {
+            return null;
+        }
+
+        Customer customer = new Customer();
+        customer.setName(customerInvoiceDTO.getCustomerInvoiceName());
+        customer.setPhone(customerInvoiceDTO.getCustomerInvoicePhone());
+        customer.setAddress(customerInvoiceDTO.getCustomerInvoiceAddress());
+        customer.setEmail(customerInvoiceDTO.getCustomerInvoiceEmail());
+        User currentUser = getCurrentUser();
+        customer.setCreatedBy(currentUser);
+
+        try {
+            customerRepository.save(customer);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while saving store: " + e.getMessage());
+        }
+        return customer;
     }
 }

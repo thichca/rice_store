@@ -14,20 +14,22 @@ import swp.se1889.g1.rice_store.entity.*;
 import swp.se1889.g1.rice_store.repository.*;
 import swp.se1889.g1.rice_store.service.InvoicesService;
 import swp.se1889.g1.rice_store.service.Iservice.UserService;
+import swp.se1889.g1.rice_store.service.ProductService;
 import swp.se1889.g1.rice_store.service.UserServiceIpml;
+import swp.se1889.g1.rice_store.service.ZoneService;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/owner/invoices")
 public class InvoiceController {
+
+    private final ProductService productService;
+    private final ZoneService zoneService;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
     private final InvoicesService invoiceService;
@@ -39,7 +41,7 @@ public class InvoiceController {
 
     @Autowired
     public InvoiceController(ProductRepository productRepository, CustomerRepository customerRepository, InvoicesService invoiceService, ZoneRepository zoneRepository, InvoiceDetailRepository invoiceDetailRepository
-            , UserServiceIpml userService, InvoicesRepository invoicesRepository) {
+            , UserServiceIpml userService, InvoicesRepository invoicesRepository, ProductService productService, ZoneService zoneService) {
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.invoiceService = invoiceService;
@@ -47,36 +49,39 @@ public class InvoiceController {
         this.invoiceDetailRepository = invoiceDetailRepository;
         this.userService = userService;
         this.invoicesRepository = invoicesRepository;
+        this.productService = productService;
+        this.zoneService = zoneService;
     }
 
     @GetMapping
     public String listInvoices(Model model, HttpSession session,
                                @RequestParam(defaultValue = "0") int page,
                                @RequestParam(defaultValue = "10") int size,
-                               @RequestParam(required = false) String idMin ,
-                               @RequestParam(required = false) String idMax ,
-                               @RequestParam(required = false) String note ,
-                               @RequestParam(required = false) String status ,
-                               @RequestParam(required = false) String amountMin ,
-                               @RequestParam(required = false) String amountMax ,
-                               @RequestParam(required = false) String dateMin ,
-                               @RequestParam(required = false) String dateMax ,
-                               @RequestParam(required = false) String dateMin1 ,
+                               @RequestParam(required = false) String idMin,
+                               @RequestParam(required = false) String idMax,
+                               @RequestParam(required = false) String note,
+                               @RequestParam(required = false) String status,
+                               @RequestParam(required = false) String amountMin,
+                               @RequestParam(required = false) String amountMax,
+                               @RequestParam(required = false) String dateMin,
+                               @RequestParam(required = false) String dateMax,
+                               @RequestParam(required = false) String dateMin1,
                                @RequestParam(required = false) String dateMax1,
                                @RequestParam(required = false) String type) {
         Store store = (Store) session.getAttribute("store");
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
         model.addAttribute("store", store);
-        // Chuyển đổi type thành Invoices.InvoiceType
-        Invoices.InvoiceType invoiceType = null;
+        Invoices.InvoiceType invoiceType;
         if (type != null && !type.isEmpty()) {
             try {
                 invoiceType = Invoices.InvoiceType.valueOf(type.toUpperCase());
             } catch (IllegalArgumentException e) {
-                // Có thể thêm thông báo lỗi nếu type không hợp lệ
                 model.addAttribute("error", "Loại hóa đơn không hợp lệ: " + type);
+                invoiceType = Invoices.InvoiceType.Purchase; // Mặc định là PURCHASE nếu type không hợp lệ
             }
+        } else {
+            invoiceType = Invoices.InvoiceType.Purchase; // Mặc định là PURCHASE nếu type không được truyền
         }
         Long parsedIdMin = parseLong(idMin);
         Long parsedIdMax = parseLong(idMax);
@@ -87,7 +92,7 @@ public class InvoiceController {
         Date parsedDateMin1 = parseDate(dateMin1);
         Date parsedDateMax1 = parseDate(dateMax1);
         Pageable pageable = PageRequest.of(page, size);
-        Page<Invoices> invoices = invoiceService.getFilter(store , parsedIdMin, parsedIdMax, note, status, parsedDateMin, parsedDateMax, pageable,  parsedDateMin1, parsedDateMax1 , parsedAmountMin , parsedAmountMax , invoiceType);
+        Page<Invoices> invoices = invoiceService.getFilter(store, parsedIdMin, parsedIdMax, note, status, parsedDateMin, parsedDateMax, pageable, parsedDateMin1, parsedDateMax1, parsedAmountMin, parsedAmountMax, invoiceType);
         model.addAttribute("invoices", invoices.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", invoices.getTotalPages());
@@ -106,6 +111,7 @@ public class InvoiceController {
         model.addAttribute("type", type);
         return "invoice";
     }
+
     private Long parseLong(String value) {
         if (value != null && !value.isEmpty()) {
             try {
@@ -193,7 +199,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/detail/{id}")
-    public String getInvoiceDetail(@PathVariable Long id, Model model ) {
+    public String getInvoiceDetail(@PathVariable Long id, Model model) {
         Invoices invoices = invoicesRepository.findById(id).orElse(null);
         List<InvoicesDetails> invoicesDetails = invoiceDetailRepository.findByInvoice(invoices);
         for (InvoicesDetails detail : invoicesDetails) {
@@ -209,6 +215,19 @@ public class InvoiceController {
                 detail.setZoneName("Khu vực đã bị xóa");
             }
         }
+
+        List<String> productNameList = new ArrayList<>();
+        List<String> zoneNameList = new ArrayList<>();
+        for (InvoicesDetails iD : invoicesDetails) {
+            Product product = productService.findProductById(iD.getId());
+            Zone zone = zoneService.getZoneById(iD.getZone().getId());
+
+            productNameList.add(product.getName());
+            zoneNameList.add(zone.getName());
+        }
+
+        model.addAttribute("productNameList", productNameList);
+        model.addAttribute("zoneNameList", zoneNameList);
         model.addAttribute("invoiceDetails", invoicesDetails);
         model.addAttribute("invoice", invoices);
         User user = userService.getCurrentUser();
@@ -217,12 +236,13 @@ public class InvoiceController {
         model.addAttribute("store", store);
         return "invoice_detail";
     }
+
     @GetMapping("/edit/{id}")
-    public  String updateInvoices(
+    public String updateInvoices(
             @PathVariable Long id,
             Model model,
             HttpSession session
-    ){
+    ) {
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
         Store store = (Store) session.getAttribute("store");
@@ -235,11 +255,12 @@ public class InvoiceController {
         return "edit-invoice";
 
     }
+
     @PostMapping("/edit/{id}")
-    public String updateInvoices(Model model, @PathVariable Long id, @ModelAttribute Invoices invoice, HttpSession session){
+    public String updateInvoices(Model model, @PathVariable Long id, @ModelAttribute Invoices invoice, HttpSession session) {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
-        Invoices invoices = invoiceService.update(id , invoice.getStatus());
+        Invoices invoices = invoiceService.update(id, invoice.getStatus());
         if (invoices != null) {
             model.addAttribute("success", "Cập nhật thành công");
         }
