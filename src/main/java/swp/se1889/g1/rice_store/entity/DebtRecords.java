@@ -3,6 +3,7 @@ package swp.se1889.g1.rice_store.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -50,8 +51,19 @@ public class DebtRecords {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDelete = false;
 
+     @Column(name="create_on" , nullable = false)
+     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")  // Format theo Tiếng Việt
+     private LocalDateTime createOn ;
 //    @Column(name ="email" , nullable = false)
 //    private String email;
+
+    public LocalDateTime getCreateOn() {
+        return createOn;
+    }
+
+    public void setCreateOn(LocalDateTime createOn) {
+        this.createOn = createOn;
+    }
 
     @PreUpdate
     public void preUpdate() {
@@ -59,7 +71,7 @@ public class DebtRecords {
     }
 
     public enum DebtType {
-        GHI_NO, TRA_NO
+        Customer_debt_shop , Customer_return_shop , Shop_debt_customer , Shop_return_customer
     }
     public void setCustomerId(Long customerId) {
         this.customerId = customerId;

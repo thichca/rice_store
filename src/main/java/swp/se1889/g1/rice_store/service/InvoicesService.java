@@ -18,6 +18,7 @@ import swp.se1889.g1.rice_store.repository.*;
 import swp.se1889.g1.rice_store.specification.InvoiceSpecifications;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -37,6 +38,14 @@ public class InvoicesService {
     private ZoneRepository zoneRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private DebtRecordRepository debtRecordsRepository;
+    @Autowired
+    private DebtRecordService debtRecordService;
+
+
+
+
 
     // Hàm tìm kiếm hóa đơn theo ID cửa hàng
     public List<Invoices> findByStore(Long storeId) {
@@ -80,8 +89,7 @@ public class InvoicesService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy cửa hàng với ID: " + dto.getStoreId()));
         // 3. Tính toán tổng giá trị hóa đơn
         BigDecimal totalPrice = calculateTotalPrice(dto.getDetails());
-        BigDecimal discount = dto.getDiscount() != null ? dto.getDiscount() : BigDecimal.ZERO;
-        BigDecimal finalAmount = totalPrice.subtract(discount);
+        BigDecimal finalAmount = totalPrice;
         // 4. Lấy thông tin về phương thức thanh toán và số tiền đã trả
         String paymentMethod = dto.getPaymentMethod();
         BigDecimal paidAmount = dto.getPaidAmount() != null ? dto.getPaidAmount() : BigDecimal.ZERO;
@@ -89,33 +97,55 @@ public class InvoicesService {
         BigDecimal debtBalance = customer.getDebtBalance() != null ? customer.getDebtBalance() : BigDecimal.ZERO;
         // 6. Tính toán nợ mới dựa trên phương thức thanh toán
         BigDecimal newDebtBalance;
-        if ("productAndDebt".equals(paymentMethod)) {
-            // Thanh toán tiền hàng + nợ: Trả cả hóa đơn và nợ cũ
+        BigDecimal debtChange;
+        DebtRecords.DebtType debtType = null;
+        if ("onlyProduct".equals(paymentMethod)) {
+            // Chỉ thanh toán tiền hàng
+            if (paidAmount.compareTo(finalAmount) < 0) {
+                // Trả thiếu: Tôi nợ nhà cung cấp
+                newDebtBalance = debtBalance.add(finalAmount.subtract(paidAmount));
+                debtChange = finalAmount.subtract(paidAmount);
+                debtType = DebtRecords.DebtType.Shop_debt_customer;
+            } else if (paidAmount.compareTo(finalAmount) > 0) {
+                // Trả thừa: Nhà cung cấp nợ tôi
+                newDebtBalance = debtBalance.subtract(paidAmount.subtract(finalAmount));
+                debtChange = paidAmount.subtract(finalAmount);
+                debtType = DebtRecords.DebtType.Customer_debt_shop;
+            } else {
+                // Trả đủ: Không thay đổi nợ
+                newDebtBalance = debtBalance;
+                debtChange = BigDecimal.ZERO;
+            }
+        } else if ("productAndDebt".equals(paymentMethod)) {
+            // Thanh toán tiền hàng + nợ
+            // Trong phần xử lý "productAndDebt":
             BigDecimal totalDue = finalAmount.add(debtBalance);
             if (paidAmount.compareTo(totalDue) < 0) {
-                newDebtBalance = totalDue.subtract(paidAmount); // Còn nợ nếu trả chưa đủ
+                // Cửa hàng còn nợ khách (Shop_debt_customer)
+                newDebtBalance = totalDue.subtract(paidAmount);
+                debtChange = totalDue.subtract(paidAmount); // Số tiền tăng vào nợ
+                debtType = DebtRecords.DebtType.Shop_debt_customer;
+            } else if (paidAmount.compareTo(totalDue) > 0) {
+                // Khách nợ cửa hàng (Customer_debt_shop)
+                newDebtBalance = paidAmount.subtract(totalDue);
+                debtChange = paidAmount.subtract(totalDue); // Số tiền khách nợ cửa hàng
+                debtType = DebtRecords.DebtType.Customer_debt_shop;
             } else {
-                newDebtBalance = paidAmount.subtract(totalDue).negate(); // Trả thừa, nợ mới là số âm (số dư dương)
-            }
-        } else if ("onlyProduct".equals(paymentMethod)) {
-            // Chỉ tiền hàng: Chỉ trả cho hóa đơn, nợ cũ giữ nguyên
-            if (paidAmount.compareTo(finalAmount) < 0) {
-                newDebtBalance = debtBalance.add(finalAmount.subtract(paidAmount)); // Tăng nợ nếu trả thiếu
-            } else {
-                newDebtBalance = debtBalance.subtract(paidAmount.subtract(finalAmount)); // Trả thừa, giảm nợ (có thể âm)
+                // Trả đủ, xóa toàn bộ nợ (Shop_return_customer)
+                newDebtBalance = BigDecimal.ZERO;
+                debtChange = debtBalance; // Số tiền cửa hàng trả lại khách
+                debtType = DebtRecords.DebtType.Shop_return_customer;
             }
         } else {
             throw new RuntimeException("Phương thức thanh toán không hợp lệ");
         }
         // 7. Cập nhật nợ mới cho khách hàng
-        customer.setDebtBalance(newDebtBalance);
-        customerRepository.save(customer);
+
         // 4. Tạo hóa đơn
         Invoices invoice = new Invoices();
         invoice.setStore(storeFromDb);  // Lưu trữ cửa hàng đã xác thực
         invoice.setCustomer(customer);
         invoice.setTotalPrice(totalPrice);
-        invoice.setDiscount(discount);
         invoice.setFinalAmount(finalAmount);
         invoice.setNote(dto.getNote());
         invoice.setQuantity(invoice.getQuantity());
@@ -125,6 +155,20 @@ public class InvoicesService {
         invoice.setCreatedBy(currentUser);
 
         Invoices savedInvoice = invoiceRepository.save(invoice);
+        // Trong phần tạo DebtRecords:
+        if (debtType != null && debtChange.compareTo(BigDecimal.ZERO) != 0) {
+            DebtRecords debtRecord = new DebtRecords();
+            debtRecord.setCustomerId(customer.getId());
+            debtRecord.setCreateOn(LocalDateTime.now());
+            debtRecord.setUpdatedAt(LocalDateTime.now());
+            debtRecord.setCreatedBy(currentUser);
+            debtRecord.setType(debtType);
+            debtRecord.setAmount(debtChange.abs()); // Luôn lấy giá trị dương
+            debtRecord.setNote("Giao dịch từ hóa đơn nhập hàng #" + savedInvoice.getId());
+            debtRecordService.addDebt(debtRecord);
+            debtRecordService.updateDebtBalances(customer, currentUser);
+        }
+
 
         // 5. Tạo chi tiết hóa đơn và cập nhật kho (zone)
         updateInventory(dto.getDetails(), savedInvoice, currentUser);

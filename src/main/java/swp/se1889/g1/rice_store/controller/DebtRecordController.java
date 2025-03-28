@@ -22,8 +22,11 @@ import swp.se1889.g1.rice_store.service.DebtRecordService;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Controller
 @RequestMapping("/debt")
@@ -55,7 +58,10 @@ public class DebtRecordController {
 
     // Xử lý submit form thêm phiếu nợ
     @PostMapping("/add")
-    public String addDebtRecord(@ModelAttribute("debtRecord") DebtRecords debtRecord , Model model , HttpSession session , RedirectAttributes redirectAttributes) {
+    public String addDebtRecord(@ModelAttribute("debtRecord") DebtRecords debtRecord , Model model , HttpSession session , RedirectAttributes redirectAttributes,
+                                @RequestParam("createOn") String createOnStr) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", new Locale("vi", "VN"));
+        LocalDateTime createOn = LocalDateTime.parse(createOnStr, formatter);
           if(debtRecord.getAmount() == null || debtRecord.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
               redirectAttributes.addFlashAttribute("error", "Số tiền nợ phải lớn hơn 0");
               model.addAttribute("customer", customerService.getCustomerById(debtRecord.getCustomerId()));
@@ -63,6 +69,7 @@ public class DebtRecordController {
           }
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
+        debtRecord.setCreateOn(createOn);
        DebtRecords debtRecords =  debtRecordService.addDebt(debtRecord);
        if(debtRecords != null){
          redirectAttributes.addFlashAttribute("success", "Thêm phiếu nợ thành công");
@@ -86,6 +93,8 @@ public class DebtRecordController {
             @RequestParam(required = false) String amountMax,
             @RequestParam(required = false) String dateMin,
             @RequestParam(required = false) String dateMax,
+            @RequestParam(required = false) String dateMin2,
+            @RequestParam(required = false) String dateMax2,
             Model model,
             HttpSession session) {
         // Parse filter parameters
@@ -95,11 +104,14 @@ public class DebtRecordController {
         BigDecimal parsedAmountMax = parseBigDecimal(amountMax);
         Date parsedDateMin = parseDate(dateMin);
         Date parsedDateMax = parseDate(dateMax);
+        Date parsedDateMin2 = parseDate(dateMin2);
+        Date parsedDateMax2 = parseDate(dateMax2);
+
 
         // Fetch filtered debt records
         Pageable pageable = PageRequest.of(page, size);
         Page<DebtRecords> debtRecords = debtRecordService.getFilteredDebtRecords(
-                customerId, pageable, parsedIdMin, parsedIdMax, note, type, parsedAmountMin, parsedAmountMax, parsedDateMin, parsedDateMax);
+                customerId, pageable, parsedIdMin, parsedIdMax, note, type, parsedAmountMin, parsedAmountMax, parsedDateMin, parsedDateMax , parsedDateMin2,parsedDateMax2);
 
         // Add attributes to model
         CustomerDTO customer = customerService.getCustomerById(customerId);
@@ -128,6 +140,9 @@ public class DebtRecordController {
         model.addAttribute("amountMax", amountMax);
         model.addAttribute("dateMin", dateMin);
         model.addAttribute("dateMax", dateMax);
+        model.addAttribute("dateMin2", dateMin2);
+        model.addAttribute("dateMax2", dateMax2);
+
 
         return "debtDetail";
     }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import swp.se1889.g1.rice_store.entity.Customer;
 import swp.se1889.g1.rice_store.entity.DebtRecords;
 import swp.se1889.g1.rice_store.entity.User;
@@ -17,10 +18,7 @@ import swp.se1889.g1.rice_store.specification.DebtRecordsSpecifications;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.PriorityQueue;
+import java.util.*;
 
 @Service
 public class    DebtRecordService {
@@ -51,6 +49,8 @@ public class    DebtRecordService {
         //   DebtRecords newDebtRecord = new DebtRecords();
         debtRecord.setNote(debtRecord.getNote());
         debtRecord.setCreatedBy(currentUser);
+        debtRecord.setType(debtRecord.getType());
+        debtRecord.setCreateOn(debtRecord.getCreateOn());
         debtRecord.setCreatedAt(LocalDateTime.now());
         debtRecord.setUpdatedAt(LocalDateTime.now());
         debtRecordRepository.save(debtRecord);
@@ -65,7 +65,7 @@ public class    DebtRecordService {
     }
     public Page<DebtRecords> getFilteredDebtRecords(Long customerId, Pageable pageable, Long idMin, Long idMax,
                                                     String note, String type, BigDecimal amountMin, BigDecimal amountMax,
-                                                    Date dateMin, Date dateMax) {
+                                                    Date dateMin, Date dateMax , Date dateMin2 , Date dateMax2) {
         Specification<DebtRecords> spec = Specification.where(DebtRecordsSpecifications.hasCustomerId(customerId));
         if (idMin != null) {
             spec = spec.and(DebtRecordsSpecifications.idGreaterThanOrEqual(idMin));
@@ -91,6 +91,12 @@ public class    DebtRecordService {
         if (dateMax != null) {
             spec = spec.and(DebtRecordsSpecifications.createdAtBefore(dateMax));
         }
+        if (dateMin2 != null) {
+            spec = spec.and(DebtRecordsSpecifications.hasCreateOn(dateMin2));
+        }
+        if (dateMax2 != null) {
+            spec = spec.and(DebtRecordsSpecifications.hasCreateOn2(dateMax2));
+        }
         return debtRecordRepository.findAll(spec, pageable);
     }
 
@@ -101,26 +107,36 @@ public class    DebtRecordService {
      public Page<DebtRecords> getCustomerPage(Long customerId , Pageable pageable){
         return debtRecordRepository.findByCustomerId(customerId , pageable);
  }
-    private void updateDebtBalances(Customer customer, User currentUser ) {
+ @Transactional
+    public void updateDebtBalances(Customer customer, User currentUser ) {
         // Lấy tất cả các bản ghi nợ của khách hàng, không nhất thiết đã được sắp xếp
         List<DebtRecords> debtRecords = debtRecordRepository.findByCustomerId(customer.getId() );
 
         // Sử dụng PriorityQueue để sắp xếp các bản ghi theo thời gian tạo (createdAt)
         PriorityQueue<DebtRecords> queue = new PriorityQueue<>(
-                (a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt())
+                Comparator.comparing(DebtRecords::getCreatedAt)
+                        .thenComparing(DebtRecords::getId) // Xử lý trùng thời gian
         );
         queue.addAll(debtRecords);
 
-        // Khởi tạo số dư nợ với BigDecimal để tránh sai số làm tròn
         BigDecimal debtBalance = BigDecimal.ZERO;
 
-        // Duyệt qua các bản ghi theo thứ tự thời gian từ sớm nhất đến muộn nhất
+        // Xử lý từng bản ghi theo thứ tự
         while (!queue.isEmpty()) {
             DebtRecords record = queue.poll();
-            if (record.getType() == DebtRecords.DebtType.GHI_NO) {
-                debtBalance = debtBalance.add(record.getAmount());
-            } else if (record.getType() == DebtRecords.DebtType.TRA_NO) {
-                debtBalance = debtBalance.subtract(record.getAmount());
+            switch (record.getType()) {
+                case Shop_debt_customer:
+                    debtBalance = debtBalance.add(record.getAmount());
+                    break;
+                case Customer_debt_shop:
+                    debtBalance = debtBalance.subtract(record.getAmount());
+                    break;
+                case Shop_return_customer:
+                    debtBalance = debtBalance.subtract(record.getAmount());
+                    break;
+                case Customer_return_shop:
+                    debtBalance = debtBalance.add(record.getAmount());
+                    break;
             }
         }
 
