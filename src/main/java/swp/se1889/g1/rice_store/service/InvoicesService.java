@@ -114,13 +114,13 @@ public class InvoicesService {
         Invoices invoice = new Invoices();
         invoice.setStore(storeFromDb);  // Lưu trữ cửa hàng đã xác thực
         invoice.setCustomer(customer);
-        invoice.setTotalPrice(paidAmount);
+        invoice.setTotalPrice(totalPrice);
         invoice.setDiscount(discount);
         invoice.setFinalAmount(finalAmount);
         invoice.setNote(dto.getNote());
         invoice.setQuantity(invoice.getQuantity());
         invoice.setType(Invoices.InvoiceType.Purchase);
-        invoice.setStatus("Unpaid");
+        invoice.setStatus("Paid");
         invoice.setIsDeleted(false);
         invoice.setCreatedBy(currentUser);
 

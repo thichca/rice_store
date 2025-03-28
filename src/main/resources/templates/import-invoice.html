@@ -318,8 +318,8 @@
             total += totalPrice;
         });
         $('[name="totalPrice"]').val(total.toFixed(2));
-        // Kích hoạt sự kiện change của paymentMethod để cập nhật lại
-        $('#paymentMethod').trigger('change');
+        // // Kích hoạt sự kiện change của paymentMethod để cập nhật lại
+        // $('#paymentMethod').trigger('change');
         calculateRemaining();
     }
 
@@ -345,13 +345,13 @@
         }
         $('[name="remainingAmount"]').val(remaining.toFixed(2));
     }
-    function updateTotal() {
-        const paidAmount = parseFloat($('[name="paidAmount"]').val()) || 0;
-        $('[name="totalPrice"]').val(paidAmount.toFixed(2)); // Tổng tiền bằng thanh toán
-    }
-
-    // Gọi hàm khi người dùng nhập thanh toán
-    $('[name="paidAmount"]').on('input', updateTotal);
+    // function updateTotal() {
+    //     const paidAmount = parseFloat($('[name="paidAmount"]').val()) || 0;
+    //     $('[name="totalPrice"]').val(paidAmount.toFixed(2)); // Tổng tiền bằng thanh toán
+    // }
+    //
+    // // Gọi hàm khi người dùng nhập thanh toán
+    // $('[name="paidAmount"]').on('input', updateTotal);
 </script>
 
 <div th:replace="~{fragments/script :: script}"></div>
