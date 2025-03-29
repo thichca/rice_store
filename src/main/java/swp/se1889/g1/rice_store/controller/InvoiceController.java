@@ -207,6 +207,10 @@ public class InvoiceController {
             redirectAttributes.addFlashAttribute("error", errorMessage);
             return "redirect:/owner/invoices/import"; // Quay lại trang nhập hóa đơn
         }
+        if (invoiceDTO.getPaidAmount().compareTo(invoiceDTO.getTotalPrice()) > 0 ) {
+            redirectAttributes.addFlashAttribute("error", "Số tiền thanh toán không được vượt quá tổng tiền!");
+            return "redirect:/owner/invoices/import";
+        }
         // Xử lý logic lưu vào database thông qua service
         Invoices invoices = invoiceService.createImportInvoice(invoiceDTO, store);
         if (invoices != null) {

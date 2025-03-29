@@ -16,7 +16,7 @@ public class InvoicesDTO {
     private String customerAddress;
     private String customerBalance;
     private String paymentMethod;
-    private double totalPrice;
+    private BigDecimal  totalPrice;
     @PositiveOrZero(message = "Thanh toán không được âm")
     private BigDecimal paidAmount;
     private double remainingAmount;
@@ -91,11 +91,11 @@ public class InvoicesDTO {
         this.paymentMethod = paymentMethod;
     }
 
-    public double getTotalPrice() {
+    public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(double totalPrice) {
+    public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
     }
 
