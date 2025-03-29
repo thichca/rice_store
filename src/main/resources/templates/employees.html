@@ -35,21 +35,27 @@
     </style>
 </head>
 <body class="bg-gray-100">
-
-
 <div class="top-0 left-0 w-full">
     <div th:replace="~{fragments/header :: header}"></div>
 
     <div class="w-[90%] mx-auto bg-white p-6 rounded-lg shadow-md mt-12">
 
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-between items-center">
             <h1 class="text-2xl font-semibold">Danh sách nhân viên</h1>
-            <a href="/owner/employees/addEmployee">
-                <button name="addEmployee" id="showFormButton"
-                        class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-                    <i class="fas fa-plus mr-2"></i> Thêm Nhân viên
-                </button>
-            </a>
+ <div class="flex">
+     <a href="/owner/employees/addEmployee" >
+         <button name="addEmployee" id="showFormButton"
+                 class="bg-blue-500 text-white px-4 py-2 rounded flex items-center m-2">
+             <i class="fas fa-plus mr-2"></i> Thêm Nhân viên
+         </button>
+     </a>
+     <a href="/shifts/schedule">
+         <button name="addEmployee"
+                 class="bg-blue-500 text-white px-4 py-2 rounded flex items-center m-2">Lịch làm nhân viên
+         </button>
+     </a>
+ </div>
+
         </div>
         <div class="flex justify-between items-center mb-4">
 
@@ -184,91 +190,92 @@
                     </button>
                 </div>
             </form>
-        </div>        <div class="overflow-x-auto">
-        <table class="table-auto border-collapse border w-full">
-            <thead>
-            <tr class="bg-gray-100">
-                <th class="border p-2 relative" style="width: 105px;">Id
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative">Tên
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative">Địa chỉ
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative">SĐT
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative">Email
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative" style="width: 105px;">Ngày tạo
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative" style="width: 105px;">Cập nhật
-                    <div class="resizer"></div>
-                </th>
-                <th class="border p-2 relative" style="width: 105px;">Hành động
-                    <div class="resizer"></div>
-                </th>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="table-auto border-collapse border w-full">
+                <thead>
+                <tr class="bg-gray-100">
+                    <th class="border p-2 relative" style="width: 105px;">Id
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Tên
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Địa chỉ
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">SĐT
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative">Email
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative" style="width: 105px;">Ngày tạo
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative" style="width: 105px;">Cập nhật
+                        <div class="resizer"></div>
+                    </th>
+                    <th class="border p-2 relative" style="width: 105px;">Hành động
+                        <div class="resizer"></div>
+                    </th>
 
-            </tr>
+                </tr>
 
-            </thead>
+                </thead>
 
-            <tbody id="tableBody">
-            <tr th:each="employee : ${employees}">
-                <td class="border p-2" th:text="${employee.getId()}"></td>
-                <td class="border p-2" th:text="${employee.getName()}"></td>
-                <td class="border p-2" th:text="${employee.getAddress()}"></td>
-                <td class="border p-2" th:text="${employee.getPhone()}"></td>
-                <td class="border p-2" th:text="${employee.getEmail()}"></td>
-                <td class="border p-2"
-                    th:text="${#temporals.format(employee.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                <td class="border p-2"
-                    th:text="${#temporals.format(employee.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                <td class="border p-2">
-                    <div class="flex gap-2 w-full">
-                        <form th:if="${!employee.isDeleted()}" class="w-1/2 "
-                              th:action="@{/owner/employees/{id}(id=${employee.getId()})}" method="get"
-                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
-                            <button type="submit"
+                <tbody id="tableBody">
+                <tr th:each="employee : ${employees}">
+                    <td class="border p-2" th:text="${employee.getId()}"></td>
+                    <td class="border p-2" th:text="${employee.getName()}"></td>
+                    <td class="border p-2" th:text="${employee.getAddress()}"></td>
+                    <td class="border p-2" th:text="${employee.getPhone()}"></td>
+                    <td class="border p-2" th:text="${employee.getEmail()}"></td>
+                    <td class="border p-2"
+                        th:text="${#temporals.format(employee.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                    <td class="border p-2"
+                        th:text="${#temporals.format(employee.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                    <td class="border p-2">
+                        <div class="flex gap-2 w-full">
+                            <form th:if="${!employee.isDeleted()}" class="w-1/2 "
+                                  th:action="@{/owner/employees/{id}(id=${employee.getId()})}" method="get"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
+                                <button type="submit"
 
-                                    class="w-full bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center
+                                        class="w-full bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center
                                 toggle-btn button-xoa space-x-2
                                 hover:bg-red-600 transition duration-200"
-                                    data-full='<i class="fas fa-trash-alt"></i> Xóa'
-                                    data-icon='<i class="fas fa-trash-alt"></i>'>
-                                <i class="fas fa-trash-alt"></i>
-                                <span>Xóa</span>
-                            </button>
-                        </form>
+                                        data-full='<i class="fas fa-trash-alt"></i> Xóa'
+                                        data-icon='<i class="fas fa-trash-alt"></i>'>
+                                    <i class="fas fa-trash-alt"></i>
+                                    <span>Xóa</span>
+                                </button>
+                            </form>
 
-                        <form th:action="@{/owner/employees/{id}(id=${employee.getId()})}" method="get"
-                              th:unless="${!employee.isDeleted()}" class="w-1/2"
-                              onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục?');">
-                            <button
-                                    type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center toggle-btn button-khoi-phuc space-x-2
+                            <form th:action="@{/owner/employees/{id}(id=${employee.getId()})}" method="get"
+                                  th:unless="${!employee.isDeleted()}" class="w-1/2"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục?');">
+                                <button
+                                        type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center toggle-btn button-khoi-phuc space-x-2
                                             hover:bg-green-600 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-undo mr-1"></i> Khôi Phục'
-                                    data-icon='<i class="fas fa-undo mr-1-alt"></i>'>
-                                <i class="fas fa-undo mr-1"></i> <span>Khôi Phục</span>
-                            </button>
-                        </form>
-                        <button
-                                class="showFormButton1 w-1/2 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                        data-full='<i class="fas fa-undo mr-1"></i> Khôi Phục'
+                                        data-icon='<i class="fas fa-undo mr-1-alt"></i>'>
+                                    <i class="fas fa-undo mr-1"></i> <span>Khôi Phục</span>
+                                </button>
+                            </form>
+                            <button
+                                    class="showFormButton1 w-1/2 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-yellow-500 hover:text-white transition duration-200"
-                                data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
-                                data-icon='<i class="fas fa-pencil-alt"></i>'>
-                            <i class="fas fa-pencil-alt mr-1"></i> Sửa
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                                    data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
+                                    data-icon='<i class="fas fa-pencil-alt"></i>'>
+                                <i class="fas fa-pencil-alt mr-1"></i> Sửa
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 
@@ -309,7 +316,7 @@
 
 
 </div>
-</div>
+
 <script th:src="@{/assets/js/resizeTable.js}"></script>
 <script th:src="@{/assets/js/collapse.js}"></script>
 <script th:src="@{/assets/js/currentPage.js}"></script>
@@ -320,7 +327,6 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<!--<div th:replace="~{fragments/script :: script}"></div>-->
 
 <script>
     var overlay1 = document.getElementById("overlay1");

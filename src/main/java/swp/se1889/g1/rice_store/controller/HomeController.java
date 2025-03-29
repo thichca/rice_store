@@ -14,6 +14,7 @@ import swp.se1889.g1.rice_store.service.*;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class HomeController {
@@ -24,15 +25,7 @@ public class HomeController {
     @Autowired
     private UserServiceIpml userService;
     @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private CustomerService customerService;
-
-    @Autowired
     private InvoicesService invoiceService;
-    @Autowired
-    private InvoiceDetailService invoiceDetailService;
 
     @PostMapping("/home")
     public String storeSelection(@RequestParam("storeName") String name,
@@ -43,56 +36,53 @@ public class HomeController {
         session.setAttribute("store", store);
         model.addAttribute("store", store);
         User user = userService.getCurrentUser();
-        long totalProducts = productService.countProductsByCurrentUser();
-        long totalCustomers = customerService.countCustomersByCurrentUser();
-        long totalInvoices = invoiceService.countInvoicesByUserAndStore(store.getId());
-        BigDecimal totalRevenue = invoiceService.getTotalSaleRevenueByUserAndStore(store.getId());
-
         model.addAttribute("user", user);
-        model.addAttribute("totalProducts", totalProducts);
-        model.addAttribute("totalCustomers", totalCustomers);
-        model.addAttribute("totalInvoices", totalInvoices);
-        model.addAttribute("totalRevenue", totalRevenue);
-        List<BigDecimal> monthlyRevenue = invoiceService.getRevenueByMonth(store != null ? store.getId() : null);
-        List<String> monthLabels = Arrays.asList("Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6");
+        Long storeId = store.getId();
+        // --- A. Tổng hóa đơn hôm nay ---
+        model.addAttribute("todayInvoiceCount", invoiceService.getTodayInvoiceCount(storeId));
 
-        model.addAttribute("monthlyRevenue", monthlyRevenue);
-        model.addAttribute("monthLabels", monthLabels);
-        List<Object[]> topCustomers = invoiceService.getTop5CustomersBySpending();
-        List<Object[]> topProducts = invoiceDetailService.getTop5ProductsSold();
+        // --- B. Tổng doanh thu hôm nay ---
+        model.addAttribute("todayRevenue", invoiceService.getTodayRevenue(storeId));
 
-        model.addAttribute("topCustomers", topCustomers);
-        model.addAttribute("topProducts", topProducts);
+        // --- C. Doanh thu theo thứ ---
+        Map<String, BigDecimal> revenueByWeekday = invoiceService.getWeeklyRevenue(storeId);
+        model.addAttribute("revenueWeekdayLabels", revenueByWeekday.keySet());
+        model.addAttribute("revenueWeekdayValues", revenueByWeekday.values());
+
+        // --- D. Doanh thu theo tháng ---
+        Map<String, BigDecimal> revenueByMonth = invoiceService.getMonthlyRevenue(storeId);
+        model.addAttribute("revenueMonthLabels", revenueByMonth.keySet());
+        model.addAttribute("revenueMonthValues", revenueByMonth.values());
+
+
+
 
         return "home";
     }
+
 
     @GetMapping("/home")
     public String getHome(HttpSession session, Model model) {
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
-
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
+        Long storeId = store.getId();
+        // --- A. Tổng hóa đơn hôm nay ---
+        model.addAttribute("todayInvoiceCount", invoiceService.getTodayInvoiceCount(storeId));
 
-        long totalProducts = productService.countProductsByCurrentUser();
-        long totalCustomers = customerService.countCustomersByCurrentUser();
-        long totalInvoices = (store != null) ? invoiceService.countInvoicesByUserAndStore(store.getId()) : invoiceService.countInvoicesByCurrentUser();
-        BigDecimal totalRevenue = (store != null)
-                ? invoiceService.getTotalSaleRevenueByUserAndStore(store.getId())
-                : invoiceService.getTotalSaleRevenueByCurrentUser();
+        // --- B. Tổng doanh thu hôm nay ---
+        model.addAttribute("todayRevenue", invoiceService.getTodayRevenue(storeId));
 
-        model.addAttribute("totalProducts", totalProducts);
-        model.addAttribute("totalCustomers", totalCustomers);
-        model.addAttribute("totalInvoices", totalInvoices);
-        model.addAttribute("totalRevenue", totalRevenue);
+        // --- C. Doanh thu theo thứ ---
+        Map<String, BigDecimal> revenueByWeekday = invoiceService.getWeeklyRevenue(storeId);
+        model.addAttribute("revenueWeekdayLabels", revenueByWeekday.keySet());
+        model.addAttribute("revenueWeekdayValues", revenueByWeekday.values());
 
-        // Lấy dữ liệu doanh thu theo tháng
-        List<BigDecimal> monthlyRevenue = invoiceService.getRevenueByMonth(store != null ? store.getId() : null);
-        List<String> monthLabels = Arrays.asList("Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6");
-
-        model.addAttribute("monthlyRevenue", monthlyRevenue);
-        model.addAttribute("monthLabels", monthLabels);
+        // --- D. Doanh thu theo tháng ---
+        Map<String, BigDecimal> revenueByMonth = invoiceService.getMonthlyRevenue(storeId);
+        model.addAttribute("revenueMonthLabels", revenueByMonth.keySet());
+        model.addAttribute("revenueMonthValues", revenueByMonth.values());
 
         return "home";
     }

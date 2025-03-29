@@ -1,5 +1,7 @@
 package swp.se1889.g1.rice_store.specification;
 import org.springframework.data.jpa.domain.Specification;
+import swp.se1889.g1.rice_store.entity.Invoices;
+import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.Zone;
 
 import java.time.LocalDateTime;
@@ -29,5 +31,8 @@ public class ZoneSpecifications {
     }
     public static Specification<Zone> updatedAtAfter(Date dateMin1){
         return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("updatedAt"), dateMin1);
+    }
+    public static Specification<Zone> hasStores(Store store) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("store"), store);
     }
 }

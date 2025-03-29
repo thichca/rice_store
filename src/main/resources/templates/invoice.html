@@ -57,6 +57,12 @@
                         <div class="resizer"></div>
                     </th>
 
+                    <th class="border p-2 hidden"></th>
+                    <th class="border p-2 hidden"></th>
+                    <th class="border p-2 hidden"></th>
+                    <th class="border p-2 hidden"></th>
+                    <th class="border p-2 hidden"></th>
+
                     <th class="border p-2 relative w-[340px]">Hành động
                         <div class="resizer"></div>
                     </th>
@@ -132,13 +138,19 @@
                 <tr th:each="invoice : ${invoices}">
                     <td class="border p-2" th:text="${invoice.id}"></td>
                     <td class="border p-2"  th:text="${invoice.note}"></td>
-                    <td class="border p-2" th:text="${invoice.status}"></td>
-                    <td class="border p-2" th:text="${invoice.totalPrice}"></td>
+                    <td class="border p-2">
+                        <span th:if="${invoice.status == 'Unpaid'}">Chưa thanh toán</span>
+                        <span th:if="${invoice.status == 'Paid'}">Đã thanh toán</span>
+                    </td>
+                    <td class="border p-2"  th:text="${#numbers.formatDecimal(invoice.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+
+                    </td>
+
                     <td class="border p-2" th:text="${#temporals.format(invoice.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                     <td class="border p-2" th:text="${#temporals.format(invoice.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                     <td class="border p-2">
                         <div class="flex gap-2 w-full">
-                            <button class="w-1/2 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
+                            <button class="w-1/1 bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center toggle-btn
                                     hover:bg-blue-700 hover:text-white transition duration-200"
                                     data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
                                     data-icon='<i class="fas fa-info"></i>'
@@ -146,13 +158,7 @@
 
                                 <i class="fas fa-info mr-1"></i> Chi tiết
                             </button>
-                            <button class="w-1/2 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
-                                    hover:bg-yellow-500 hover:text-white transition duration-200"
-                                    data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
-                                    data-icon='<i class="fas fa-pencil-alt"></i>'
-                                    th:onclick="|window.location.href='@{/owner/invoices/edit/{id}(id=${invoice.id})}'|" >
-                                <i class="fas fa-pencil-alt mr-1"></i> Sửa
-                            </button>
+
 <!--                            <button class="w-1/2 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn-->
 <!--                                    hover:bg-red-500 hover:text-white transition duration-200"-->
 <!--                                    data-full='<i class="fas fa-trash-alt mr-1"></i> Xoá'-->
@@ -182,9 +188,9 @@
 
             <select id="recordsPerPage" class="border rounded px-4 py-2"
                     th:onchange="'window.location.href=\'/owner/invoices?page=0&size=\' + this.value'">
-                <option value="10" th:selected="${recordsPerPage == 10}">10 Bản Ghi</option>
-                <option value="20" th:selected="${recordsPerPage == 20}">20 Bản Ghi</option>
-                <option value="50" th:selected="${recordsPerPage == 50}">50 Bản Ghi</option>
+                <option value="10" th:selected="${recordsPerPage == 5}">5 Bản Ghi</option>
+                <option value="20" th:selected="${recordsPerPage == 10}">10 Bản Ghi</option>
+                <option value="50" th:selected="${recordsPerPage == 20}">20 Bản Ghi</option>
             </select>
 
             <button id="nextPage" th:disabled="${currentPage + 1 >= totalPages}"

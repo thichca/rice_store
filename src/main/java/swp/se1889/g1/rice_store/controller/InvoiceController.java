@@ -1,22 +1,23 @@
 package swp.se1889.g1.rice_store.controller;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1889.g1.rice_store.dto.*;
 import swp.se1889.g1.rice_store.entity.*;
 import swp.se1889.g1.rice_store.repository.*;
-import swp.se1889.g1.rice_store.service.InvoicesService;
+import swp.se1889.g1.rice_store.service.*;
 import swp.se1889.g1.rice_store.service.Iservice.UserService;
-import swp.se1889.g1.rice_store.service.ProductService;
-import swp.se1889.g1.rice_store.service.UserServiceIpml;
-import swp.se1889.g1.rice_store.service.ZoneService;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -37,11 +38,14 @@ public class InvoiceController {
     private final InvoiceDetailRepository invoiceDetailRepository;
     private final UserServiceIpml userService;
     private final InvoicesRepository invoicesRepository;
+    private final CustomerService customerService;
+
 
 
     @Autowired
     public InvoiceController(ProductRepository productRepository, CustomerRepository customerRepository, InvoicesService invoiceService, ZoneRepository zoneRepository, InvoiceDetailRepository invoiceDetailRepository
-            , UserServiceIpml userService, InvoicesRepository invoicesRepository, ProductService productService, ZoneService zoneService) {
+            , UserServiceIpml userService, InvoicesRepository invoicesRepository,
+                             ProductService productService, ZoneService zoneService , CustomerService customerService) {
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.invoiceService = invoiceService;
@@ -51,12 +55,13 @@ public class InvoiceController {
         this.invoicesRepository = invoicesRepository;
         this.productService = productService;
         this.zoneService = zoneService;
+        this.customerService = customerService;
     }
 
     @GetMapping
     public String listInvoices(Model model, HttpSession session,
                                @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "10") int size,
+                               @RequestParam(defaultValue = "5") int size,
                                @RequestParam(required = false) String idMin,
                                @RequestParam(required = false) String idMax,
                                @RequestParam(required = false) String note,
@@ -67,7 +72,7 @@ public class InvoiceController {
                                @RequestParam(required = false) String dateMax,
                                @RequestParam(required = false) String dateMin1,
                                @RequestParam(required = false) String dateMax1,
-                               @RequestParam(required = false) String type) {
+                               @RequestParam(required = false) String type ) {
         Store store = (Store) session.getAttribute("store");
         User user = userService.getCurrentUser();
         model.addAttribute("user", user);
@@ -109,6 +114,7 @@ public class InvoiceController {
         model.addAttribute("dateMin1", dateMin1);
         model.addAttribute("dateMax1", dateMax1);
         model.addAttribute("type", type);
+
         return "invoice";
     }
 
@@ -146,8 +152,9 @@ public class InvoiceController {
         return null;
     }
 
+
     @GetMapping("/import")
-    public String showImportForm(Model model, HttpSession session, String name) {
+    public String showImportForm(Model model, HttpSession session, String name ) {
         model.addAttribute("invoice", new InvoicesDTO());
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
@@ -156,6 +163,7 @@ public class InvoiceController {
         model.addAttribute("customer", new Customer());
         model.addAttribute("product", new Product());
         model.addAttribute("zone", new Zone());
+        model.addAttribute("newCustomer" , new CustomerDTO());
         return "import-invoice";
     }
 
@@ -182,18 +190,27 @@ public class InvoiceController {
     public Customer searchCustomer(@RequestParam String phone) {
         return customerRepository.findCustomerByPhone(phone);
     }
-
     @PostMapping("/import")
-    public String saveInvoice(@ModelAttribute InvoicesDTO invoiceDTO,
-                              Authentication authentication, HttpSession session, Model model) {
+    public String saveInvoice(@Valid @ModelAttribute InvoicesDTO invoiceDTO,
+                              BindingResult bindingResult,
+                              Authentication authentication, HttpSession session, Model model, RedirectAttributes redirectAttributes ) {
         String username = authentication.getName(); // Lấy tên người dùng đã đăng nhập
         Store store = (Store) session.getAttribute("store");
         model.addAttribute("store", store);
-
+        // Kiểm tra lỗi validation
+        if (bindingResult.hasErrors()) {
+            // Thu thập tất cả thông báo lỗi từ BindingResult và nối thành một chuỗi
+            String errorMessage = bindingResult.getFieldErrors().stream()
+                    .map(error -> error.getDefaultMessage())
+                    .collect(Collectors.joining(", "));
+            // Gửi chuỗi lỗi về trang nhập hóa đơn qua flash attribute
+            redirectAttributes.addFlashAttribute("error", errorMessage);
+            return "redirect:/owner/invoices/import"; // Quay lại trang nhập hóa đơn
+        }
         // Xử lý logic lưu vào database thông qua service
         Invoices invoices = invoiceService.createImportInvoice(invoiceDTO, store);
         if (invoices != null) {
-            model.addAttribute("success", "Lưu thành công");
+          redirectAttributes.addFlashAttribute("success", "Lưu thành công");
         }
         return "redirect:/owner/invoices";
     }
@@ -219,7 +236,7 @@ public class InvoiceController {
         List<String> productNameList = new ArrayList<>();
         List<String> zoneNameList = new ArrayList<>();
         for (InvoicesDetails iD : invoicesDetails) {
-            Product product = productService.findProductById(iD.getId());
+            Product product = productService.findProductById(iD.getProduct().getId());
             Zone zone = zoneService.getZoneById(iD.getZone().getId());
 
             productNameList.add(product.getName());
@@ -266,6 +283,25 @@ public class InvoiceController {
         }
         return "redirect:/owner/invoices";
     }
+    // Endpoint thêm khách hàng (sử dụng cho modal trong trang import)
+    @PostMapping("/import/add")
+    @ResponseBody
+    public ResponseEntity<?> addCustomer(@Valid @ModelAttribute("newCustomer") CustomerDTO customerDTO,
+                                         BindingResult result) {
+        if (result.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        try {
+            customerService.createCustomer(customerDTO);
+            return ResponseEntity.ok().body(Collections.singletonMap("message", "Thêm khách hàng thành công!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("errorMessage", e.getMessage()));
+        }
+    }
+
 }
 
 

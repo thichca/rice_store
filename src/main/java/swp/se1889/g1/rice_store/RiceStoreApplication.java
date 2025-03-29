@@ -9,5 +9,6 @@ public class RiceStoreApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(RiceStoreApplication.class, args);
 	}
+	//hihi
 
 }

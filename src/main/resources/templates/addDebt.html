@@ -6,6 +6,8 @@
     <title>Thêm Nợ</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body class="bg-gray-100 p-6">
 <div th:replace="~{fragments/header :: header}"></div><br><br>
@@ -39,15 +41,20 @@
         <div class="mb-4">
             <label for="type" class="block text-sm font-medium text-gray-700">Loại Công Nợ:</label>
             <select name="type" id="type" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-                <option value="GHI_NO">Ghi nợ</option>
-                <option value="TRA_NO">Trả nợ</option>
+                <option value="Customer_debt_shop">Khách hàng nợ cửa hàng</option>
+                <option value="Customer_return_shop">Khách hàng trả cửa hàng</option>
+                <option value="Shop_debt_customer">Cửa hàng nợ khách hàng</option>
+                <option value="Shop_return_customer">Cửa hàng trả khách hàng</option>
             </select>
+        </div>
+        <div class="mb-4">
+            <label for="createOn" class="block text-sm font-medium text-gray-700">Ngày lập phiếu:</label>
+            <input type="text" id="createOn" name="createOn" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
         </div>
         <div class="mb-4">
             <label for="note" class="block text-sm font-medium text-gray-700">Mô tả:</label>
             <textarea id="note" name="note" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
         </div>
-
         <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600">Thêm Nợ</button><br><br>
         <button type="button" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600" th:onclick="|window.location.href='@{/debt/detail(customerId=${customer.id})}'|">Hủy</button>
     </form>
@@ -78,6 +85,23 @@
         // Nếu có lỗi thì ngăn form submit
         return errorText.classList.contains("hidden");
     }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr("#createOn", {
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            locale: "vn",  // Sử dụng locale Tiếng Việt
+            dateFormat: "d/m/Y H:i:S",  // Định dạng hiển thị dd/MM/yyyy HH:mm:ss
+            defaultDate: new Date()
+        });
+    });
+
+
+
+</script>
+
 </script>
 
 </body>

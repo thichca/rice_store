@@ -5,6 +5,7 @@ import swp.se1889.g1.rice_store.entity.Customer;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class CustomerSpecifications {
 
@@ -46,5 +47,9 @@ public class CustomerSpecifications {
 
     public static Specification<Customer> updatedAtBetween(LocalDateTime from, LocalDateTime to) {
         return (root, query, cb) -> cb.between(root.get("updatedAt"), from, to);
+    }
+
+    public static Specification<Customer> createdByIn(List<Long> ids) {
+        return (root, query, cb) -> root.get("createdBy").get("id").in(ids);
     }
 }

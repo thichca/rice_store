@@ -12,117 +12,86 @@
 <!-- Header -->
 <div th:replace="~{fragments/header :: header}"></div>
 
-<!-- Tổng quan -->
+<!-- Kết quả bán hàng hôm nay -->
 <div class="container mx-auto mt-6">
-    <h1 class="text-3xl font-bold mb-4">📊 Tổng quan cửa hàng</h1>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Card -->
-        <div class="bg-white shadow rounded-lg p-5 flex items-center space-x-4 border-l-4 border-blue-500">
-            <i class="fas fa-box fa-2x text-blue-500"></i>
-            <div>
-                <p class="text-gray-500">Sản phẩm</p>
-                <h3 class="text-2xl font-bold" th:text="${totalProducts}">0</h3>
-            </div>
+    <h1 class="text-2xl font-bold mb-4">Kết quả bán hàng hôm nay</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white shadow p-4 rounded border-l-4 border-blue-500">
+            <p class="text-sm text-gray-500">Hóa đơn hôm nay</p>
+            <h2 class="text-2xl font-bold text-blue-600" th:text="${todayInvoiceCount}">0</h2>
         </div>
-
-        <div class="bg-white shadow rounded-lg p-5 flex items-center space-x-4 border-l-4 border-green-500">
-            <i class="fas fa-users fa-2x text-green-500"></i>
-            <div>
-                <p class="text-gray-500">Khách hàng</p>
-                <h3 class="text-2xl font-bold" th:text="${totalCustomers}">0</h3>
-            </div>
-        </div>
-
-        <div class="bg-white shadow rounded-lg p-5 flex items-center space-x-4 border-l-4 border-yellow-500">
-            <i class="fas fa-file-invoice fa-2x text-yellow-500"></i>
-            <div>
-                <p class="text-gray-500">Hóa đơn</p>
-                <h3 class="text-2xl font-bold" th:text="${totalInvoices}">0</h3>
-            </div>
-        </div>
-
-        <div class="bg-white shadow rounded-lg p-5 flex items-center space-x-4 border-l-4 border-red-500">
-            <i class="fas fa-coins fa-2x text-red-500"></i>
-            <div>
-                <p class="text-gray-500">Doanh thu</p>
-                <h3 class="text-2xl font-bold"
-                    th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT') + ' đ'}">
-                    0 đ
-                </h3>
-            </div>
+        <div class="bg-white shadow p-4 rounded border-l-4 border-green-500">
+            <p class="text-sm text-gray-500">Doanh thu hôm nay</p>
+            <h2 class="text-2xl font-bold text-green-600" th:text="${todayRevenue} + ' đ'">0 đ</h2>
         </div>
     </div>
 </div>
 
-<!-- Bảng dữ liệu -->
-<div class="container mx-auto mt-10">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Top sản phẩm -->
-        <div class="bg-white shadow rounded-lg p-5">
-            <h2 class="text-xl font-semibold mb-4"><i class="fas fa-star text-yellow-400 mr-2"></i>Top 5 sản phẩm bán
-                chạy</h2>
-            <ul class="list-disc pl-6 space-y-2 text-gray-700">
-                <li th:each="p : ${topProducts}" th:text="|${p[0]} - ${p[1]} kg|"
-                >Tên sản phẩm - Số lượng
-                </li>
-            </ul>
-        </div>
-
-        <!-- Top khách hàng -->
-        <div class="bg-white shadow rounded-lg p-5">
-            <h2 class="text-xl font-semibold mb-4"><i class="fas fa-user-tie text-green-500 mr-2"></i>Top 5 khách hàng
-                chi tiêu</h2>
-            <ul class="list-disc pl-6 space-y-2 text-gray-700">
-                <li th:each="c : ${topCustomers}"
-                    th:text="|${c[0]} - ${#numbers.formatDecimal(c[1], 0, 'POINT', 0, 'COMMA')} đ|">
-                    Tên khách - Số tiền
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<!-- Biểu đồ -->
+<!-- Biểu đồ doanh thu -->
 <div class="container mx-auto mt-10 bg-white shadow rounded-lg p-6">
-    <h2 class="text-xl font-semibold mb-4"><i class="fas fa-chart-bar mr-2 text-blue-600"></i>Doanh thu theo tháng</h2>
-    <canvas id="revenueBarChart" style="max-height: 300px;"></canvas>
+    <h2 class="text-xl font-semibold mb-4">Doanh thu thuần</h2>
+
+    <div class="flex space-x-4 mb-4">
+        <button class="tab-btn text-blue-600 font-semibold border-b-2 border-blue-600" data-mode="weekday">Theo thứ</button>
+        <button class="tab-btn text-gray-600" data-mode="month">Theo tháng</button>
+    </div>
+
+    <canvas id="salesChart" style="max-height: 350px;"></canvas>
 </div>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    const revenueData = /*[[${monthlyRevenue}]]*/ [];
-    const monthLabels = /*[[${monthLabels}]]*/ [];
+    const revenueLabelsByWeekday = /*[[${revenueWeekdayLabels}]]*/ [];
+    const revenueDataByWeekday = /*[[${revenueWeekdayValues}]]*/ [];
+    const revenueLabelsByMonth = /*[[${revenueMonthLabels}]]*/ [];
+    const revenueDataByMonth = /*[[${revenueMonthValues}]]*/ [];
 
-    const ctxBar = document.getElementById('revenueBarChart').getContext('2d');
-    new Chart(ctxBar, {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const chart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: monthLabels,
+            labels: revenueLabelsByWeekday,
             datasets: [{
                 label: 'Doanh thu (VNĐ)',
-                data: revenueData,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                borderRadius: 5
+                data: revenueDataByWeekday,
+                backgroundColor: '#3B82F6',
+                borderRadius: 4
             }]
         },
         options: {
             responsive: true,
-            plugins: {
-                legend: {display: false}
-            },
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function (value) {
+                        callback: function(value) {
                             return value.toLocaleString('vi-VN') + ' đ';
                         }
                     }
                 }
             }
         }
+    });
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("border-b-2", "text-blue-600"));
+            btn.classList.add("border-b-2", "text-blue-600");
+            const mode = btn.dataset.mode;
+
+            let labels = [], data = [];
+            if (mode === "weekday") {
+                labels = revenueLabelsByWeekday;
+                data = revenueDataByWeekday;
+            } else if (mode === "month") {
+                labels = revenueLabelsByMonth;
+                data = revenueDataByMonth;
+            }
+
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update();
+        });
     });
     /*]]>*/
 </script>

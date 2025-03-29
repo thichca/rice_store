@@ -25,10 +25,10 @@
                         th:onclick="|window.location.href='@{/owner/zone/add}'|">
                     <i class="fas fa-plus mr-2"></i> THÊM KHU VỰC
                 </button>
-<!--                <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center"-->
-<!--                        th:onclick="|window.location.href='@{/owner/zone/addInventory}'|">-->
-<!--                    <i class="fas fa-plus mr-2"></i> NHẬP KHO-->
-<!--                </button>-->
+                <!--                <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center"-->
+                <!--                        th:onclick="|window.location.href='@{/owner/zone/addInventory}'|">-->
+                <!--                    <i class="fas fa-plus mr-2"></i> NHẬP KHO-->
+                <!--                </button>-->
             </div>
         </div>
         <p class="text-gray-600 mb-4">
@@ -58,6 +58,8 @@
                     <th class="border p-2 hidden"></th>
                     <th class="border p-2 hidden"></th>
                     <th class="border p-2 hidden"></th>
+                    <th class="border p-2 hidden"></th>
+                    <th class="border p-2 hidden"></th>
                     <th class="border p-2 relative w-[340px]">Hành động
                         <div class="resizer"></div>
                     </th>
@@ -67,31 +69,39 @@
                 <tr class="bg-gray-50">
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="search-zoneid-min" placeholder="Từ"
-                                   style="font-weight: normal;"  th:value="${idMin}" >
-                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="search-zoneid-max" placeholder="Đến"
-                                   style="font-weight: normal;" th:value="${idMax}" >
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="search-zoneid-min"
+                                   placeholder="Từ"
+                                   style="font-weight: normal;" th:value="${idMin}">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2" id="search-zoneid-max"
+                                   placeholder="Đến"
+                                   style="font-weight: normal;" th:value="${idMax}">
                         </div>
                     </th>
 
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zonename" th:value="${name}" >
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zonename"
+                                                  th:value="${name}">
                     </td>
-                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zoneaddress" th:value="${address}">
+                    <td class="border p-2"><input type="text" class="w-full border rounded p-1" id="search-zoneaddress"
+                                                  th:value="${address}">
                     </td>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-zonemin" placeholder="Từ"
-                                   style="font-weight: normal;" th:value="${dateMin}" >
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-zonemax" placeholder="Đến"
-                                   style="font-weight: normal;" th:value="${dateMax}" >
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-zonemin"
+                                   placeholder="Từ"
+                                   style="font-weight: normal;" th:value="${dateMin}">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-zonemax"
+                                   placeholder="Đến"
+                                   style="font-weight: normal;" th:value="${dateMax}">
                         </div>
                     </th>
                     <th class="border p-2">
                         <div class="flex w-full gap-1">
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-update-zonemin" placeholder="Từ"
-                                   style="font-weight: normal;"  th:value="${dateMin1}" >
-                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-update-zonemax" placeholder="Đến"
-                                   style="font-weight: normal;"  th:value="${dateMax1}" >
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr"
+                                   id="search-update-zonemin" placeholder="Từ"
+                                   style="font-weight: normal;" th:value="${dateMin1}">
+                            <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr"
+                                   id="search-update-zonemax" placeholder="Đến"
+                                   style="font-weight: normal;" th:value="${dateMax1}">
                         </div>
                     </th>
                     <td class="border p-2">
@@ -102,7 +112,10 @@
                                     data-icon='<i class="fas fa-times"></i>'>
                                 <i class="fas fa-times mr-1"></i> Bỏ lọc
                             </button>
-                            <button onclick="filterZones()" class="w-1/3 bg-white border border-blue-500 text-white-500 px-2 py-1 rounded flex items-center justify-center toggle-btn hover:bg-red-500 hover:text-white transition duration-200" data-full='<i class="fa fa-filter"></i> Lọc' data-icon='<i class="fa fa-filter"></i>'>
+                            <button onclick="filterZones()"
+                                    class="w-1/3 bg-white border border-blue-500 text-white-500 px-2 py-1 rounded flex items-center justify-center toggle-btn hover:bg-red-500 hover:text-white transition duration-200"
+                                    data-full='<i class="fa fa-filter"></i> Lọc'
+                                    data-icon='<i class="fa fa-filter"></i>'>
                                 <i class="fa fa-filter"></i> Lọc
                             </button>
 
@@ -204,6 +217,7 @@
             }
         }
     });
+
     function filterZones() {
         var idMin = document.getElementById('search-zoneid-min').value;
         var idMax = document.getElementById('search-zoneid-max').value;
@@ -226,6 +240,7 @@
 
         window.location.href = url;
     }
+
     function buildFilterParams() {
         var params = '';
         var idMin = document.getElementById('search-zoneid-min').value;
@@ -246,7 +261,8 @@
         if (dateMax1) params += '&dateMax1=' + encodeURIComponent(dateMax1);
         return params;
     }
-    document.getElementById('clearFilters').addEventListener('click', function() {
+
+    document.getElementById('clearFilters').addEventListener('click', function () {
         document.getElementById('search-zoneid-min').value = '';
         document.getElementById('search-zoneid-max').value = '';
         document.getElementById('search-zonename').value = '';

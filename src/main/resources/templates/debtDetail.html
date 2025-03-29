@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
   <meta charset="UTF-8">
   <title>Example</title>
@@ -52,6 +52,9 @@
             <th class="border p-2 relative">Ngày lập phiếu
               <div class="resizer"></div>
             </th>
+            <th class="border p-2 relative">Ngày tạo
+              <div class="resizer"></div>
+            </th>
             <th class="border p-2 relative">Hành động
               <div class="resizer"></div>
             </th>
@@ -69,14 +72,22 @@
             <td class="border p-2">
               <select class="border rounded p-1 w-full" id="search-type" oninput="filterDebts()">
                 <option value="" th:selected="${type == null or type == ''}">Tất cả</option>
-                <option value="GHI_NO" th:selected="${type == 'GHI_NO'}">Ghi nợ</option>
-                <option value="TRA_NO" th:selected="${type == 'TRA_NO'}">Trả nợ</option>
+                <option value="Customer_debt_shop" th:selected="${type == 'Customer_debt_shop'}">Khách hàng nợ cửa hàng</option>
+                <option value="Customer_return_shop" th:selected="${type == 'Customer_return_shop'}">Khách hàng trả cửa hàng</option>
+                <option value="Shop_debt_customer" th:selected="${type == 'Shop_debt_customer'}">Cửa hàng nợ khách hàng</option>
+                <option value="Shop_return_customer" th:selected="${type == 'Shop_return_customer'}">Cửa hàng trả khách hàng</option>
               </select>
             </td>
             <th class="border p-2">
               <div class="flex w-full gap-1">
                 <input type="number" class="border rounded w-1/2 py-1 px-2" placeholder="Từ" id="search-debt-min1" th:value="${amountMin}">
                 <input type="number" class="border rounded w-1/2 py-1 px-2" placeholder="Đến" id="search-debt-max1"  th:value="${amountMax}">
+              </div>
+            </th>
+            <th class="border p-2">
+              <div class="flex w-full gap-1">
+                <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-min2" placeholder="Từ" th:value="${dateMin2}" >
+                <input type="text" class="border rounded w-1/2 py-1 px-2 flatpickr" id="search-date-max2" placeholder="Đến" th:value="${dateMax2}" >
               </div>
             </th>
             <th class="border p-2">
@@ -107,12 +118,18 @@
             <!--          <td class="border p-2" th:text="${x.index+1}"></td>-->
             <td class="border p-2" th:text="${debt.id}"></td>
             <td class="border p-2" th:text="${debt.note}"></td>
-            <td class="border p-2" th:text="${debt.type}"></td>
-            <td class="border p-2" th:text="${debt.amount}"></td>
+            <td class="border p-2">
+              <span th:if="${debt.type.name() == 'Customer_debt_shop'}">Khách hàng nợ cửa hàng</span>
+              <span th:if="${debt.type.name() == 'Customer_return_shop'}">Khách hàng trả cửa hàng</span>
+              <span th:if="${debt.type.name() == 'Shop_debt_customer'}">Cửa hàng nợ khách hàng</span>
+              <span th:if="${debt.type.name() == 'Shop_return_customer'}">Cửa hàng trả khách hàng</span>
+            </td>
+            <td class="border p-2" th:text="${#numbers.formatDecimal(debt.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+            <td class="border p-2" th:text="${#temporals.format(debt.createOn, 'dd/MM/yyyy HH:mm:ss')}"></td>
             <td class="border p-2" th:text="${#temporals.format(debt.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
             <td class="border p-2">
               <button class="w-32 h-10 text-lg font-semibold bg-blue-500 text-white px-4 py-2 rounded flex items-center justify-center hover:bg-blue-700 transition duration-200"
-                      th:attr="onclick=|showDetail('${debt.id}', '${debt.note}', '${debt.type}', '${debt.amount}', '${#temporals.format(debt.createdAt, 'dd/MM/yyyy HH:mm:ss')}')|"
+                      th:attr="onclick=|showDetail('${debt.id}','${customerName}','${customerPhone}', '${debt.note}', '${debt.type}', '${debt.amount}', '${#temporals.format(debt.createOn, 'dd/MM/yyyy HH:mm:ss')}')|"
                       data-full='<i class="fas fa-info mr-1"></i> Chi tiết'
                       data-icon='<i class="fas fa-info"></i>'>
                 <i class="fas fa-info mr-1"></i> Chi tiết
@@ -164,7 +181,14 @@
         <label class="text-sm font-semibold">ID:</label>
         <input type="text" id="detailId" class="border p-1 w-full text-sm" readonly>
       </div>
-
+      <div>
+        <label class="text-sm font-semibold">Tên khách hàng:</label>
+        <input type="text" id="detailName" class="border p-1 w-full text-sm" readonly>
+      </div>
+      <div>
+        <label class="text-sm font-semibold">Số điện thoại:</label>
+        <input type="text" id="detailPhone" class="border p-1 w-full text-sm" readonly>
+      </div>
       <div>
         <label class="text-sm font-semibold">Ghi chú:</label>
         <input type="text" id="detailNote" class="border p-1 w-full text-sm" readonly>
@@ -195,18 +219,26 @@
   var customerId = [[${customer.id}]];
 </script>
 <script>
-  function showDetail(id, note, type, amount, date) {
-    // Giảm z-index của thead để không đè lên modal
+  function showDetail(id, customerName , customerPhone ,note, type, amount, date) {
     document.querySelector("thead").style.zIndex = "0";
-    // Hiển thị modal
     document.getElementById("detailModal").style.display = "flex";
-    document.getElementById("detailId").value = id;
-    document.getElementById("detailNote").value = note || "Không có ghi chú";
-    document.getElementById("detailType").value = type;
-    document.getElementById("detailAmount").value = amount;
-    document.getElementById("detailDate").value = date;
 
-    document.getElementById("detailModal").style.display = "flex";
+    // Ánh xạ loại nợ sang tiếng Việt
+    var typeMap = {
+      "Customer_debt_shop": "Khách hàng nợ cửa hàng",
+      "Customer_return_shop": "Khách hàng trả cửa hàng",
+      "Shop_debt_customer": "Cửa hàng nợ khách hàng",
+      "Shop_return_customer": "Cửa hàng trả khách hàng"
+    };
+
+    document.getElementById("detailId").value = id;
+    document.getElementById("detailName").value = customerName;
+    document.getElementById("detailPhone").value = customerPhone;
+    document.getElementById("detailNote").value = note || "Không có ghi chú";
+    document.getElementById("detailType").value = typeMap[type] || "Không xác định"; // Dịch loại nợ
+    let formattedAmount = new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 0 }).format(amount).replace(/\./g, ",") + " đ";
+    document.getElementById("detailAmount").value = formattedAmount;
+    document.getElementById("detailDate").value = date;
   }
 
   function closeModal() {
@@ -243,6 +275,8 @@
     var amountMax = document.getElementById('search-debt-max1').value;
     var dateMin = document.getElementById('search-date-min1').value;
     var dateMax = document.getElementById('search-date-max1').value;
+    var dateMin2 = document.getElementById('search-date-min2').value;
+    var dateMax2 = document.getElementById('search-date-max2').value;
 
     var url = '/debt/detail?customerId=' + customerId + '&page=0&size=' + document.getElementById('recordsPerPage').value;
     if (idMin) url += '&idMin=' + idMin;
@@ -253,6 +287,8 @@
     if (amountMax) url += '&amountMax=' + amountMax;
     if (dateMin) url += '&dateMin=' + encodeURIComponent(dateMin);
     if (dateMax) url += '&dateMax=' + encodeURIComponent(dateMax);
+    if (dateMin2) url += '&dateMin2=' + encodeURIComponent(dateMin2);
+    if (dateMax2) url += '&dateMax2=' + encodeURIComponent(dateMax2);
 
     window.location.href = url;
   }
@@ -275,6 +311,12 @@
     var dateMax = document.getElementById('search-date-max1').value;
     if (dateMax) params += '&dateMax=' + encodeURIComponent(dateMax);
     return params;
+    var dateMin2 = document.getElementById('search-date-min2').value;
+    if (dateMin2) params += '&dateMin2=' + encodeURIComponent(dateMin2);
+    return params;
+    var dateMax2 = document.getElementById('search-date-max2').value;
+    if (dateMax2) params += '&dateMax2=' + encodeURIComponent(dateMax2);
+    return params;
   }
   document.getElementById('clearFilters').addEventListener('click', function() {
     document.getElementById('search-id-min1').value = '';
@@ -285,6 +327,8 @@
     document.getElementById('search-debt-max1').value = '';
     document.getElementById('search-date-min1').value = '';
     document.getElementById('search-date-max1').value = '';
+    document.getElementById('search-date-min2').value = '';
+    document.getElementById('search-date-max2').value = '';
     var url = '/debt/detail?customerId=' + customerId + '&page=0&size=' + document.getElementById('recordsPerPage').value;
     window.location.href = url;
   });

@@ -65,7 +65,7 @@ public class ZoneController {
         Date parsedDateMax1 = parseDate(dateMax1);
         Date parsedDateMin1 = parseDate(dateMin1);
         Pageable pageable = PageRequest.of(page, size);
-        Page<Zone> zones = zoneService.getFilter(parsedIdMin, parsedIdMax, name, address, parsedDateMin, parsedDateMax, pageable, parsedDateMax1, parsedDateMin1);
+        Page<Zone> zones = zoneService.getFilter(store , parsedIdMin, parsedIdMax, name, address, parsedDateMin, parsedDateMax, pageable, parsedDateMax1, parsedDateMin1);
         model.addAttribute("zones", zones.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", zones.getTotalPages());

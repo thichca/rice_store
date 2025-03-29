@@ -76,7 +76,8 @@ public class EmployeeService {
         try {
             employeeRepository.save(user);
         } catch (Exception e) {
-            throw new RuntimeException("Error while saving employee: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Lỗi hệ thống: " + e.getMessage());
+            return null;
         }
         return user;
     }

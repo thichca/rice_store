@@ -24,12 +24,21 @@ public class ProductSpecifications {
         return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("price"), maxPrice);
     }
 
-    public static Specification<Product> createdDateEqual(LocalDate createdDate) {
-        return (root, query, cb) -> cb.equal(cb.function("DATE", LocalDate.class, root.get("createdAt")), createdDate);
+    public static Specification<Product> createdDateEqual(LocalDate date) {
+        return (root, query, cb) -> cb.between(
+                root.get("createdAt"),
+                date.atStartOfDay(),
+                date.plusDays(1).atStartOfDay()
+        );
     }
 
-    public static Specification<Product> updatedDateEqual(LocalDate updatedDate) {
-        return (root, query, cb) -> cb.equal(cb.function("DATE", LocalDate.class, root.get("updatedAt")), updatedDate);
+
+    public static Specification<Product> updatedDateEqual(LocalDate date) {
+        return (root, query, cb) -> cb.between(
+                root.get("updatedAt"),
+                date.atStartOfDay(),
+                date.plusDays(1).atStartOfDay()
+        );
     }
 
     public static Specification<Product> createdBy(Long userId) {
