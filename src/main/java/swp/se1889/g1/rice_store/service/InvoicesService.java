@@ -131,10 +131,16 @@ public class InvoicesService {
                 debtChange = paidAmount.subtract(totalDue); // Số tiền khách nợ cửa hàng
                 debtType = DebtRecords.DebtType.Customer_debt_shop;
             } else {
-                // Trả đủ, xóa toàn bộ nợ (Shop_return_customer)
                 newDebtBalance = BigDecimal.ZERO;
-                debtChange = debtBalance; // Số tiền cửa hàng trả lại khách
-                debtType = DebtRecords.DebtType.Shop_return_customer;
+                debtChange = debtBalance.negate(); // 288.000 nếu debtBalance = -288.000
+                if (debtChange.compareTo(BigDecimal.ZERO) > 0) {
+                    debtType = DebtRecords.DebtType.Shop_debt_customer; // Tăng debtBalance
+                } else if (debtChange.compareTo(BigDecimal.ZERO) < 0) {
+                    debtType = DebtRecords.DebtType.Customer_debt_shop; // Giảm debtBalance
+                    debtChange = debtChange.negate(); // Đảm bảo amount dương
+                } else {
+                    debtType = null; // Không cần bản ghi nếu debtBalance đã là 0
+                }
             }
         } else {
             throw new RuntimeException("Phương thức thanh toán không hợp lệ");
@@ -163,10 +169,11 @@ public class InvoicesService {
             debtRecord.setUpdatedAt(LocalDateTime.now());
             debtRecord.setCreatedBy(currentUser);
             debtRecord.setType(debtType);
-            debtRecord.setAmount(debtChange.abs()); // Luôn lấy giá trị dương
+            debtRecord.setAmount(debtChange); // Luôn lấy giá trị dương
             debtRecord.setNote("Giao dịch từ hóa đơn nhập hàng #" + savedInvoice.getId());
             debtRecordService.addDebt(debtRecord);
-            debtRecordService.updateDebtBalances(customer, currentUser);
+            customer.setDebtBalance(newDebtBalance);
+            customerRepository.save(customer);
         }
 
 

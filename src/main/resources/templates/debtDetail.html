@@ -119,10 +119,10 @@
             <td class="border p-2" th:text="${debt.id}"></td>
             <td class="border p-2" th:text="${debt.note}"></td>
             <td class="border p-2">
-              <span th:if="${debt.type =='Customer_debt_shop'}"> Khách hàng nợ cửa hàng </span>
-              <span th:if="${debt.type =='Customer_return_shop'}"> Khách hàng trả cửa hàng </span>
-              <span th:if="${debt.type =='Shop_debt_customer'}"> Cửa hàng nợ khách hàng </span>
-              <span th:if="${debt.type =='Shop_return_customer'}"> Cửa hàng trả khách hàng </span>
+              <span th:if="${debt.type.name() == 'Customer_debt_shop'}">Khách hàng nợ cửa hàng</span>
+              <span th:if="${debt.type.name() == 'Customer_return_shop'}">Khách hàng trả cửa hàng</span>
+              <span th:if="${debt.type.name() == 'Shop_debt_customer'}">Cửa hàng nợ khách hàng</span>
+              <span th:if="${debt.type.name() == 'Shop_return_customer'}">Cửa hàng trả khách hàng</span>
             </td>
             <td class="border p-2" th:text="${#numbers.formatDecimal(debt.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
             <td class="border p-2" th:text="${#temporals.format(debt.createOn, 'dd/MM/yyyy HH:mm:ss')}"></td>

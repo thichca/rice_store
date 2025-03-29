@@ -140,25 +140,10 @@ public class    DebtRecordService {
             }
         }
 
-        Customer updatedCustomer = new Customer();
-        updatedCustomer.setId(customer.getId());
-        updatedCustomer.setName(customer.getName());
-        updatedCustomer.setPhone(customer.getPhone());
-        updatedCustomer.setAddress(customer.getAddress());
-        updatedCustomer.setEmail(customer.getEmail());
-        updatedCustomer.setDebtBalance(customer.getDebtBalance());
-
-
-
         // Cập nhật số dư nợ cho khách hàng và lưu lại vào cơ sở dữ liệu
         customer.setDebtBalance(debtBalance);
-
-        changeHistoryService.trackCustomerChanges(
-                updatedCustomer,
-                customer,
-                currentUser
-        );
         customerRepository.save(customer);
+
     }
 
     private User getCurrentUser() {
