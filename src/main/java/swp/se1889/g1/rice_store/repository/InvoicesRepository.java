@@ -14,6 +14,7 @@ import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -28,54 +29,25 @@ public interface InvoicesRepository extends JpaRepository<Invoices, Long>, JpaSp
 
     Page<Invoices> findInvoicesByStore(Store store, Pageable pageable);
 
-    @Query("SELECT MONTH(i.createdAt) AS month, COALESCE(SUM(i.finalAmount), 0) " +
-            "FROM Invoices i WHERE i.isDeleted = false " +
-            "GROUP BY MONTH(i.createdAt) ORDER BY MONTH(i.createdAt)")
-    List<Object[]> getRevenueByMonth();
+    // --- A. Tổng hóa đơn hôm nay ---
+    @Query("SELECT COUNT(i) FROM Invoices i WHERE i.store.id = :storeId AND i.type = 'Sale' AND i.isDeleted = false AND i.createdAt BETWEEN :start AND :end")
+    long countTodayInvoices(@Param("storeId") Long storeId,
+                            @Param("start") LocalDateTime start,
+                            @Param("end") LocalDateTime end);
 
-    @Query("SELECT MONTH(i.createdAt) AS month, COALESCE(SUM(i.finalAmount), 0) " +
-            "FROM Invoices i WHERE i.store.id = :storeId AND i.isDeleted = false " +
-            "GROUP BY MONTH(i.createdAt) ORDER BY MONTH(i.createdAt)")
-    List<Object[]> getRevenueByMonthAndStore(@Param("storeId") Long storeId);
+    // --- B. Tổng doanh thu hôm nay ---
+    @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.store.id = :storeId AND i.type = 'Sale' AND i.isDeleted = false AND i.createdAt BETWEEN :start AND :end")
+    BigDecimal sumTodayRevenue(@Param("storeId") Long storeId,
+                               @Param("start") LocalDateTime start,
+                               @Param("end") LocalDateTime end);
 
+    // --- C. Doanh thu theo thứ trong tuần hiện tại ---
+    @Query(value = "SELECT DATEPART(WEEKDAY, i.created_at) AS weekday, SUM(i.final_amount) AS revenue FROM invoices i WHERE i.store_id = :storeId AND i.type = 'Sale' AND i.is_deleted = 0 AND i.created_at BETWEEN :start AND :end GROUP BY DATEPART(WEEKDAY, i.created_at) ORDER BY weekday", nativeQuery = true)
+    List<Object[]> getRevenueByWeekday(@Param("storeId") Long storeId,
+                                       @Param("start") LocalDateTime start,
+                                       @Param("end") LocalDateTime end);
 
-    // Đếm tổng số hóa đơn theo User hiện tại
-    @Query("SELECT COUNT(i) FROM Invoices i WHERE i.createdBy = :createdBy AND i.isDeleted = false")
-    long countByCreatedBy(@Param("createdBy") User createdBy);
-
-    // Đếm tổng số hóa đơn theo User + Store
-    @Query("SELECT COUNT(i) FROM Invoices i WHERE i.createdBy = :createdBy AND i.store.id = :storeId AND i.isDeleted = false")
-    long countByUserAndStore(@Param("createdBy") User createdBy, @Param("storeId") Long storeId);
-
-    // Tính tổng doanh thu theo User hiện tại
-    @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.isDeleted = false")
-    BigDecimal getTotalRevenueByUser(@Param("createdBy") User createdBy);
-
-    // Tính tổng doanh thu theo User + Store
-    @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.store.id = :storeId AND i.isDeleted = false")
-    BigDecimal getTotalRevenueByUserAndStore(@Param("createdBy") User createdBy, @Param("storeId") Long storeId);
-
-    @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.type = :type AND i.isDeleted = false")
-    BigDecimal getTotalSaleRevenueByUser(@Param("createdBy") User createdBy, @Param("type") Invoices.InvoiceType type);
-
-    @Query("SELECT COALESCE(SUM(i.finalAmount), 0) FROM Invoices i WHERE i.createdBy = :createdBy AND i.store.id = :storeId AND i.type = :type AND i.isDeleted = false")
-    BigDecimal getTotalSaleRevenueByUserAndStore(@Param("createdBy") User createdBy, @Param("storeId") Long storeId, @Param("type") Invoices.InvoiceType type);
-
-    @Query("SELECT MONTH(i.createdAt) AS month, COALESCE(SUM(i.finalAmount), 0) " +
-            "FROM Invoices i WHERE i.isDeleted = false AND i.type = 'Sale' " +
-            "GROUP BY MONTH(i.createdAt) ORDER BY MONTH(i.createdAt)")
-    List<Object[]> getSaleRevenueByMonth();
-
-    @Query("SELECT MONTH(i.createdAt) AS month, COALESCE(SUM(i.finalAmount), 0) " +
-            "FROM Invoices i WHERE i.store.id = :storeId AND i.isDeleted = false AND i.type = 'Sale' " +
-            "GROUP BY MONTH(i.createdAt) ORDER BY MONTH(i.createdAt)")
-    List<Object[]> getSaleRevenueByMonthAndStore(@Param("storeId") Long storeId);
-
-    @Query("SELECT i.customer.name, SUM(i.finalAmount) " +
-            "FROM Invoices i " +
-            "WHERE i.type = 'Sale' AND i.isDeleted = false " +
-            "GROUP BY i.customer.name " +
-            "ORDER BY SUM(i.finalAmount) DESC")
-    List<Object[]> findTop5CustomersBySpending(Pageable pageable);
-
+    // --- D. Doanh thu theo các tháng trong năm hiện tại ---
+    @Query(value = "SELECT MONTH(i.created_at) AS month, SUM(i.final_amount) AS revenue FROM invoices i WHERE i.store_id = :storeId AND i.type = 'Sale' AND i.is_deleted = 0 AND YEAR(i.created_at) = :year GROUP BY MONTH(i.created_at) ORDER BY month", nativeQuery = true)
+    List<Object[]> getRevenueByMonth(@Param("storeId") Long storeId, @Param("year") int year);
 }

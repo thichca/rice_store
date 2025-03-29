@@ -16,11 +16,6 @@ public class CustomerSpecifications {
     public static Specification<Customer> createdBy(Long userId) {
         return (root, query, cb) -> cb.equal(root.get("createdBy").get("id"), userId);
     }
-
-    public static Specification<Customer> idEquals(Long id) {
-        return (root, query, cb) -> cb.equal(root.get("id"), id);
-    }
-
     public static Specification<Customer> nameContains(String name) {
         return (root, query, cb) -> cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
     }

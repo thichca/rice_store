@@ -28,18 +28,5 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSp
     @Query("SELECT new swp.se1889.g1.rice_store.dto.CustomerDTO(c.id, c.name, c.phone, c.address, c.email) FROM Customer c WHERE c.isDeleted = false AND c.name LIKE %:query%")
     List<CustomerDTO> searchCustomerDetails(@Param("query") String query);
 
-    @Query("""
-                SELECT COUNT(c)
-                FROM Customer c
-                WHERE c.isDeleted = false
-                AND (
-                    c.createdBy.id = :ownerId
-                    OR c.createdBy.id IN (
-                        SELECT u.id FROM User u WHERE u.createdBy = :ownerId
-                    )
-                )
-            """)
-    long countByOwnerAndEmployees(@Param("ownerId") Long ownerId);
-
 
 }

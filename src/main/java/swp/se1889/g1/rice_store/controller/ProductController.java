@@ -101,14 +101,6 @@ public class ProductController {
         }
     }
 
-
-    @GetMapping("/edit-product/{id}")
-    @ResponseBody
-    public ProductDTO getProductForEdit(@PathVariable Long id) {
-        return productService.getProductById(id);
-    }
-
-
     @PostMapping("/products/update")
     @ResponseBody
     public ResponseEntity<?> updateProduct(@Valid @ModelAttribute("editProduct") ProductDTO productDTO, BindingResult result) {
