@@ -145,7 +145,7 @@ public class CustomerService {
     }
 
     public Page<CustomerDTO> filterCustomersWithSpec(
-            String id, String name, String phone,
+            String name, String phone,
             String address, String email, String debt,
             LocalDate createdDate, LocalDate updatedDate,
             int page, int size) {
@@ -153,11 +153,10 @@ public class CustomerService {
         User currentUser = getCurrentUser();
         if (currentUser == null) return Page.empty();
 
-        Long parsedId = null;
         BigDecimal parsedDebt = null;
 
         try {
-            if (id != null && !id.isBlank()) parsedId = Long.parseLong(id);
+
             if (debt != null && !debt.isBlank()) parsedDebt = new BigDecimal(debt);
         } catch (NumberFormatException e) {
             throw new RuntimeException("ID hoặc dư nợ không hợp lệ.");
@@ -185,7 +184,6 @@ public class CustomerService {
 
         spec = spec.and(CustomerSpecifications.createdByIn(allowedCreatedByIds));
 
-        if (parsedId != null) spec = spec.and(CustomerSpecifications.idEquals(parsedId));
         if (name != null && !name.isBlank()) spec = spec.and(CustomerSpecifications.nameContains(name));
         if (phone != null && !phone.isBlank()) spec = spec.and(CustomerSpecifications.phoneContains(phone));
         if (address != null && !address.isBlank()) spec = spec.and(CustomerSpecifications.addressContains(address));
@@ -200,12 +198,6 @@ public class CustomerService {
         return customerRepository.findAll(spec, pageable).map(CustomerDTO::new);
     }
 
-    public long countCustomersByStore(Store store) {
-        User owner = userRepository.findByUsername(store.getCreatedBy());
-        if (owner == null) return 0;
-
-        return customerRepository.countByOwnerAndEmployees(owner.getId());
-    }
 
 
     public List<CustomerDTO> searchCustomers(String query) {

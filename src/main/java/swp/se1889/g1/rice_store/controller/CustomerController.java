@@ -36,7 +36,6 @@ public class CustomerController {
     public String getCustomers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(required = false) String id,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String address,
@@ -52,15 +51,13 @@ public class CustomerController {
 
 
         Page<CustomerDTO> customerPage = customerService.filterCustomersWithSpec(
-                id, name, phone, address, email, debt, createdDate, updatedDate, page, size);
+                name, phone, address, email, debt, createdDate, updatedDate, page, size);
 
         model.addAttribute("customers", customerPage.getContent());
         model.addAttribute("totalPages", customerPage.getTotalPages());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalItems", customerPage.getTotalElements());
 
-
-        model.addAttribute("id", id);
         model.addAttribute("name", name);
         model.addAttribute("phone", phone);
         model.addAttribute("address", address);

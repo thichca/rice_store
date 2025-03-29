@@ -18,6 +18,8 @@ import swp.se1889.g1.rice_store.repository.*;
 import swp.se1889.g1.rice_store.specification.InvoiceSpecifications;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -236,67 +238,6 @@ public class InvoicesService {
         return null;
     }
 
-    public List<BigDecimal> getRevenueByMonth(Long storeId) {
-        List<BigDecimal> monthlyRevenue = new ArrayList<>(Collections.nCopies(6, BigDecimal.ZERO));
-        List<Object[]> results;
-
-        if (storeId != null) {
-            results = invoiceRepository.getSaleRevenueByMonthAndStore(storeId);
-        } else {
-            results = invoiceRepository.getSaleRevenueByMonth();
-        }
-
-        for (Object[] row : results) {
-            int month = (int) row[0];
-            BigDecimal revenue = (BigDecimal) row[1];
-            if (month >= 1 && month <= 6) {
-                monthlyRevenue.set(month - 1, revenue);
-            }
-        }
-
-        return monthlyRevenue;
-    }
-
-    public List<Object[]> getTop5CustomersBySpending() {
-        return invoiceRepository.findTop5CustomersBySpending(PageRequest.of(0, 5));
-    }
-
-
-    // Lấy tổng số hóa đơn theo User hiện tại
-    public long countInvoicesByCurrentUser() {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return invoiceRepository.countByCreatedBy(currentUser);
-        }
-        return 0;
-    }
-
-    // Lấy tổng số hóa đơn theo User + Store
-    public long countInvoicesByUserAndStore(Long storeId) {
-        User currentUser = getCurrentUser();
-        if (currentUser != null && storeId != null) {
-            return invoiceRepository.countByUserAndStore(currentUser, storeId);
-        }
-        return 0;
-    }
-
-    // Lấy tổng doanh thu theo User hiện tại
-    public BigDecimal getTotalRevenueByCurrentUser() {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return invoiceRepository.getTotalRevenueByUser(currentUser);
-        }
-        return BigDecimal.ZERO;
-    }
-
-    // Lấy tổng doanh thu theo User + Store
-    public BigDecimal getTotalRevenueByUserAndStore(Long storeId) {
-        User currentUser = getCurrentUser();
-        if (currentUser != null && storeId != null) {
-            return invoiceRepository.getTotalRevenueByUserAndStore(currentUser, storeId);
-        }
-        return BigDecimal.ZERO;
-    }
 
     public Invoices update(Long id, String newStatus) {
         Invoices invoices = invoiceRepository.findById(id).orElse(null);
@@ -357,23 +298,63 @@ public class InvoicesService {
         return invoiceRepository.findAll(spec, pageable);
     }
 
-    // Tổng doanh thu theo user và chỉ loại hóa đơn "Sale"
-    public BigDecimal getTotalSaleRevenueByCurrentUser() {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return invoiceRepository.getTotalSaleRevenueByUser(currentUser, Invoices.InvoiceType.Sale);
-        }
-        return BigDecimal.ZERO;
+    // --- A. Tổng hóa đơn hôm nay ---
+    public long getTodayInvoiceCount(Long storeId) {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        return invoiceRepository.countTodayInvoices(storeId, start, end);
     }
 
-    // Tổng doanh thu theo user + store và chỉ loại hóa đơn "Sale"
-    public BigDecimal getTotalSaleRevenueByUserAndStore(Long storeId) {
-        User currentUser = getCurrentUser();
-        if (currentUser != null && storeId != null) {
-            return invoiceRepository.getTotalSaleRevenueByUserAndStore(currentUser, storeId, Invoices.InvoiceType.Sale);
-        }
-        return BigDecimal.ZERO;
+
+    // --- B. Tổng doanh thu hôm nay ---
+    public BigDecimal getTodayRevenue(Long storeId) {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        return invoiceRepository.sumTodayRevenue(storeId, start, end);
     }
+
+
+    // --- C. Doanh thu theo thứ trong tuần hiện tại ---
+    public Map<String, BigDecimal> getWeeklyRevenue(Long storeId) {
+        LocalDate today = LocalDate.now();
+        LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
+        LocalDate endOfWeek = today.with(DayOfWeek.SUNDAY);
+
+        List<Object[]> results = invoiceRepository.getRevenueByWeekday(
+                storeId,
+                startOfWeek.atStartOfDay(),
+                endOfWeek.plusDays(1).atStartOfDay()
+        );
+
+        Map<String, BigDecimal> map = new LinkedHashMap<>();
+        String[] weekdays = {"Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"};
+        for (int i = 0; i < 7; i++) map.put(weekdays[i], BigDecimal.ZERO);
+        for (Object[] row : results) {
+            Integer dayOfWeek = (Integer) row[0];
+            BigDecimal revenue = (BigDecimal) row[1];
+            map.put(weekdays[dayOfWeek - 1], revenue);
+        }
+        return map;
+    }
+
+
+    // --- D. Doanh thu theo các tháng trong năm hiện tại ---
+    public Map<String, BigDecimal> getMonthlyRevenue(Long storeId) {
+        int year = LocalDate.now().getYear();
+        List<Object[]> results = invoiceRepository.getRevenueByMonth(storeId, year);
+
+        Map<String, BigDecimal> map = new LinkedHashMap<>();
+        for (int i = 1; i <= 12; i++) {
+            map.put("Tháng " + i, BigDecimal.ZERO);
+        }
+        for (Object[] row : results) {
+            Integer month = (Integer) row[0];
+            BigDecimal revenue = (BigDecimal) row[1];
+            map.put("Tháng " + month, revenue);
+        }
+        return map;
+    }
+
 
 
 }

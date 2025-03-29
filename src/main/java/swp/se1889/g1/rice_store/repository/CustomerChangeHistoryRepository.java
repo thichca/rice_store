@@ -24,6 +24,7 @@ public interface CustomerChangeHistoryRepository extends JpaRepository<CustomerC
     @Query("SELECT c FROM CustomerChangeHistory c WHERE " +
             "(COALESCE(:customerName, '') = '' OR c.customer.name LIKE CONCAT('%', :customerName, '%')) " +
             "AND (COALESCE(:changedField, '') = '' OR c.changedField LIKE CONCAT('%', :changedField, '%')) " +
+            "AND (COALESCE(:oldValue, '') = '' OR c.oldValue LIKE CONCAT('%', :oldValue, '%')) " +
             "AND (COALESCE(:changedBy, '') = '' OR c.changedBy.name LIKE CONCAT('%', :changedBy, '%')) " +
             "AND (COALESCE(:addInfo, '') = '' OR c.additionalInfo LIKE CONCAT('%', :addInfo, '%')) " +
             "AND (COALESCE(:startDate, null) IS NULL OR c.changedAt >= :startDate) " +
@@ -31,6 +32,7 @@ public interface CustomerChangeHistoryRepository extends JpaRepository<CustomerC
     Page<CustomerChangeHistory> advancedSearchCustomerChangeHistory(
             @Param("customerName") String customerName,
             @Param("changedField") String changedField,
+            @Param("oldValue") String oldValue,
             @Param("changedBy") String changedBy,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,

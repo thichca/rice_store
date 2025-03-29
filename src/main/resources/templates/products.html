@@ -2,20 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="">
 <head>
     <meta charset="UTF-8">
-    <title>Example</title>
+    <title>Quản lý sản phẩm</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <style>
-        #errorModal {
-            z-index: 1000; /* Đảm bảo modal luôn ở trên cùng */
-        }
-
-        #errorModal .bg-white {
-            z-index: 1001; /* Hộp thông báo bên trong modal */
-        }
-
-        .bg-gray-900.bg-opacity-50 {
-            z-index: 999; /* Lớp nền mờ của modal */
-        }
         #errorToast {
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
             opacity: 0;
@@ -59,9 +48,6 @@
     <div th:replace="~{fragments/header :: header}"></div>
 </div>
 <div class="mt-28">
-    <div th:if="${errorMessage}" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
-        <span th:text="${errorMessage}"></span>
-    </div>
     <div id="errorToast" class="hidden fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
     </div>
     <div id="successToast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
@@ -113,39 +99,6 @@
                 </form>
 
 
-            </div>
-        </div>
-        <!-- Modal Chi tiết chung -->
-        <div id="detailProductModal"
-             class="hidden fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
-            <div class="bg-white p-6 rounded-lg shadow-2xl w-[400px] relative z-50">
-                <h2 class="text-xl font-semibold mb-4 text-center">Chi tiết Sản phẩm</h2>
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-medium">Tên sản phẩm</label>
-                    <input type="text" id="detailName" class="border p-2 w-full rounded bg-gray-100" readonly>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-medium">Mô tả</label>
-                    <textarea id="detailDescription" class="border p-2 w-full rounded bg-gray-100" rows="4"
-                              readonly></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-medium">Giá</label>
-                    <input type="text" id="detailPrice" class="border p-2 w-full rounded bg-gray-100" readonly>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-medium">Ngày tạo</label>
-                    <input type="text" id="detailCreatedAt" class="border p-2 w-full rounded bg-gray-100" readonly>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-gray-700 font-medium">Ngày cập nhật</label>
-                    <input type="text" id="detailUpdatedAt" class="border p-2 w-full rounded bg-gray-100" readonly>
-                </div>
-                <div class="flex justify-end mt-4">
-                    <button type="button" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
-                            onclick="toggleModal('detailProductModal')">Đóng
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -224,7 +177,7 @@
                     <th class="border p-2 relative">Cập nhật
                         <div class="resizer"></div>
                     </th>
-                    <th class="border p-2 relative w-[340px]">Hành động
+                    <th class="border p-2 relative ">Hành động
                         <div class="resizer"></div>
                     </th>
                 </tr>
@@ -253,7 +206,7 @@
                         <td class="border p-2">
                             <div class="flex justify-center gap-3">
                                 <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded min-w-[100px]">Lọc</button>
-                                <a href="/owner/products" class="bg-gray-400 text-white px-4 py-1 rounded min-w-[100px] text-center">Xóa</a>
+                                <a href="/owner/products" class="bg-gray-400 text-white px-4 py-1 rounded min-w-[100px] text-center">Bỏ lọc</a>
                             </div>
 
                         </td>
@@ -272,19 +225,19 @@
                         th:text="${#temporals.format(product.updatedAt, 'dd/MM/yyyy ')}"></td>
                     <td class="border p-1">
                         <div class="flex flex-wrap gap-2 justify-center">
-                            <button class="flex-1 min-w-[100px] bg-blue-500 text-white px-2 py-1 rounded flex items-center justify-center hover:bg-blue-700 transition duration-200"
-                                    th:onclick="|showProductDetail(${product.id})|">
-                                <i class="fas fa-info mr-1"></i> Chi tiết
-                            </button>
-
-                            <button class="flex-1 min-w-[100px] bg-yellow-400 text-black px-2 py-1 rounded flex items-center justify-center hover:bg-yellow-500 transition duration-200"
+                            <button class="w-1/3 bg-yellow-300 text-black px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-yellow-500 hover:text-white transition duration-200"
+                                    data-full='<i class="fas fa-pencil-alt mr-1"></i> Sửa'
+                                    data-icon='<i class="fas fa-pencil-alt"></i>'
                                     th:onclick="|toggleModal('editProductModal-' + ${product.id})|">
                                 <i class="fas fa-pencil-alt mr-1"></i> Sửa
                             </button>
-
-                            <button class="flex-1 min-w-[100px] bg-red-500 text-white px-2 py-1 rounded flex items-center justify-center hover:bg-red-700 transition duration-200"
+                            <button class="w-1/3 bg-white border border-red-500 text-red-500 px-2 py-1 rounded flex items-center justify-center toggle-btn
+                                    hover:bg-red-500 hover:text-white transition duration-200"
+                                    data-full='<i class="fas fa-trash-alt mr-1"></i> Xoá'
+                                    data-icon='<i class="fas fa-trash-alt"></i>'
                                     th:onclick="|if(confirm('Bạn có chắc muốn xóa sản phẩm này?')) window.location.href='@{/delete/{id}(id=${product.id})}'|">
-                                <i class="fas fa-trash mr-1"></i> Xóa
+                                <i class="fas fa-trash-alt mr-1"></i> Xóa
                             </button>
                         </div>
 
@@ -420,53 +373,6 @@
         }
     </script>
     <script>
-        async function showProductDetail(productId) {
-            try {
-                let response = await fetch(`/edit-product/${productId}`);
-                let product = await response.json();
-
-                document.getElementById("detailName").value = product.name;
-                document.getElementById("detailDescription").value = product.description;
-                document.getElementById("detailPrice").value = product.price;
-
-                // Định dạng ngày giờ
-                let createdAt = new Date(product.createdAt).toLocaleString('vi-VN', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-                let updatedAt = new Date(product.updatedAt).toLocaleString('vi-VN', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-
-                document.getElementById("detailCreatedAt").value = createdAt;
-                document.getElementById("detailUpdatedAt").value = updatedAt;
-
-                toggleModal("detailProductModal");
-            } catch (error) {
-                console.error("Lỗi khi lấy thông tin sản phẩm:", error);
-                alert("Không thể tải thông tin sản phẩm!");
-            }
-        }
-
-        function toggleModal(modalId) {
-            let modal = document.getElementById(modalId);
-            modal.classList.toggle("hidden");
-        }
-        document.addEventListener("DOMContentLoaded", function () {
-            togglePriceInput();
-        });
-
-
-
         async function submitEditProductForm(event, form) {
             event.preventDefault();  // Ngăn form reload trang
 
