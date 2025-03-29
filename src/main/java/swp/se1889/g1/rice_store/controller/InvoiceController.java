@@ -236,7 +236,7 @@ public class InvoiceController {
         List<String> productNameList = new ArrayList<>();
         List<String> zoneNameList = new ArrayList<>();
         for (InvoicesDetails iD : invoicesDetails) {
-            Product product = productService.findProductById(iD.getId());
+            Product product = productService.findProductById(iD.getProduct().getId());
             Zone zone = zoneService.getZoneById(iD.getZone().getId());
 
             productNameList.add(product.getName());
