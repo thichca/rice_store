@@ -133,6 +133,7 @@ public class CustomerChangeHistoryService {
     public Page<CustomerChangeHistoryDTO> searchCustomerChanges(
             String customerName,
             String changedField,
+            String oldValue,
             String changedBy,
             LocalDateTime startDate,
             LocalDateTime endDate,
@@ -141,7 +142,7 @@ public class CustomerChangeHistoryService {
     ) {
 
         Page<CustomerChangeHistory> changePage = changeHistoryRepository.advancedSearchCustomerChangeHistory(
-                customerName, changedField, changedBy, startDate, endDate, addInfo.getUsername(), pageable
+                customerName, changedField,oldValue, changedBy, startDate, endDate, addInfo.getUsername(), pageable
         );
 
         return changePage.map(change -> new CustomerChangeHistoryDTO(

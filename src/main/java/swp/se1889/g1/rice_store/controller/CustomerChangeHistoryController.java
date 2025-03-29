@@ -40,6 +40,7 @@ public class CustomerChangeHistoryController {
     public String getCustomerChangeHistory(
             @RequestParam(required = false) String customerName,
             @RequestParam(required = false) String changedField,
+            @RequestParam(required = false) String oldValue,
             @RequestParam(required = false) String changedBy,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
@@ -75,10 +76,21 @@ public class CustomerChangeHistoryController {
                 parsedEndDate = null;
             }
         }
-
+        if(customerName != null && !customerName.trim().isEmpty()) {
+            customerName = customerName.trim();
+        }
+        if(changedField != null && !changedField.trim().isEmpty()) {
+            changedField = changedField.trim();
+        }
+        if(oldValue != null && !oldValue.trim().isEmpty()) {
+            oldValue = oldValue.trim();
+        }
+        if(changedBy != null && !changedBy.trim().isEmpty()) {
+            changedBy = changedBy.trim();
+        }
         Pageable pageable = PageRequest.of(page, size);
         Page<CustomerChangeHistoryDTO> changeHistories = customerChangeHistoryService.searchCustomerChanges(
-                customerName, changedField, changedBy, parsedStartDate, parsedEndDate, user2, pageable
+                customerName, changedField,oldValue, changedBy, parsedStartDate, parsedEndDate, user2, pageable
         );
 
         model.addAttribute("changeHistories", changeHistories.getContent());
