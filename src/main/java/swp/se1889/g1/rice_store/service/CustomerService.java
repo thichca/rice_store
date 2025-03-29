@@ -10,7 +10,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1889.g1.rice_store.dto.CustomerDTO;
+import swp.se1889.g1.rice_store.dto.CustomerInvoiceDTO;
 import swp.se1889.g1.rice_store.entity.Customer;
 import swp.se1889.g1.rice_store.entity.Store;
 import swp.se1889.g1.rice_store.entity.User;
@@ -40,6 +42,7 @@ public class CustomerService {
         this.customerRepository = customerRepository;
         this.changeHistoryService = changeHistoryService;
     }
+
     public CustomerDTO getCustomerById(Long id) {
         Optional<Customer> customerOpt = customerRepository.findById(id);
         if (customerOpt.isPresent()) {
@@ -199,7 +202,6 @@ public class CustomerService {
     }
 
 
-
     public List<CustomerDTO> searchCustomers(String query) {
         return customerRepository.searchCustomerDetails(query);
     }
@@ -210,5 +212,38 @@ public class CustomerService {
 
     public Customer saveCustomer(Customer customer) {
         return customerRepository.save(customer);
+    }
+
+    public Customer createCustomerInvoice(CustomerInvoiceDTO customerInvoiceDTO, RedirectAttributes redirectAttributes) {
+        boolean hasError = false;
+
+        if (customerRepository.findCustomerByEmail(customerInvoiceDTO.getCustomerInvoiceEmail()) != null) {
+            redirectAttributes.addFlashAttribute("error", "Email khách hàng đã tồn tại");
+            hasError = true;
+        }
+
+        if (customerRepository.findCustomerByPhone(customerInvoiceDTO.getCustomerInvoicePhone()) != null) {
+            redirectAttributes.addFlashAttribute("error", "Số điện thoại khách hàng đã tồn tại");
+            hasError = true;
+        }
+
+        if (hasError) {
+            return null;
+        }
+
+        Customer customer = new Customer();
+        customer.setName(customerInvoiceDTO.getCustomerInvoiceName());
+        customer.setPhone(customerInvoiceDTO.getCustomerInvoicePhone());
+        customer.setAddress(customerInvoiceDTO.getCustomerInvoiceAddress());
+        customer.setEmail(customerInvoiceDTO.getCustomerInvoiceEmail());
+        User currentUser = getCurrentUser();
+        customer.setCreatedBy(currentUser);
+
+        try {
+            customerRepository.save(customer);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while saving store: " + e.getMessage());
+        }
+        return customer;
     }
 }

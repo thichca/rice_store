@@ -3,8 +3,6 @@ package swp.se1889.g1.rice_store.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -22,7 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class CustomerChangeHistoryService {
@@ -48,8 +46,8 @@ public class CustomerChangeHistoryService {
             if (user.getRole().equals("ROLE_OWNER")) {
                 return user.getUsername();
             } else {
-                Store store = storeRepository.findById(user.getCreatedBy());
-                User user2 = userRepository.findByUsername(store.getCreatedBy());
+                Optional<Store> store = storeRepository.findById(user.getCreatedBy());
+                User user2 = userRepository.findByUsername(store.get().getCreatedBy());
                 return user2.getUsername();
             }
         }
@@ -73,7 +71,7 @@ public class CustomerChangeHistoryService {
             CustomerChangeHistory change = createChangeHistory(
                     originalCustomer, "Số điện thoại",
                     updatedCustomer.getPhone(),
-                    originalCustomer.getPhone(),  changedBy);
+                    originalCustomer.getPhone(), changedBy);
             change.setAdditionalInfo(getAdditionalInfo());
             changeHistories.add(change);
         }
@@ -82,7 +80,7 @@ public class CustomerChangeHistoryService {
             CustomerChangeHistory change = createChangeHistory(
                     originalCustomer, "Địa Chỉ",
                     updatedCustomer.getAddress(),
-                    originalCustomer.getAddress(),  changedBy);
+                    originalCustomer.getAddress(), changedBy);
             change.setAdditionalInfo(getAdditionalInfo());
             changeHistories.add(change);
         }
@@ -91,7 +89,7 @@ public class CustomerChangeHistoryService {
             CustomerChangeHistory change = createChangeHistory(
                     originalCustomer, "email",
                     updatedCustomer.getEmail(),
-                    originalCustomer.getEmail(),  changedBy);
+                    originalCustomer.getEmail(), changedBy);
             change.setAdditionalInfo(getAdditionalInfo());
             changeHistories.add(change);
         }
@@ -142,7 +140,7 @@ public class CustomerChangeHistoryService {
     ) {
 
         Page<CustomerChangeHistory> changePage = changeHistoryRepository.advancedSearchCustomerChangeHistory(
-                customerName, changedField,oldValue, changedBy, startDate, endDate, addInfo.getUsername(), pageable
+                customerName, changedField, oldValue, changedBy, startDate, endDate, addInfo.getUsername(), pageable
         );
 
         return changePage.map(change -> new CustomerChangeHistoryDTO(

@@ -20,10 +20,14 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSpecificationExecutor<Customer> {
     Optional<Customer> findById(Long id);
+
     List<Customer> findByPhone(String phone);
+
     List<Customer> findByemail(String email);
 
     Customer findCustomerByPhone(String phone);
+
+    Customer findCustomerByEmail(String email);
 
     @Query("SELECT new swp.se1889.g1.rice_store.dto.CustomerDTO(c.id, c.name, c.phone, c.address, c.email) FROM Customer c WHERE c.isDeleted = false AND c.name LIKE %:query%")
     List<CustomerDTO> searchCustomerDetails(@Param("query") String query);
