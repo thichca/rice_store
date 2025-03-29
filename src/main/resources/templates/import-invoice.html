@@ -7,16 +7,122 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        #errorModal {
+            z-index: 1000; /* Đảm bảo modal luôn ở trên cùng */
+        }
+
+        #errorModal .bg-white {
+            z-index: 1001; /* Hộp thông báo bên trong modal */
+        }
+
+        .bg-gray-900.bg-opacity-50 {
+            z-index: 999;
+        }
+
+        #errorToast {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            opacity: 0;
+            transform: translateX(100px);
+            max-width: 300px;
+        }
+
+        #errorToast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        #errorToast ul {
+            list-style-type: disc;
+            padding-left: 1rem;
+            margin: 0;
+        }
+
+        #errorToast li {
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 4px; /* Tạo khoảng cách giữa các lỗi */
+        }
+
+        #successToast {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            opacity: 0;
+            transform: translateX(100px);
+            max-width: 300px;
+        }
+
+        #successToast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
 <div th:replace="~{fragments/header :: header}"></div><br><br>
+<div th:if="${errorMessage}" class="bg-red-500 text-white px-4 py-2 rounded mb-4">
+    <span th:text="${errorMessage}"></span>
+</div>
+<div id="errorToast"
+     class="hidden fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
+</div>
+<div id="successToast"
+     class="hidden fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500">
+</div>
 <div class="max-w-screen-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
-    <form id="invoiceForm" th:action="@{/owner/invoices/import}" method="post">
-        <input type="hidden" name="storeId" th:value="${store.id}">
-
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-semibold text-gray-800">Hóa Đơn Nhập Kho</h1>
         </div>
+        <div class="flex justify-between items-center mb-6">
+            <button onclick="toggleModal('addCustomerModal')"
+                    class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
+                <i class="fas fa-plus mr-2"></i> THÊM KHÁCH HÀNG
+            </button>
+        </div>
+    <!-- Modal Thêm Khách Hàng -->
+    <div id="addCustomerModal"
+         class="hidden fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50 z-50">
+        <div class="bg-white p-6 rounded-lg shadow-2xl w-[400px] relative z-50">
+            <h2 class="text-xl font-semibold mb-4 text-center">Thêm Khách Hàng</h2>
+            <form th:action="@{/owner/invoices/import/add}" th:object="${newCustomer}" method="post"
+                  onsubmit="submitCustomerForm(event)">
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-medium">Tên khách hàng</label>
+                    <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{name}">
+                    <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-red-500"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-medium">Số điện thoại</label>
+                    <input type="text" class="border p-2 w-full rounded focus:outline-blue-500" th:field="*{phone}">
+                    <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="text-red-500"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-medium">Địa chỉ</label>
+                    <input type="text" class="border p-2 w-full rounded focus:outline-blue-500"
+                           th:field="*{address}">
+                    <span th:if="${#fields.hasErrors('address')}" th:errors="*{address}"
+                          class="text-red-500"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-gray-700 font-medium">Email</label>
+                    <input type="email" class="border p-2 w-full rounded focus:outline-blue-500"
+                           th:field="*{email}">
+                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500"></span>
+                </div>
+
+                <div class="flex justify-end mt-4 gap-3">
+                    <button type="button" class="bg-gray-400 text-white px-4 py-2 rounded"
+                            onclick="toggleModal('addCustomerModal')">Hủy
+                    </button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <form id="invoiceForm" th:action="@{/owner/invoices/import}" method="post">
+        <input type="hidden" name="storeId" th:value="${store.id}">
         <div class="grid grid-cols-1 lg:grid-cols-10 gap-6">
             <div class="lg:col-span-7 bg-gray-100 p-6 rounded-lg shadow-md hover:shadow-xl transition duration-300">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">Danh Sách Sản Phẩm</h2>
@@ -318,8 +424,8 @@
             total += totalPrice;
         });
         $('[name="totalPrice"]').val(total.toFixed(2));
-        // Kích hoạt sự kiện change của paymentMethod để cập nhật lại
-        $('#paymentMethod').trigger('change');
+        // // Kích hoạt sự kiện change của paymentMethod để cập nhật lại
+        // $('#paymentMethod').trigger('change');
         calculateRemaining();
     }
 
@@ -345,15 +451,118 @@
         }
         $('[name="remainingAmount"]').val(remaining.toFixed(2));
     }
-    function updateTotal() {
-        const paidAmount = parseFloat($('[name="paidAmount"]').val()) || 0;
-        $('[name="totalPrice"]').val(paidAmount.toFixed(2)); // Tổng tiền bằng thanh toán
+
+    function toggleModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.toggle("hidden");
     }
+    async function submitCustomerForm(event) {
+        event.preventDefault();  // Ngăn form reload trang mặc định
 
-    // Gọi hàm khi người dùng nhập thanh toán
-    $('[name="paidAmount"]').on('input', updateTotal);
+        let form = event.target;
+        let formData = new FormData(form);
+
+        let response = await fetch(form.action, {
+            method: form.method,
+            body: formData
+        });
+
+        let result = await response.json();
+        if (!response.ok) {
+            let errors = [];
+            if (result.errorMessage) {
+                errors.push(result.errorMessage);
+            } else {
+                for (const [field, message] of Object.entries(result)) {
+                    errors.push(message);
+                }
+            }
+            let errorMessage = errors.join("\n");  // Gộp lỗi thành danh sách
+            showErrorToast(errorMessage);
+        } else {
+            // Lưu thông báo vào localStorage trước khi reload
+            localStorage.setItem("successMessage", result.message);
+
+            // Reload trang ngay lập tức
+            location.reload();
+        }
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        let successMessage = localStorage.getItem("successMessage");
+        if (successMessage) {
+            showSuccessToast(successMessage);
+            // Xóa thông báo khỏi localStorage sau khi hiển thị để tránh lặp lại
+            localStorage.removeItem("successMessage");
+            // Ẩn thông báo sau 2 giây
+            setTimeout(() => {
+                document.getElementById("successToast").classList.remove("show");
+                setTimeout(() => document.getElementById("successToast").classList.add("hidden"), 500);
+            }, 2000);
+        }
+    });
+    function showErrorToast(message) {
+        let toast = document.getElementById("errorToast");
+
+        // Kiểm tra nếu message chứa nhiều lỗi, hiển thị dưới dạng danh sách
+        let errorMessageHTML = "<ul class='list-disc pl-4'>";
+        message.split("\n").forEach(msg => {
+            if (msg.trim() !== "") {
+                errorMessageHTML += `<li>${msg}</li>`;
+            }
+        });
+        errorMessageHTML += "</ul>";
+        toast.innerHTML = errorMessageHTML;
+        toast.classList.add("show");
+        toast.classList.remove("hidden");
+        // Sau 2 giây thì ẩn đi
+        setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => toast.classList.add("hidden"), 500);
+        }, 2000);
+    }
+    function showSuccessToast(message) {
+        let toast = document.getElementById("successToast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        toast.classList.remove("hidden");
+        // Ẩn sau 2 giây
+        setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => toast.classList.add("hidden"), 500);
+        }, 2000);
+    }
+    async function submitUpdateForm(event, customerId) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: formData
+        });
+        const result = await response.json();
+        if (!response.ok) {
+            let errors = [];
+
+            if (result.errorMessage) {
+                errors.push(result.errorMessage);
+            } else {
+                for (const [field, message] of Object.entries(result)) {
+                    errors.push(message);
+                }
+            }
+            showErrorToast(errors.join("\n"));
+        } else {
+            localStorage.setItem("successMessage", result.message);
+
+            // Đóng modal
+            const modalId = `editCustomerModal-${customerId}`;
+            toggleModal(modalId);
+
+            // Reload đúng URL hiện tại (giữ lại page & filter)
+            location.href = window.location.href;
+        }
+    }
 </script>
-
 <div th:replace="~{fragments/script :: script}"></div>
 </body>
 </html>

@@ -42,4 +42,10 @@ public class DebtRecordsSpecifications {
     public static Specification<DebtRecords> createdAtBefore(Date dateMax) {
         return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("createdAt"), dateMax);
     }
+    public static Specification<DebtRecords> hasCreateOn(Date dateMin2) {
+        return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("createOn"), dateMin2);
+    }
+    public static Specification<DebtRecords> hasCreateOn2(Date dateMax2){
+        return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("createOn"), dateMax2);
+    }
 }

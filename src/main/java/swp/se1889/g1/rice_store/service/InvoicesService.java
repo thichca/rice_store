@@ -18,6 +18,9 @@ import swp.se1889.g1.rice_store.repository.*;
 import swp.se1889.g1.rice_store.specification.InvoiceSpecifications;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -37,6 +40,14 @@ public class InvoicesService {
     private ZoneRepository zoneRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private DebtRecordRepository debtRecordsRepository;
+    @Autowired
+    private DebtRecordService debtRecordService;
+
+
+
+
 
     // Hàm tìm kiếm hóa đơn theo ID cửa hàng
     public List<Invoices> findByStore(Long storeId) {
@@ -80,8 +91,7 @@ public class InvoicesService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy cửa hàng với ID: " + dto.getStoreId()));
         // 3. Tính toán tổng giá trị hóa đơn
         BigDecimal totalPrice = calculateTotalPrice(dto.getDetails());
-        BigDecimal discount = dto.getDiscount() != null ? dto.getDiscount() : BigDecimal.ZERO;
-        BigDecimal finalAmount = totalPrice.subtract(discount);
+        BigDecimal finalAmount = totalPrice;
         // 4. Lấy thông tin về phương thức thanh toán và số tiền đã trả
         String paymentMethod = dto.getPaymentMethod();
         BigDecimal paidAmount = dto.getPaidAmount() != null ? dto.getPaidAmount() : BigDecimal.ZERO;
@@ -89,42 +99,85 @@ public class InvoicesService {
         BigDecimal debtBalance = customer.getDebtBalance() != null ? customer.getDebtBalance() : BigDecimal.ZERO;
         // 6. Tính toán nợ mới dựa trên phương thức thanh toán
         BigDecimal newDebtBalance;
-        if ("productAndDebt".equals(paymentMethod)) {
-            // Thanh toán tiền hàng + nợ: Trả cả hóa đơn và nợ cũ
+        BigDecimal debtChange;
+        DebtRecords.DebtType debtType = null;
+        if ("onlyProduct".equals(paymentMethod)) {
+            // Chỉ thanh toán tiền hàng
+            if (paidAmount.compareTo(finalAmount) < 0) {
+                // Trả thiếu: Tôi nợ nhà cung cấp
+                newDebtBalance = debtBalance.add(finalAmount.subtract(paidAmount));
+                debtChange = finalAmount.subtract(paidAmount);
+                debtType = DebtRecords.DebtType.Shop_debt_customer;
+            } else if (paidAmount.compareTo(finalAmount) > 0) {
+                // Trả thừa: Nhà cung cấp nợ tôi
+                newDebtBalance = debtBalance.subtract(paidAmount.subtract(finalAmount));
+                debtChange = paidAmount.subtract(finalAmount);
+                debtType = DebtRecords.DebtType.Customer_debt_shop;
+            } else {
+                // Trả đủ: Không thay đổi nợ
+                newDebtBalance = debtBalance;
+                debtChange = BigDecimal.ZERO;
+            }
+        } else if ("productAndDebt".equals(paymentMethod)) {
+            // Thanh toán tiền hàng + nợ
+            // Trong phần xử lý "productAndDebt":
             BigDecimal totalDue = finalAmount.add(debtBalance);
             if (paidAmount.compareTo(totalDue) < 0) {
-                newDebtBalance = totalDue.subtract(paidAmount); // Còn nợ nếu trả chưa đủ
+                // Cửa hàng còn nợ khách (Shop_debt_customer)
+                newDebtBalance = totalDue.subtract(paidAmount);
+                debtChange = totalDue.subtract(paidAmount); // Số tiền tăng vào nợ
+                debtType = DebtRecords.DebtType.Shop_debt_customer;
+            } else if (paidAmount.compareTo(totalDue) > 0) {
+                // Khách nợ cửa hàng (Customer_debt_shop)
+                newDebtBalance = paidAmount.subtract(totalDue);
+                debtChange = paidAmount.subtract(totalDue); // Số tiền khách nợ cửa hàng
+                debtType = DebtRecords.DebtType.Customer_debt_shop;
             } else {
-                newDebtBalance = paidAmount.subtract(totalDue).negate(); // Trả thừa, nợ mới là số âm (số dư dương)
-            }
-        } else if ("onlyProduct".equals(paymentMethod)) {
-            // Chỉ tiền hàng: Chỉ trả cho hóa đơn, nợ cũ giữ nguyên
-            if (paidAmount.compareTo(finalAmount) < 0) {
-                newDebtBalance = debtBalance.add(finalAmount.subtract(paidAmount)); // Tăng nợ nếu trả thiếu
-            } else {
-                newDebtBalance = debtBalance.subtract(paidAmount.subtract(finalAmount)); // Trả thừa, giảm nợ (có thể âm)
+                newDebtBalance = BigDecimal.ZERO;
+                debtChange = debtBalance.negate(); // 288.000 nếu debtBalance = -288.000
+                if (debtChange.compareTo(BigDecimal.ZERO) > 0) {
+                    debtType = DebtRecords.DebtType.Shop_debt_customer; // Tăng debtBalance
+                } else if (debtChange.compareTo(BigDecimal.ZERO) < 0) {
+                    debtType = DebtRecords.DebtType.Customer_debt_shop; // Giảm debtBalance
+                    debtChange = debtChange.negate(); // Đảm bảo amount dương
+                } else {
+                    debtType = null; // Không cần bản ghi nếu debtBalance đã là 0
+                }
             }
         } else {
             throw new RuntimeException("Phương thức thanh toán không hợp lệ");
         }
         // 7. Cập nhật nợ mới cho khách hàng
-        customer.setDebtBalance(newDebtBalance);
-        customerRepository.save(customer);
+
         // 4. Tạo hóa đơn
         Invoices invoice = new Invoices();
         invoice.setStore(storeFromDb);  // Lưu trữ cửa hàng đã xác thực
         invoice.setCustomer(customer);
-        invoice.setTotalPrice(paidAmount);
-        invoice.setDiscount(discount);
+        invoice.setTotalPrice(totalPrice);
         invoice.setFinalAmount(finalAmount);
         invoice.setNote(dto.getNote());
         invoice.setQuantity(invoice.getQuantity());
         invoice.setType(Invoices.InvoiceType.Purchase);
-        invoice.setStatus("Unpaid");
+        invoice.setStatus("Paid");
         invoice.setIsDeleted(false);
         invoice.setCreatedBy(currentUser);
 
         Invoices savedInvoice = invoiceRepository.save(invoice);
+        // Trong phần tạo DebtRecords:
+        if (debtType != null && debtChange.compareTo(BigDecimal.ZERO) != 0) {
+            DebtRecords debtRecord = new DebtRecords();
+            debtRecord.setCustomerId(customer.getId());
+            debtRecord.setCreateOn(LocalDateTime.now());
+            debtRecord.setUpdatedAt(LocalDateTime.now());
+            debtRecord.setCreatedBy(currentUser);
+            debtRecord.setType(debtType);
+            debtRecord.setAmount(debtChange); // Luôn lấy giá trị dương
+            debtRecord.setNote("Giao dịch từ hóa đơn nhập hàng #" + savedInvoice.getId());
+            debtRecordService.addDebt(debtRecord);
+            customer.setDebtBalance(newDebtBalance);
+            customerRepository.save(customer);
+        }
+
 
         // 5. Tạo chi tiết hóa đơn và cập nhật kho (zone)
         updateInventory(dto.getDetails(), savedInvoice, currentUser);
@@ -185,67 +238,6 @@ public class InvoicesService {
         return null;
     }
 
-    public List<BigDecimal> getRevenueByMonth(Long storeId) {
-        List<BigDecimal> monthlyRevenue = new ArrayList<>(Collections.nCopies(6, BigDecimal.ZERO));
-        List<Object[]> results;
-
-        if (storeId != null) {
-            results = invoiceRepository.getSaleRevenueByMonthAndStore(storeId);
-        } else {
-            results = invoiceRepository.getSaleRevenueByMonth();
-        }
-
-        for (Object[] row : results) {
-            int month = (int) row[0];
-            BigDecimal revenue = (BigDecimal) row[1];
-            if (month >= 1 && month <= 6) {
-                monthlyRevenue.set(month - 1, revenue);
-            }
-        }
-
-        return monthlyRevenue;
-    }
-
-    public List<Object[]> getTop5CustomersBySpending() {
-        return invoiceRepository.findTop5CustomersBySpending(PageRequest.of(0, 5));
-    }
-
-
-    // Lấy tổng số hóa đơn theo User hiện tại
-    public long countInvoicesByCurrentUser() {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return invoiceRepository.countByCreatedBy(currentUser);
-        }
-        return 0;
-    }
-
-    // Lấy tổng số hóa đơn theo User + Store
-    public long countInvoicesByUserAndStore(Long storeId) {
-        User currentUser = getCurrentUser();
-        if (currentUser != null && storeId != null) {
-            return invoiceRepository.countByUserAndStore(currentUser, storeId);
-        }
-        return 0;
-    }
-
-    // Lấy tổng doanh thu theo User hiện tại
-    public BigDecimal getTotalRevenueByCurrentUser() {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return invoiceRepository.getTotalRevenueByUser(currentUser);
-        }
-        return BigDecimal.ZERO;
-    }
-
-    // Lấy tổng doanh thu theo User + Store
-    public BigDecimal getTotalRevenueByUserAndStore(Long storeId) {
-        User currentUser = getCurrentUser();
-        if (currentUser != null && storeId != null) {
-            return invoiceRepository.getTotalRevenueByUserAndStore(currentUser, storeId);
-        }
-        return BigDecimal.ZERO;
-    }
 
     public Invoices update(Long id, String newStatus) {
         Invoices invoices = invoiceRepository.findById(id).orElse(null);
@@ -306,23 +298,63 @@ public class InvoicesService {
         return invoiceRepository.findAll(spec, pageable);
     }
 
-    // Tổng doanh thu theo user và chỉ loại hóa đơn "Sale"
-    public BigDecimal getTotalSaleRevenueByCurrentUser() {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return invoiceRepository.getTotalSaleRevenueByUser(currentUser, Invoices.InvoiceType.Sale);
-        }
-        return BigDecimal.ZERO;
+    // --- A. Tổng hóa đơn hôm nay ---
+    public long getTodayInvoiceCount(Long storeId) {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        return invoiceRepository.countTodayInvoices(storeId, start, end);
     }
 
-    // Tổng doanh thu theo user + store và chỉ loại hóa đơn "Sale"
-    public BigDecimal getTotalSaleRevenueByUserAndStore(Long storeId) {
-        User currentUser = getCurrentUser();
-        if (currentUser != null && storeId != null) {
-            return invoiceRepository.getTotalSaleRevenueByUserAndStore(currentUser, storeId, Invoices.InvoiceType.Sale);
-        }
-        return BigDecimal.ZERO;
+
+    // --- B. Tổng doanh thu hôm nay ---
+    public BigDecimal getTodayRevenue(Long storeId) {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        return invoiceRepository.sumTodayRevenue(storeId, start, end);
     }
+
+
+    // --- C. Doanh thu theo thứ trong tuần hiện tại ---
+    public Map<String, BigDecimal> getWeeklyRevenue(Long storeId) {
+        LocalDate today = LocalDate.now();
+        LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
+        LocalDate endOfWeek = today.with(DayOfWeek.SUNDAY);
+
+        List<Object[]> results = invoiceRepository.getRevenueByWeekday(
+                storeId,
+                startOfWeek.atStartOfDay(),
+                endOfWeek.plusDays(1).atStartOfDay()
+        );
+
+        Map<String, BigDecimal> map = new LinkedHashMap<>();
+        String[] weekdays = {"Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"};
+        for (int i = 0; i < 7; i++) map.put(weekdays[i], BigDecimal.ZERO);
+        for (Object[] row : results) {
+            Integer dayOfWeek = (Integer) row[0];
+            BigDecimal revenue = (BigDecimal) row[1];
+            map.put(weekdays[dayOfWeek - 1], revenue);
+        }
+        return map;
+    }
+
+
+    // --- D. Doanh thu theo các tháng trong năm hiện tại ---
+    public Map<String, BigDecimal> getMonthlyRevenue(Long storeId) {
+        int year = LocalDate.now().getYear();
+        List<Object[]> results = invoiceRepository.getRevenueByMonth(storeId, year);
+
+        Map<String, BigDecimal> map = new LinkedHashMap<>();
+        for (int i = 1; i <= 12; i++) {
+            map.put("Tháng " + i, BigDecimal.ZERO);
+        }
+        for (Object[] row : results) {
+            Integer month = (Integer) row[0];
+            BigDecimal revenue = (BigDecimal) row[1];
+            map.put("Tháng " + month, revenue);
+        }
+        return map;
+    }
+
 
 
 }

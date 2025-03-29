@@ -42,14 +42,6 @@ public class ProductService {
 
     @Autowired
     private UserRepository userRepository;
-    // Lấy tổng số sản phẩm theo user hiện tại
-    public long countProductsByCurrentUser() {
-        User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return productRepository.countByCreatedBy(currentUser);
-        }
-        return 0;
-    }
 
 
     public Product getProductToDelete(Long id) {

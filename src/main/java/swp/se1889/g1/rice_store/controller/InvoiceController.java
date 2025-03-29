@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,11 +16,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.se1889.g1.rice_store.dto.*;
 import swp.se1889.g1.rice_store.entity.*;
 import swp.se1889.g1.rice_store.repository.*;
-import swp.se1889.g1.rice_store.service.InvoicesService;
+import swp.se1889.g1.rice_store.service.*;
 import swp.se1889.g1.rice_store.service.Iservice.UserService;
-import swp.se1889.g1.rice_store.service.ProductService;
-import swp.se1889.g1.rice_store.service.UserServiceIpml;
-import swp.se1889.g1.rice_store.service.ZoneService;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -40,11 +38,14 @@ public class InvoiceController {
     private final InvoiceDetailRepository invoiceDetailRepository;
     private final UserServiceIpml userService;
     private final InvoicesRepository invoicesRepository;
+    private final CustomerService customerService;
+
 
 
     @Autowired
     public InvoiceController(ProductRepository productRepository, CustomerRepository customerRepository, InvoicesService invoiceService, ZoneRepository zoneRepository, InvoiceDetailRepository invoiceDetailRepository
-            , UserServiceIpml userService, InvoicesRepository invoicesRepository, ProductService productService, ZoneService zoneService) {
+            , UserServiceIpml userService, InvoicesRepository invoicesRepository,
+                             ProductService productService, ZoneService zoneService , CustomerService customerService) {
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.invoiceService = invoiceService;
@@ -54,12 +55,13 @@ public class InvoiceController {
         this.invoicesRepository = invoicesRepository;
         this.productService = productService;
         this.zoneService = zoneService;
+        this.customerService = customerService;
     }
 
     @GetMapping
     public String listInvoices(Model model, HttpSession session,
                                @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "10") int size,
+                               @RequestParam(defaultValue = "5") int size,
                                @RequestParam(required = false) String idMin,
                                @RequestParam(required = false) String idMax,
                                @RequestParam(required = false) String note,
@@ -150,6 +152,7 @@ public class InvoiceController {
         return null;
     }
 
+
     @GetMapping("/import")
     public String showImportForm(Model model, HttpSession session, String name ) {
         model.addAttribute("invoice", new InvoicesDTO());
@@ -160,6 +163,7 @@ public class InvoiceController {
         model.addAttribute("customer", new Customer());
         model.addAttribute("product", new Product());
         model.addAttribute("zone", new Zone());
+        model.addAttribute("newCustomer" , new CustomerDTO());
         return "import-invoice";
     }
 
@@ -186,7 +190,6 @@ public class InvoiceController {
     public Customer searchCustomer(@RequestParam String phone) {
         return customerRepository.findCustomerByPhone(phone);
     }
-
     @PostMapping("/import")
     public String saveInvoice(@Valid @ModelAttribute InvoicesDTO invoiceDTO,
                               BindingResult bindingResult,
@@ -280,6 +283,25 @@ public class InvoiceController {
         }
         return "redirect:/owner/invoices";
     }
+    // Endpoint thêm khách hàng (sử dụng cho modal trong trang import)
+    @PostMapping("/import/add")
+    @ResponseBody
+    public ResponseEntity<?> addCustomer(@Valid @ModelAttribute("newCustomer") CustomerDTO customerDTO,
+                                         BindingResult result) {
+        if (result.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        try {
+            customerService.createCustomer(customerDTO);
+            return ResponseEntity.ok().body(Collections.singletonMap("message", "Thêm khách hàng thành công!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("errorMessage", e.getMessage()));
+        }
+    }
+
 }
 
 

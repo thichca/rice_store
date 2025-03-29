@@ -42,7 +42,7 @@
             <div class="resizer"></div>
           </th>
         </tr>
-        <form method="get" action="/owner/zones">
+        <form method="get" action="/zones">
           <tr class="bg-gray-50">
             <td class="border p-2">
               <input type="text" name="productName" th:value="${productName}" class="w-full border rounded p-1" placeholder="Tên sản phẩm">
@@ -68,7 +68,7 @@
             <td class="border p-2">
               <div class="flex justify-center gap-3">
                 <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded min-w-[100px]">Lọc</button>
-                <a href="/owner/zones" class="bg-gray-400 text-white px-4 py-1 rounded min-w-[100px] text-center">Xóa</a>
+                <a href="zones" class="bg-gray-400 text-white px-4 py-1 rounded min-w-[100px] text-center">Xóa</a>
               </div>
             </td>
           </tr>
@@ -82,7 +82,7 @@
           <td class="border p-2" th:text="${item.description}"></td>
           <td class="border p-2" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
           <td class="border p-2" th:text="${item.zoneName}"></td>
-          <td class="border p-2" th:text="${item.quantity}"></td>
+          <td class="border p-2" th:text="${#numbers.formatDecimal(item.quantity, 0, 'COMMA', 0, 'POINT') + ' kg'}"></td>
           <td class="border p-2 text-center">--</td> <!-- Placeholder cho hành động -->
         </tr>
         </tbody>
@@ -91,7 +91,7 @@
     <div class="w-full flex justify-center items-center mt-4 gap-2" th:if="${totalPages > 0}">
       <!-- Nút "Trước" -->
       <a th:if="${currentPage > 0}"
-         th:href="@{/owner/zones(
+         th:href="@{/zones(
            page=${currentPage - 1},
            size=5,
            productName=${productName},
@@ -108,7 +108,7 @@
 
       <!-- Danh sách trang -->
       <th:block th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}">
-        <a th:href="@{/owner/zones(
+        <a th:href="@{/zones(
              page=${pageNumber},
              size=5,
              productName=${productName},
@@ -127,7 +127,7 @@
 
       <!-- Nút "Sau" -->
       <a th:if="${currentPage + 1 < totalPages}"
-         th:href="@{/owner/zones(
+         th:href="@{/zones(
            page=${currentPage + 1},
            size=5,
            productName=${productName},
