@@ -86,6 +86,7 @@ public class CustomerChangeHistoryController {
         model.addAttribute("totalPages", changeHistories.getTotalPages());
         model.addAttribute("totalItems", changeHistories.getTotalElements());
         model.addAttribute("user", userDetails);
+        model.addAttribute("changedField", changedField);
 
         return "CustomerChangeHistory";
     }

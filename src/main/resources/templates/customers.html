@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="">
 <head>
     <meta charset="UTF-8">
     <title>Example</title>
@@ -192,7 +192,11 @@
             </div>
         </div>
 
-
+        <a sec:authorize="hasRole('ROLE_OWNER')" href="/owner/history/customer">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
+                Lịch sử thay đổi
+            </button>
+        </a>
         <p class="text-gray-600 mb-4">
             Tổng cộng: <span th:text="${totalItems}"></span> bản ghi
         </p>

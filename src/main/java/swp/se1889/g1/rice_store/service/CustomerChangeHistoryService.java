@@ -62,7 +62,7 @@ public class CustomerChangeHistoryService {
 
         if (!compareValues(originalCustomer.getName(), updatedCustomer.getName())) {
             CustomerChangeHistory change = createChangeHistory(
-                    originalCustomer, "name",
+                    originalCustomer, "Họ và Tên",
                     updatedCustomer.getName(),
                     originalCustomer.getName(), changedBy);
             change.setAdditionalInfo(getAdditionalInfo());
@@ -71,7 +71,7 @@ public class CustomerChangeHistoryService {
 
         if (!compareValues(originalCustomer.getPhone(), updatedCustomer.getPhone())) {
             CustomerChangeHistory change = createChangeHistory(
-                    originalCustomer, "phone",
+                    originalCustomer, "Số điện thoại",
                     updatedCustomer.getPhone(),
                     originalCustomer.getPhone(),  changedBy);
             change.setAdditionalInfo(getAdditionalInfo());
@@ -80,7 +80,7 @@ public class CustomerChangeHistoryService {
 
         if (!compareValues(originalCustomer.getAddress(), updatedCustomer.getAddress())) {
             CustomerChangeHistory change = createChangeHistory(
-                    originalCustomer, "address",
+                    originalCustomer, "Địa Chỉ",
                     updatedCustomer.getAddress(),
                     originalCustomer.getAddress(),  changedBy);
             change.setAdditionalInfo(getAdditionalInfo());
@@ -94,18 +94,6 @@ public class CustomerChangeHistoryService {
                     originalCustomer.getEmail(),  changedBy);
             change.setAdditionalInfo(getAdditionalInfo());
             changeHistories.add(change);
-        }
-
-        if (originalCustomer.getDebtBalance().compareTo(updatedCustomer.getDebtBalance()) != 0) {
-            CustomerChangeHistory debtChangeHistory = createChangeHistory(
-                    originalCustomer,
-                    "debtBalance",
-                    updatedCustomer.getDebtBalance().toString(),
-                    originalCustomer.getDebtBalance().toString(),
-                    changedBy
-            );
-            debtChangeHistory.setAdditionalInfo(getAdditionalInfo());
-            changeHistories.add(debtChangeHistory);
         }
 
         changeHistoryRepository.saveAll(changeHistories);

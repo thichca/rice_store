@@ -25,7 +25,6 @@
                              id="dropdown-menu">
                             <a th:href="@{/profile}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Hồ
                                 sơ</a>
-                            <a th:href="@{/owner/history/customer}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Lịch sử thay đổi</a>
                             <div th:if="${user != null && user.role == 'ROLE_OWNER'}">
                                 <a th:href="@{/owner/store}"
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Thay
