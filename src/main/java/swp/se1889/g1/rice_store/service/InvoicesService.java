@@ -119,30 +119,43 @@ public class InvoicesService {
                 debtChange = BigDecimal.ZERO;
             }
         } else if ("productAndDebt".equals(paymentMethod)) {
-            // Thanh toán tiền hàng + nợ
-            // Trong phần xử lý "productAndDebt":
-            BigDecimal totalDue = finalAmount.add(debtBalance);
+            // Điều chỉnh: Nếu cửa hàng đang nợ khách (debtBalance > 0), ta trừ số nợ ra khỏi tiền hàng
+            BigDecimal totalDue;
+            if (debtBalance.compareTo(BigDecimal.ZERO) > 0) {
+                totalDue = finalAmount.subtract(debtBalance);
+                debtType = DebtRecords.DebtType.Customer_return_shop;
+            } else {
+                totalDue = finalAmount.add(debtBalance.abs());
+            }
+
             if (paidAmount.compareTo(totalDue) < 0) {
-                // Cửa hàng còn nợ khách (Shop_debt_customer)
-                newDebtBalance = totalDue.subtract(paidAmount);
-                debtChange = totalDue.subtract(paidAmount); // Số tiền tăng vào nợ
-                debtType = DebtRecords.DebtType.Shop_debt_customer;
+                // Trả thiếu: cập nhật nợ theo hướng hiện tại
+                if (debtBalance.compareTo(BigDecimal.ZERO) > 0) {
+                    newDebtBalance = debtBalance.add(finalAmount.subtract(paidAmount));
+                    debtType = DebtRecords.DebtType.Customer_return_shop;
+                } else {
+                    newDebtBalance = debtBalance.add(finalAmount.subtract(paidAmount));
+                    debtType = DebtRecords.DebtType.Customer_debt_shop;
+                }
+                debtChange = finalAmount.subtract(paidAmount);
             } else if (paidAmount.compareTo(totalDue) > 0) {
-                // Khách nợ cửa hàng (Customer_debt_shop)
-                newDebtBalance = paidAmount.subtract(totalDue);
-                debtChange = paidAmount.subtract(totalDue); // Số tiền khách nợ cửa hàng
-                debtType = DebtRecords.DebtType.Customer_debt_shop;
+                // Trả thừa: nếu cửa hàng nợ khách thì ta trừ số tiền vượt trả vào nợ
+                if (debtBalance.compareTo(BigDecimal.ZERO) > 0) {
+                    // Ví dụ: nợ khách 50, đơn hàng 100, trả 200 => newDebtBalance = 50 - (200 - 100) = -50
+                    newDebtBalance = debtBalance.subtract(paidAmount.subtract(finalAmount));
+                    debtChange = paidAmount.subtract(finalAmount.add(debtBalance)).negate();
+                    debtType = DebtRecords.DebtType.Shop_debt_customer;
+                }
+                //  debtChange = paidAmount.subtract(finalAmount.add(debtBalance));
+                else {
+                    newDebtBalance = debtBalance.subtract(paidAmount.subtract(finalAmount));
+                    debtType = DebtRecords.DebtType.Shop_return_customer;
+                }
+                debtChange = paidAmount.subtract(finalAmount.add(debtBalance));
             } else {
                 newDebtBalance = BigDecimal.ZERO;
-                debtChange = debtBalance.negate(); // 288.000 nếu debtBalance = -288.000
-                if (debtChange.compareTo(BigDecimal.ZERO) > 0) {
-                    debtType = DebtRecords.DebtType.Shop_debt_customer; // Tăng debtBalance
-                } else if (debtChange.compareTo(BigDecimal.ZERO) < 0) {
-                    debtType = DebtRecords.DebtType.Customer_debt_shop; // Giảm debtBalance
-                    debtChange = debtChange.negate(); // Đảm bảo amount dương
-                } else {
-                    debtType = null; // Không cần bản ghi nếu debtBalance đã là 0
-                }
+                debtChange = BigDecimal.ZERO;
+                debtType = null;
             }
         } else {
             throw new RuntimeException("Phương thức thanh toán không hợp lệ");

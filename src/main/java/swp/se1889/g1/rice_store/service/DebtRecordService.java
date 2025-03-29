@@ -114,7 +114,7 @@ public class    DebtRecordService {
 
         // Sử dụng PriorityQueue để sắp xếp các bản ghi theo thời gian tạo (createdAt)
         PriorityQueue<DebtRecords> queue = new PriorityQueue<>(
-                Comparator.comparing(DebtRecords::getCreatedAt)
+                Comparator.comparing(DebtRecords::getCreateOn)
                         .thenComparing(DebtRecords::getId) // Xử lý trùng thời gian
         );
         queue.addAll(debtRecords);
